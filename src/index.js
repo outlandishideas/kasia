@@ -1,9 +1,7 @@
-import repressConnect from './Connect';
-import repressMiddleware from './Middleware';
-import repressReducer from './middleware';
+import repressConnect from './connect';
+import repressReducer from './reducer';
 
 export {
-  repressConnect,
-  repressMiddleware,
-  repressReducer
+  repressConnect as connect,
+  repressReducer as reducer
 };
