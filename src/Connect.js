@@ -7,7 +7,7 @@ const mapRouteParamsToRequest = (routeParams) => {
   };
 };
 
-export default function Connect (options = {
+export default function repressConnect (options = {
   /** The name of the WP-API subject used in API request. */
   subject: 'post',
   /** From which property on the component's props will the route parameters be derived? */
@@ -44,30 +44,3 @@ export default function Connect (options = {
     return new RepressComponentWrapper(this.props);
   };
 };
-
-function repressConnect (target) {
-  let keys;
-
-  if (typeof Reflect !== 'undefined' && typeof Reflect.ownKeys === 'function') {
-    keys = Reflect.ownKeys(target.prototype);
-  } else {
-    keys = Object.getOwnPropertyNames(target.prototype);
-    if (typeof Object.getOwnPropertySymbols === 'function') {
-      keys = keys.concat(Object.getOwnPropertySymbols(target.prototype));
-    }
-  }
-
-  keys.forEach((key) => {
-    if (key === 'constructor') {
-      return;
-    }
-
-    let descriptor = Object.getOwnPropertyDescriptor(target.prototype, key);
-
-    if (typeof descriptor.value === 'function') {
-      Object.defineProperty(target.prototype, key, boundMethod(target, key, descriptor));
-    }
-  });
-
-  return target;
-}
