@@ -1,0 +1,3 @@
+export const REQUEST_POST = 'REQUEST_POST';
+export const RECEIVE_POST = 'REQUEST_POST';
+export const INVALIDATE_POST = 'INVALIDATE_POST';
