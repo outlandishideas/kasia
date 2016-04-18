@@ -1,3 +1,3 @@
-export function getPost ({ slug }) {
+export function fetchPost ({ slug }) {
   // TODO
 }
