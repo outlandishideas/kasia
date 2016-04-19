@@ -6,7 +6,11 @@ class Test extends Component {
   constructor (props, context) {
     super(props, context);
   }
+  
+  testMethod () {
+    
+  }
 }
 
 const a = new Test();
-console.log(Test.fetchData());
+console.log(a);
