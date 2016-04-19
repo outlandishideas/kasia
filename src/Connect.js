@@ -1,21 +1,22 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 
-const mapRouteParamsToRequest = (routeParams) => {
-  return {
+import { fetchPost } from './sagas';
 
-  };
-};
+const $defProp = Object.defineProperty;
+const $getPropDesc = Object.getOwnPropertyDescriptor;
 
 export default function repressConnect (options = {
-  /** The name of the WP-API subject used in API request. */
-  subject: 'post',
   /** From which property on the component's props will the route parameters be derived? */
   routeParamsPropName: 'params',
-  /** A function which maps the route parameters to the necessary canonical WP-API query parameters. */
-  mapRouteParamsToRequest,
   /** Will the request to WP-API be made with the `_embed` query parameter? */
   useEmbedRequestQuery: true,
+  /** A function which maps component props to WP-API route parameters. */
+  mapPropsToRouteParams: null,
+  /** A function which maps component props to WP-API query parameters. */
+  mapPropsToQueryParams: null,
+  /** Options for dispatch when server-side rendering the component. */
+  fetchDataOptions: {},
   /** react-redux connect() decorator argument proxies. */
   connect: {
     mapStateToProps: undefined,
@@ -25,22 +26,62 @@ export default function repressConnect (options = {
   }
 }) {
   return (target) => {
-    const { mapRouteParamsToRequest, routeParamsPropName, mapDispatchToProps,
-      mergeProps, connectOptions } = options.connect;
+    const { routeParamsPropName, mapDispatchToProps, mergeProps,
+      connectOptions, fetchDataOptions } = options.connect;
 
-    const mapStateToProps = (state) => Object.assign(
+    const targetKeys = getTargetKeys(target);
+
+    const mapPropsToRouteParams = options.mapPropsToRouteParams
+      ? options.mapPropsToRouteParams
+      : (props) => ({ id: props.params.id });
+
+    const mapStateToProps = (state, props) => (state) => Object.assign(
       options.connect.mapStateToProps(state),
-      { data: mapRouteParamsToRequest(this.props[routeParamsPropName]) }
+      { post: mapPropsToRouteParams(props[routeParamsPropName]) }
     );
 
-    @connect(mapStateToProps, mapDispatchToProps, mergeProps, connectOptions)
-    class RepressComponentWrapper extends Component {
+    const createConnectArgs = (props) => [
+      mapStateToProps(props),
+      mapDispatchToProps,
+      mergeProps,
+      connectOptions
+    ];
+
+    class IntermediaryRepressComponentWrapper extends Component {
       constructor (props, context) {
         super(props, context);
 
+        const connectArgs = createConnectArgs(props);
+
+        connect(...connectArgs)(target);
+
+        targetKeys.forEach((key) => {
+          if (key !== 'constructor') {
+            const connectedKeyDescriptor = $getPropDesc(target, key);
+            $defProp(this, key, connectedKeyDescriptor);
+          }
+        });
       }
     }
 
-    return new RepressComponentWrapper(this.props);
+    // TODO implement and import fetchPage saga
+    IntermediaryRepressComponentWrapper.fetchData = () => [fetchPost, {
+      slug: target.constructor.name,
+      ...fetchDataOptions
+    }];
+
+    return IntermediaryRepressComponentWrapper;
   };
 };
+
+// TODO move into util folder
+function getTargetKeys (target) {
+  if (typeof Reflect !== 'undefined' && typeof Reflect.ownKeys === 'function') {
+    return Reflect.ownKeys(target.prototype);
+  } else {
+    const keys = Object.getOwnPropertyNames(target.prototype);
+    return typeof Object.getOwnPropertySymbols === 'function'
+      ? keys.concat(Object.getOwnPropertySymbols(target.prototype))
+      : keys;
+  }
+}

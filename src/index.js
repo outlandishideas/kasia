@@ -1,7 +1,7 @@
-import repressConnect from './connect';
-import repressReducer from './reducer';
+import connect from './connect';
+import reducer from './reducer';
 
-export {
-  repressConnect as connect,
-  repressReducer as reducer
+export default {
+  connect,
+  reducer
 };

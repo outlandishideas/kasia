@@ -1,8 +1,4 @@
-const ActionTypes = {
-  REQUEST_POST: 'REQUEST_POST',
-  RECEIVE_POST: 'RECEIVE_POST',
-  INVALIDATE_POST: 'INVALIDATE_POST'
-};
+import ActionTypes from './ActionTypes';
 
 const keys = Object.keys(ActionTypes);
 
