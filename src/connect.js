@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 
-import getKeys from './utils/getKeys';
+import getTargetKeys from './utils/getTargetKeys';
 import { fetchPost } from './sagas';
 
 export default function repressConnect (options = {
@@ -12,18 +12,11 @@ export default function repressConnect (options = {
   fetchDataOptions: {}
 }) {
   return (target) => {
-    const targetKeys = getKeys(target);
+    const targetKeys = getTargetKeys(target);
 
     class RepressComponentWrapper extends Component {
       constructor (props, context) {
         super(props, context);
-
-        targetKeys.forEach((key) => {
-          if (key !== 'constructor') {
-            const targetKeyDescriptor = Object.getOwnPropertyDescriptor(target.prototype, key);
-            Object.defineProperty(this, key, targetKeyDescriptor);
-          }
-        });
       }
     }
 
@@ -31,6 +24,13 @@ export default function repressConnect (options = {
       slug: target.name,
       ...options.fetchDataOptions
     }];
+
+    targetKeys.forEach((key) => {
+      if (key !== 'constructor') {
+        const targetKeyDescriptor = Object.getOwnPropertyDescriptor(target.prototype, key);
+        Object.defineProperty(RepressComponentWrapper.prototype, key, targetKeyDescriptor);
+      }
+    });
 
     return RepressComponentWrapper;
   };
