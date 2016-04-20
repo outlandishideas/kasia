@@ -234,6 +234,16 @@ RePress contains a series of components that can be used for implementing common
 
 [...etc....]
 
+## Porting From A WordPress Theme To React
+
+We provide a [WordPress plugin]() for doing this. It attempts to work out how your theme is structured and outputs WordPress components based on this that can be seen by moving around the site normally.
+
+(quick note on how this could be done - basically the same as any cache - interupt the render on the way out and introspect to work out how it is should look - anything that is something like `header.php` then put it into its own component and so on)
+
+(should this be a WordPress plugin or a command line script to run across the thing in PHP (or JS?)? Parsing PHP is the key factor and maybe the layout of how themes work in WordPress is consistent enough that we could skip out the bit where we have to use WordPress at all. Presumably all the basic WordPress theme functions are well known and documented (the Loop etc) that you could translate stuff across pretty easily)
+
+We've ported the default WordPress theme [Twenty Sixteen]() to React using this tool and a little cleaning up.
+
 ## Justification
 
 ## Makes Use Of
