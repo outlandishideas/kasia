@@ -77,7 +77,7 @@ If you are already using `redux-saga` for managing side-effects you don't need t
 Decide a component that is going to connect to WordPress and decorate that component with `connectToWordPress`.
 
 
-```
+```js
 import React, { Component } from 'react';
 
 import { connectToWordPress } from 'repress';
@@ -100,7 +100,7 @@ connectToWordPress()(MyPost);
 
 Assuming this post is connected up to [react-router](https://github.com/reactjs/react-router) in the following manner and the above other work is done:
 
-```
+```js
 import React from 'react';
 
 import { Route, IndexRoute } from 'react-router';
@@ -123,7 +123,7 @@ The works by simple convention. Anything with `Post` in it is assumed to be a wa
 
 RePress delivers the data to you straight out of WordPress by default. We have found this data to be excessively nested and this to be a problem. Therefore if you set up as follows, you will receive information from the WordPress API in a lightly restructured format that makes it easier to handle in Javascript - for example keys are camel-cased and nesting is reduced. See [below](#) for how this data is structured internal to Redux store.
 
-```
+```js
 repressReducers = createRePressReducers({
   api: 'https://example.com/wp-api/v2/',
   restructureData: true
@@ -132,7 +132,7 @@ repressReducers = createRePressReducers({
 
 Sometimes you might not want to make these assumptions. `connectToWordPress` accepts a number of possible arguments to explicitly tell RePress what data is wanted from WordPress REST API.
 
-```
+```js
 // Connect to WordPress
 connectToWordPress({
   routeParamsPropName: 'params.slug', //  From which property on the component's props will the route parameters be derived?  
@@ -153,7 +153,7 @@ You can do this by dispatching the action handlers that under the hood are respo
 
 For example, if we wanted to fetch a post for our own component.
 
-```
+```js
 import React, { Component } from 'react';
 
 import { connectToWordPressDirectly } from 'repress';
@@ -201,7 +201,7 @@ connectToWordPressDirectly(mapStateToProps)(MyPost);
 
 For simple mapping of state to props we provide an example implementation of `mapStateToProps`. This can just be turned on in the simple case with the following and props will be returned simply as the `this.props[type]`:
 
-```
+```js
 import React, { Component } from 'react';
 
 import { connectToWordPressDirectly } from 'repress';
