@@ -7,6 +7,7 @@ jest.unmock('../connect');
 
 import React, { Component } from 'react';
 import { createStore } from 'redux';
+import { connect } from 'react-redux';
 import TestUtils from 'react-addons-test-utils';
 import sinon from 'sinon';
 
@@ -31,7 +32,7 @@ const testConnectOptions = {
 };
 
 @repressConnect()
-class ConnectedComponent extends Component {
+class _ConnectedComponent extends Component {
   constructor (props, context) {
     super(props, context);
   }
@@ -40,6 +41,10 @@ class ConnectedComponent extends Component {
     return (<div>Hello, World!</div>);
   }
 }
+
+const ConnectedComponent = connect((state) => ({
+  helloFromMapStateToProps: true
+}))(_ConnectedComponent);
 
 describe('Repress connect', () => {
   it('wraps a component', () => {
@@ -54,13 +59,17 @@ describe('Repress connected component', () => {
 
   afterAll(() => {
     store.dispatch = originalDispatch;
-  })
+  });
 
   const component = <ConnectedComponent {...testProps} testProp={true} />;
+  const rendered = renderer.render(component);
 
   it('passes props down to children', () => {
-    const rendered = renderer.render(component);
     expect(rendered.props.testProp).toBe(true);
+  });
+
+  it('does not inhibit redux connect from performing own mapStateToProps', () => {
+    expect(rendered.props.helloFromMapStateToProps).toBe(true);
   });
 
   it('dispatches an action corresponding to given configuration', () => {
