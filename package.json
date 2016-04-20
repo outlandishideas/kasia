@@ -8,7 +8,8 @@
     "test": "tests"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest",
+    "test:watch": "jest --watch",
     "lint": "eslint src/"
   },
   "repository": {
@@ -26,7 +27,8 @@
     "babel-preset-stage-0": "^6.5.0",
     "eslint": "^2.8.0",
     "eslint-config-airbnb-base": "^1.0.1",
-    "eslint-plugin-import": "^1.5.0"
+    "eslint-plugin-import": "^1.5.0",
+    "react-addons-test-utils": "^15.0.1"
   },
   "babel": {
     "presets": [
@@ -41,7 +43,15 @@
   "eslintConfig": {
     "extends": "airbnb-base"
   },
+  "jest": {
+    "unmockedModulePathPatterns": [
+      "<rootDir>/node_modules/react",
+      "<rootDir>/node_modules/react-dom",
+      "<rootDir>/node_modules/react-addons-test-utils"
+    ]
+  },
   "dependencies": {
+    "jest-cli": "^11.0.2",
     "react": "^15.0.1",
     "react-dom": "^15.0.1",
     "react-redux": "^4.4.5",

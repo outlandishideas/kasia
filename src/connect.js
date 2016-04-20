@@ -12,11 +12,12 @@ export default function repressConnect (options = {
   fetchDataOptions: {}
 }) {
   return (Target) => {
-    const targetKeys = getTargetKeys(Target);
-
     class RepressComponentWrapper extends Component {
       constructor (props, context) {
         super(props, context);
+      }
+      render() {
+        return <Target {...this.props} />;
       }
     }
 
@@ -25,13 +26,6 @@ export default function repressConnect (options = {
       ...options.fetchDataOptions
     }];
 
-    targetKeys.forEach((key) => {
-      if (key !== 'constructor') {
-        const targetKeyDescriptor = Object.getOwnPropertyDescriptor(Target.prototype, key);
-        Object.defineProperty(RepressComponentWrapper.prototype, key, targetKeyDescriptor);
-      }
-    });
-
-    return RepressComponentWrapper;
+    return Target;
   };
 };
