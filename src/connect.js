@@ -23,7 +23,7 @@ export default function repressConnect ({
 
     const postTypePlural = postTypePlural || postType + 's';
 
-    const mapStateToProps = (state, ownProps) => {
+    const mapStateToProps = function repressMapStateToProps (state, ownProps) {
       const params = ownProps[routeParamsPropName];
       const collection = state.repress[postTypePlural];
 
