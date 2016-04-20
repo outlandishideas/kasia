@@ -42,8 +42,8 @@ import { createRePressReducers } from 'repress';
 repressReducers = createRePressReducers({api: 'https://example.com/wp-api/v2/'});
 
 const rootReducer = combineReducers({
-  repressReducers
-})
+  repress: repressReducers
+});
 
 export default rootReducer
 ```
