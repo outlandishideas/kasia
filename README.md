@@ -16,7 +16,7 @@ You don't need to worry about this however. This complexity is more or less hidd
 
 You need to have a working installation of WordPress that has the [WP REST API](http://v2.wp-api.org/) installed. That's it.
 
-We have a boilerplate for this based on WordPress Bedrock to get you started.
+We have [a boilerplate]() for this based on [WordPress Bedrock](https://github.com/roots/bedrock) to get you started with all this set up.
 
 ## Requirements On The React Side
 
