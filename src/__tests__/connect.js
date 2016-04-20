@@ -1,24 +1,29 @@
 jest.unmock('redux');
-jest.unmock('react-redux');
 jest.unmock('sinon');
 
+jest.unmock('../ActionTypes');
+jest.unmock('../sagas');
 jest.unmock('../reducer');
 jest.unmock('../connect');
 
 import React, { Component } from 'react';
-import { createStore } from 'redux';
-import { connect } from 'react-redux';
-import TestUtils from 'react-addons-test-utils';
+import { combineReducers, createStore } from 'redux';
+import { mount } from 'enzyme';
 import sinon from 'sinon';
 
 import ActionTypes from '../ActionTypes';
 import repressReducer from '../reducer';
 import repressConnect from '../connect';
 
-const renderer = TestUtils.createRenderer();
-const store = createStore(repressReducer, { repress: {} });
+const interceptReducer = sinon.stub();
+interceptReducer.returns({});
 
-const testPostTypeName = 'TestPostType';
+const rootReducer = combineReducers({
+  intercept: interceptReducer,
+  repress: repressReducer
+});
+
+const store = createStore(rootReducer, { repress: {} });
 
 const testProps = {
   store,
@@ -28,55 +33,42 @@ const testProps = {
 };
 
 const testConnectOptions = {
-  postType: testPostTypeName
+  postType: 'testPostType',
+  useEmbedRequestQuery: true,
+  fetchDataOptions: {}
 };
 
-@repressConnect()
-class _ConnectedComponent extends Component {
+@repressConnect(testConnectOptions)
+class ConnectedComponent extends Component {
   constructor (props, context) {
     super(props, context);
   }
 
   render () {
-    return (<div>Hello, World!</div>);
+    return <div>Hello, World!</div>;
   }
 }
 
-const ConnectedComponent = connect((state) => ({
-  helloFromMapStateToProps: true
-}))(_ConnectedComponent);
-
-describe('Repress connect', () => {
+describe('Repress connect decorator', () => {
   it('wraps a component', () => {
     expect(ConnectedComponent.__repress).toBe(true);
   });
 });
 
-describe('Repress connected component', () => {
-  const originalDispatch = store.dispatch;
+describe('A connected component', () => {
+  const rendered = mount(
+    <ConnectedComponent {...testProps} testProp={true} />
+  );
 
-  beforeAll(() => sinon.spy(store, 'dispatch'));
-
-  afterAll(() => {
-    store.dispatch = originalDispatch;
-  });
-
-  const component = <ConnectedComponent {...testProps} testProp={true} />;
-  const rendered = renderer.render(component);
-
-  it('passes props down to children', () => {
-    expect(rendered.props.testProp).toBe(true);
-  });
-
-  it('does not inhibit redux connect from performing own mapStateToProps', () => {
-    expect(rendered.props.helloFromMapStateToProps).toBe(true);
+  it('passes props down', () => {
+    expect(rendered.props().testProp).toBe(true);
   });
 
   it('dispatches an action corresponding to given configuration', () => {
-    store.dispatch.calledWith({
+    expect(interceptReducer.calledWith({}, {
       type: ActionTypes.REQUEST_POST,
       params: testProps.params,
-      connectOptions: testConnectOptions
-    });
+      options: testConnectOptions
+    })).toBe(true);
   });
 });

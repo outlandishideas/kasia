@@ -1,8 +1,6 @@
 import ActionTypes from './ActionTypes';
 
-export default function repressReducer (state = {
-  repress: {}
-}, action) {
+export default function repressReducer (state = {}, action) {
   switch (action.type) {
     case ActionTypes.RECEIVE_POST:
       const nextState = Object.assign({}, state);

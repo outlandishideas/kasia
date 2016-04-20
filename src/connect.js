@@ -4,26 +4,24 @@ import { connect } from 'react-redux';
 import ActionTypes from './ActionTypes';
 import { fetchPost } from './sagas';
 
-export default function repressConnect (options = {
+export default function repressConnect ({
   /** The Wordpress post type that the component represents. */
-  postType: 'post',
-  /** The collection name for the redux store where items of type `postType` are placed. */
-  postTypePlural: null,
+  postType = 'post',
   /** From which property on the component's props will the route parameters be derived? */
-  routeParamsPropName: 'params',
+  routeParamsPropName = 'params',
   /** Will the request to WP-API be made with the `_embed` query parameter? */
-  useEmbedRequestQuery: true,
+  useEmbedRequestQuery = true,
   /** Object to merge with the action that is dispatched in order to request post data. */
-  fetchDataOptions: {}
-}) {
+  fetchDataOptions = {},
+  /** The collection name for the redux store where items of type `postType` are placed. */
+  postTypePlural
+} = {}) {
   return (target) => {
     if (target.__repress) {
       throw new Error(`The component "${target.name}" is already wrapped by Repress.`);
     }
 
-    const { postType, routeParamsPropName } = options;
-
-    const postTypePlural = options.postTypePlural || postType + 's';
+    const postTypePlural = postTypePlural || postType + 's';
 
     const mapStateToProps = (state, ownProps) => {
       const params = ownProps[routeParamsPropName];
@@ -37,13 +35,10 @@ export default function repressConnect (options = {
     class RepressComponentWrapper extends Component {
       constructor (props, context) {
         super(props, context);
-      }
-
-      componentWillMount () {
         this.props.dispatch({
           type: ActionTypes.REQUEST_POST,
           params: this.props[routeParamsPropName],
-          connectOptions: options
+          options: { postType, useEmbedRequestQuery, fetchDataOptions }
         });
       }
 
@@ -56,7 +51,7 @@ export default function repressConnect (options = {
 
     RepressComponentWrapper.fetchData = () => [fetchPost, {
       postType: target.name,
-      ...options.fetchDataOptions
+      ...fetchDataOptions
     }];
 
     return connect(mapStateToProps)(RepressComponentWrapper);
