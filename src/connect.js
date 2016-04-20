@@ -23,14 +23,14 @@ export default function repressConnect ({
 
     const postTypePlural = postTypePlural || postType + 's';
 
-    const mapStateToProps = function repressMapStateToProps (state, ownProps) {
+    function repressMapStateToProps (state, ownProps) {
       const params = ownProps[routeParamsPropName];
       const collection = state.repress[postTypePlural];
 
       return collection
-          ? { [postType]: collection[postTypePlural][params.id] }
-          : { [postType]: null };
-    };
+        ? { [postType]: collection[postTypePlural][params.id] }
+        : { [postType]: null };
+    }
 
     class RepressComponentWrapper extends Component {
       componentWillMount () {
@@ -53,6 +53,6 @@ export default function repressConnect ({
       ...fetchDataOptions
     }];
 
-    return connect(mapStateToProps)(RepressComponentWrapper);
+    return connect(repressMapStateToProps)(RepressComponentWrapper);
   };
 };
