@@ -11,8 +11,8 @@ export default function repressConnect (options = {
   /** Options for dispatch when server-side rendering the component. */
   fetchDataOptions: {}
 }) {
-  return (target) => {
-    const targetKeys = getTargetKeys(target);
+  return (Target) => {
+    const targetKeys = getTargetKeys(Target);
 
     class RepressComponentWrapper extends Component {
       constructor (props, context) {
@@ -21,13 +21,13 @@ export default function repressConnect (options = {
     }
 
     RepressComponentWrapper.fetchData = () => [fetchPost, {
-      slug: target.name,
+      slug: Target.name,
       ...options.fetchDataOptions
     }];
 
     targetKeys.forEach((key) => {
       if (key !== 'constructor') {
-        const targetKeyDescriptor = Object.getOwnPropertyDescriptor(target.prototype, key);
+        const targetKeyDescriptor = Object.getOwnPropertyDescriptor(Target.prototype, key);
         Object.defineProperty(RepressComponentWrapper.prototype, key, targetKeyDescriptor);
       }
     });
