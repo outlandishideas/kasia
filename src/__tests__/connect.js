@@ -6,8 +6,8 @@ jest.unmock('../reducer');
 jest.unmock('../connect');
 
 import React, { Component } from 'react';
-import TestUtils from 'react-addons-test-utils';
 import { createStore } from 'redux';
+import TestUtils from 'react-addons-test-utils';
 import sinon from 'sinon';
 
 import ActionTypes from '../ActionTypes';
