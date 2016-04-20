@@ -66,10 +66,8 @@ describe('Repress connected component', () => {
   it('dispatches an action corresponding to given configuration', () => {
     store.dispatch.calledWith({
       type: ActionTypes.REQUEST_POST,
-      data: {
-        params: testProps.params,
-        connectOptions: testConnectOptions
-      }
+      params: testProps.params,
+      connectOptions: testConnectOptions
     });
   });
 });

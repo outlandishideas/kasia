@@ -38,13 +38,10 @@ export default function repressConnect (options = {
       }
 
       componentWillMount () {
-        console.log(this.props.dispatch)
         this.props.dispatch({
           type: ActionTypes.REQUEST_POST,
-          data: {
-            params: this.props[routeParamsPropName],
-            connectOptions: options
-          }
+          params: this.props[routeParamsPropName],
+          connectOptions: options
         });
       }
 
