@@ -117,11 +117,11 @@ export default
 ;
 ```
 
-It will just work. Eventually `MyPost` will recieve the post information as `this.props.post`. If something goes wrong it will recieve `this.props.error` which it should handle if required.
+It will just work. Eventually `MyPost` will receive the post information as `this.props.post`. If something goes wrong it will receive `this.props.error` which it should handle if required.
 
 The works by simple convention. Anything with `Post` in it is assumed to be a wanted the post post type in WordPress, anything with `Page` is assumed to be wanting that, anything with `Taxonomy` is assumed to be a taxonomy and so on. The information from React Router passed as props (for example `slug` or `id`) is assumed to correspond to those meanings in WordPress REST API generally. You can also override this if neccessary as we will see.
 
-RePress delivers the data to you straight out of WordPress by default. We have found this data to be expessively nested and this to be a problem. Therefore if you set up as follows, you will recieve information from the WordPress API in a lightly restructed format that makes it easier to handle in Javascript - for example keys are camel-cased and nesting is reduced. See [below](#) for how this data is structured internal to Redux store.
+RePress delivers the data to you straight out of WordPress by default. We have found this data to be excessively nested and this to be a problem. Therefore if you set up as follows, you will receive information from the WordPress API in a lightly restructured format that makes it easier to handle in Javascript - for example keys are camel-cased and nesting is reduced. See [below](#) for how this data is structured internal to Redux store.
 
 ```
 repressReducers = createRePressReducers({
@@ -233,3 +233,9 @@ connectToWordPressDirectly({ automap: true })(MyPost);
 RePress contains a series of components that can be used for implementing common WordPress style functionality. There are.
 
 [...etc....]
+
+## Justification
+
+## Makes Use Of
+
+## Prior Art
