@@ -7,6 +7,8 @@ import { fetchPost } from './sagas';
 export default function repressConnect (options = {
   /** The Wordpress post type that the component represents. */
   postType: 'post',
+  /** The collection name for the redux store where items of type `postType` are placed. */
+  postTypePlural: null,
   /** From which property on the component's props will the route parameters be derived? */
   routeParamsPropName: 'params',
   /** Will the request to WP-API be made with the `_embed` query parameter? */
@@ -21,7 +23,7 @@ export default function repressConnect (options = {
 
     const { postType, routeParamsPropName } = options;
 
-    const postTypePlural = postType + 's';
+    const postTypePlural = options.postTypePlural || postType + 's';
 
     const mapStateToProps = (state, ownProps) => {
       const params = ownProps[routeParamsPropName];
