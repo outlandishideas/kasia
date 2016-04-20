@@ -22,7 +22,7 @@ We have a boilerplate for this based on WordPress Bedrock to get you started.
 
 We assume that you are using React and [Redux](https://github.com/reactjs/redux) as an implementation of the Flux pattern.
 
-If you want to avoid setting this up yourself we have a boilerplate you can use.
+If you want to avoid setting this up yourself we have a boilerplate [you can use]() with instructions on how to start a project. Its a universal application as well.
 
 ## Using RePress
 
