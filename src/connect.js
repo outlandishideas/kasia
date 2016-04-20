@@ -33,8 +33,7 @@ export default function repressConnect ({
     };
 
     class RepressComponentWrapper extends Component {
-      constructor (props, context) {
-        super(props, context);
+      componentWillMount () {
         this.props.dispatch({
           type: ActionTypes.REQUEST_POST,
           params: this.props[routeParamsPropName],
