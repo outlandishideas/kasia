@@ -1,5 +1,4 @@
 jest.unmock('redux');
-jest.unmock('sinon');
 
 jest.unmock('../ActionTypes');
 jest.unmock('../sagas');
@@ -9,14 +8,13 @@ jest.unmock('../connect');
 import React, { Component } from 'react';
 import { combineReducers, createStore } from 'redux';
 import { mount } from 'enzyme';
-import sinon from 'sinon';
 
 import ActionTypes from '../ActionTypes';
 import repressReducer from '../reducer';
 import repressConnect from '../connect';
 
-const interceptReducer = sinon.stub();
-interceptReducer.returns({});
+const interceptReducer = jest.fn();
+interceptReducer.mockReturnValue({});
 
 const rootReducer = combineReducers({
   intercept: interceptReducer,
@@ -50,25 +48,23 @@ class ConnectedComponent extends Component {
 }
 
 describe('Repress connect decorator', () => {
-  it('wraps a component', () => {
+  it('wraps a component...', () => {
     expect(ConnectedComponent.__repress).toBe(true);
   });
-});
 
-describe('A connected component', () => {
   const rendered = mount(
     <ConnectedComponent {...testProps} testProp={true} />
   );
 
-  it('passes props down', () => {
+  it('...that passes props down', () => {
     expect(rendered.props().testProp).toBe(true);
   });
 
-  it('dispatches an action corresponding to given configuration', () => {
-    expect(interceptReducer.calledWith({}, {
+  it('...that dispatches an action corresponding to given configuration', () => {
+    expect(interceptReducer.mock.calls[3][1]).toEqual({
       type: ActionTypes.REQUEST_POST,
       params: testProps.params,
       options: testConnectOptions
-    })).toBe(true);
+    });
   });
 });
