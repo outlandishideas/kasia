@@ -1,47 +1,47 @@
-import SubjectTypes from './SubjectTypes';
+import ContentTypes from './ContentTypes';
 
 export default {
-  [SubjectTypes.CATEGORY]: {
+  [ContentTypes.CATEGORY]: {
     PLURAL: '/categories',
     SINGLE: '/categories/:id'
   },
-  [SubjectTypes.COMMENT]: {
+  [ContentTypes.COMMENT]: {
     SINGLE: '/comments/:id',
     PLURAL: '/comments'
   },
-  [SubjectTypes.MEDIA]: {
+  [ContentTypes.MEDIA]: {
     SINGLE: '/media/:id',
     PLURAL: '/media'
   },
-  [SubjectTypes.PAGE]: {
+  [ContentTypes.PAGE]: {
     SINGLE: '/pages/:id',
     PLURAL: '/pages'
   },
-  [SubjectTypes.POST]: {
+  [ContentTypes.POST]: {
     SINGLE: '/posts/:id',
     PLURAL: '/posts'
   },
-  [SubjectTypes.POST_REVISION]: {
+  [ContentTypes.POST_REVISION]: {
     SINGLE: '/:postId/revisions/:id',
     PLURAL: '/:postId/revisions'
   },
-  [SubjectTypes.POST_TYPE]: {
+  [ContentTypes.POST_TYPE]: {
     SINGLE: '/types/:id',
     PLURAL: '/types'
   },
-  [SubjectTypes.POST_STATUS]: {
+  [ContentTypes.POST_STATUS]: {
     SINGLE: '/statuses/:id',
     PLURAL: '/statuses'
   },
-  [SubjectTypes.TAG]: {
+  [ContentTypes.TAG]: {
     SINGLE: '/tags/:id',
     PLURAL: '/tags'
   },
-  [SubjectTypes.TAXONOMY]: {
+  [ContentTypes.TAXONOMY]: {
     SINGLE: '/taxonomies/:id',
     PLURAL: '/taxonomies'
   },
-  [SubjectTypes.USER]: {
+  [ContentTypes.USER]: {
     SINGLE: '/users/:id',
     PLURAL: '/users'
   }

@@ -1,11 +1,11 @@
-import { mapToLowercasePlural } from './constants/SubjectTypes';
+import { mapToCamelCasePlural } from './constants/ContentTypes';
 import { BaseActionTypes } from './constants/ActionTypes';
 import normalisers from './normalisers';
 
 export default function repressReducer (state = {}, action) {
-  const [namespace, subjectType, actionType] = action.type.split('/');
+  const [actionNamespace, contentType, actionType] = action.type.split('/');
 
-  if (namespace !== 'repress') {
+  if (actionNamespace !== 'repress') {
     return state;
   }
 
@@ -24,19 +24,22 @@ export default function repressReducer (state = {}, action) {
 
     case BaseActionTypes.RECEIVE:
       const nextState = Object.assign({}, state);
-      const normalisedData = normalisers[subjectType](action.data);
-      const collectionName = mapToLowercasePlural(subjectType);
+      const normalisedData = normalisers[contentType](action.data);
+      const collectionName = mapToCamelCasePlural(contentType);
 
       if (!nextState[collectionName]) {
         nextState[collectionName] = {};
       }
 
       return Object.assign(state, nextState, {
-        [collectionName]: normalisedData.entities[collectionName]
+        [collectionName]: Object.assign(
+          nextState[collectionName],
+          normalisedData.entities[collectionName]
+        )
       });
 
     case BaseActionTypes.INVALIDATE:
-      delete state[subjectType][action.id];
+      delete state[contentType][action.id];
       return Object.assign({}, state);
 
     default:

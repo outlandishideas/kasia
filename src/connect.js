@@ -1,14 +1,25 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 
-import SubjectTypes from './constants/SubjectTypes';
+import ContentTypes, { mapToCamelCase, mapToCamelCasePlural } from './constants/ContentTypes';
 import { createRequest } from './actionCreators';
 import { fetchResource } from './sagas';
 
+const contentTypeNames = Object.keys(ContentTypes);
+
+function deriveContentType (targetName) {
+  for (let i = 0; i < contentTypeNames.length; i++) {
+    const contentTypeName = contentTypeNames[i];
+    if (targetName.toLowerCase().includes(contentTypeName.toLowerCase())) {
+      return contentTypeName;
+    }
+  }
+}
+
 export default function repressConnect ({
-  /** The WP-API subject type that the component should receive data for, e.g. post, page, etc. */
-  subjectType = 'post',
-  /** From which property on the component's props will the route parameters be derived? */
+  /** The subject type for which the WP-API request will be made. */
+  contentType = null,
+  /** From which property on the component's props will the WP-API route parameters be derived? */
   routeParamsPropName = 'params',
   /** Will the request to WP-API be made with the `_embed` query parameter? */
   useEmbedRequestQuery = true,
@@ -19,23 +30,30 @@ export default function repressConnect ({
     if (target.__repress) {
       throw new Error(`The component "${target.name}" is already wrapped by Repress.`);
     }
-    
-    const isCustomPostType = Object.keys(SubjectTypes).includes(subjectType);
+
+    if (!(contentType = contentType || deriveContentType(target))) {
+      throw new Error('Could not derive content type from class name. Pass a content type explicitly.');
+    }
+
+    const isCustomContentType = !contentTypeNames.includes(contentType);
+    const camelCaseContentTypeSingular = mapToCamelCase(contentType);
+    const camelCaseContentTypePlural = mapToCamelCasePlural(contentType);
 
     function repressMapStateToProps (state, ownProps) {
       const params = ownProps[routeParamsPropName];
-      const collection = state.repress[subjectType];
-
-      return collection
-        ? { [subjectType]: collection[subjectType][params.id] }
-        : { [subjectType]: null };
+      const collection = state.repress[camelCaseContentTypePlural];
+      const value = collection ? collection[params.id] : null;
+      return { [camelCaseContentTypeSingular]: value };
     }
 
     class RepressComponentWrapper extends Component {
       componentWillMount () {
-        this.props.dispatch(createRequest(subjectType, {
+        this.props.dispatch(createRequest(contentType, {
           params: this.props[routeParamsPropName],
-          subjectType, useEmbedRequestQuery, fetchDataOptions, isCustomPostType
+          contentType,
+          useEmbedRequestQuery,
+          fetchDataOptions,
+          isCustomContentType
         }));
       }
 
@@ -47,7 +65,7 @@ export default function repressConnect ({
     RepressComponentWrapper.__repress = true;
 
     RepressComponentWrapper.fetchData = () => [
-      [fetchResource, subjectType, fetchDataOptions]
+      [fetchResource, contentType, fetchDataOptions]
     ];
 
     return connect(repressMapStateToProps)(RepressComponentWrapper);

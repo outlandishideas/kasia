@@ -2,7 +2,7 @@ jest.unmock('redux')
 jest.unmock('redux-saga')
 jest.unmock('normalizr')
 
-jest.unmock('../constants/SubjectTypes');
+jest.unmock('../constants/ContentTypes');
 jest.unmock('../reducer');
 jest.unmock('../normalisers/index');
 jest.unmock('../normalisers/post');
@@ -12,7 +12,7 @@ import { combineReducers, createStore } from 'redux';
 
 import postJson from './fixtures/wp-api-responses/post'
 
-import SubjectTypes from '../constants/SubjectTypes';
+import ContentTypes from '../constants/ContentTypes';
 import repressReducer from '../reducer';
 import normalisers from '../normalisers';
 import { receive } from '../actionCreators';
@@ -40,11 +40,11 @@ describe('Repress reducer', () => {
   });
 
   it('normalises a WP-API response and places in store', () => {
-    const normalisedData = normalisers[SubjectTypes.POST](postJson);
+    const normalisedData = normalisers[ContentTypes.POST](postJson);
     const entities = normalisedData.entities.posts;
 
     store.dispatch(
-      receive(SubjectTypes.POST, postJson)
+      receive(ContentTypes.POST, postJson)
     );
 
     expect(store.getState()).toEqual({

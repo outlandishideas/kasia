@@ -1,4 +1,4 @@
-import SubjectTypes from './SubjectTypes';
+import ContentTypes from './ContentTypes';
 
 export const BaseActionTypes = {
   REQUEST: {
@@ -11,29 +11,29 @@ export const BaseActionTypes = {
   INVALIDATE: 'INVALIDATE'
 };
 
-function makeActionTypes (subjectType) {
+function makeActionTypes (contentType) {
   return {
     REQUEST: {
-      CREATE: `repress/${subjectType}/${BaseActionTypes.REQUEST.CREATE}`,
-      START: `repress/${subjectType}/${BaseActionTypes.REQUEST.START}`,
-      FAIL: `repress/${subjectType}/${BaseActionTypes.REQUEST.FAIL}`,
-      COMPLETE: `repress/${subjectType}/${BaseActionTypes.REQUEST.COMPLETE}`
+      CREATE: `repress/${contentType}/${BaseActionTypes.REQUEST.CREATE}`,
+      START: `repress/${contentType}/${BaseActionTypes.REQUEST.START}`,
+      FAIL: `repress/${contentType}/${BaseActionTypes.REQUEST.FAIL}`,
+      COMPLETE: `repress/${contentType}/${BaseActionTypes.REQUEST.COMPLETE}`
     },
-    RECEIVE: `repress/${subjectType}/${BaseActionTypes.RECEIVE}`,
-    INVALIDATE: `repress/${subjectType}/${BaseActionTypes.INVALIDATE}`
+    RECEIVE: `repress/${contentType}/${BaseActionTypes.RECEIVE}`,
+    INVALIDATE: `repress/${contentType}/${BaseActionTypes.INVALIDATE}`
   };
 }
 
 export default {
-  [SubjectTypes.POST]: makeActionTypes(SubjectTypes.POST),
-  [SubjectTypes.POST_REVISION]: makeActionTypes(SubjectTypes.POST_REVISION),
-  [SubjectTypes.PAGE]: makeActionTypes(SubjectTypes.PAGE),
-  [SubjectTypes.MEDIA]: makeActionTypes(SubjectTypes.MEDIA),
-  [SubjectTypes.POST_TYPE]: makeActionTypes(SubjectTypes.POST_TYPE),
-  [SubjectTypes.POST_STATUS]: makeActionTypes(SubjectTypes.POST_STATUS),
-  [SubjectTypes.COMMENT]: makeActionTypes(SubjectTypes.COMMENT),
-  [SubjectTypes.TAXONOMY]: makeActionTypes(SubjectTypes.TAXONOMY),
-  [SubjectTypes.CATEGORY]: makeActionTypes(SubjectTypes.CATEGORY),
-  [SubjectTypes.TAG]: makeActionTypes(SubjectTypes.TAG),
-  [SubjectTypes.USER]: makeActionTypes(SubjectTypes.USER)
+  [ContentTypes.POST]: makeActionTypes(ContentTypes.POST),
+  [ContentTypes.POST_REVISION]: makeActionTypes(ContentTypes.POST_REVISION),
+  [ContentTypes.PAGE]: makeActionTypes(ContentTypes.PAGE),
+  [ContentTypes.MEDIA]: makeActionTypes(ContentTypes.MEDIA),
+  [ContentTypes.POST_TYPE]: makeActionTypes(ContentTypes.POST_TYPE),
+  [ContentTypes.POST_STATUS]: makeActionTypes(ContentTypes.POST_STATUS),
+  [ContentTypes.COMMENT]: makeActionTypes(ContentTypes.COMMENT),
+  [ContentTypes.TAXONOMY]: makeActionTypes(ContentTypes.TAXONOMY),
+  [ContentTypes.CATEGORY]: makeActionTypes(ContentTypes.CATEGORY),
+  [ContentTypes.TAG]: makeActionTypes(ContentTypes.TAG),
+  [ContentTypes.USER]: makeActionTypes(ContentTypes.USER)
 };

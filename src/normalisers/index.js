@@ -1,4 +1,4 @@
-import SubjectTypes from '../constants/SubjectTypes';
+import ContentTypes from '../constants/ContentTypes';
 
 import category from './category';
 import comment from './comment';
@@ -12,14 +12,14 @@ import taxonomy from './taxonomy';
 import user from './user';
 
 export default {
-  [SubjectTypes.CATEGORY]: category,
-  [SubjectTypes.COMMENT]: comment,
-  [SubjectTypes.MEDIA]: media,
-  [SubjectTypes.PAGE]: page,
-  [SubjectTypes.POST]: post,
-  [SubjectTypes.POST_TYPE]: postType,
-  [SubjectTypes.POST_STATUS]: postStatus,
-  [SubjectTypes.TAG]: tag,
-  [SubjectTypes.TAXONOMY]: taxonomy,
-  [SubjectTypes.USER]: user
+  [ContentTypes.CATEGORY]: category,
+  [ContentTypes.COMMENT]: comment,
+  [ContentTypes.MEDIA]: media,
+  [ContentTypes.PAGE]: page,
+  [ContentTypes.POST]: post,
+  [ContentTypes.POST_TYPE]: postType,
+  [ContentTypes.POST_STATUS]: postStatus,
+  [ContentTypes.TAG]: tag,
+  [ContentTypes.TAXONOMY]: taxonomy,
+  [ContentTypes.USER]: user
 };
