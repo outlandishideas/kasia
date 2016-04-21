@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 
+import SubjectTypes from './constants/SubjectTypes';
 import { createRequest } from './actionCreators';
 import { fetchResource } from './sagas';
 
@@ -18,6 +19,8 @@ export default function repressConnect ({
     if (target.__repress) {
       throw new Error(`The component "${target.name}" is already wrapped by Repress.`);
     }
+    
+    const isCustomPostType = Object.keys(SubjectTypes).includes(subjectType);
 
     function repressMapStateToProps (state, ownProps) {
       const params = ownProps[routeParamsPropName];
@@ -32,7 +35,7 @@ export default function repressConnect ({
       componentWillMount () {
         this.props.dispatch(createRequest(subjectType, {
           params: this.props[routeParamsPropName],
-          options: { subjectType, useEmbedRequestQuery, fetchDataOptions }
+          subjectType, useEmbedRequestQuery, fetchDataOptions, isCustomPostType
         }));
       }
 
