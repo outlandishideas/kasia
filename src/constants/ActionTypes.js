@@ -11,16 +11,16 @@ export const BaseActionTypes = {
   INVALIDATE: 'INVALIDATE'
 };
 
-function makeActionTypes (actionType) {
+function makeActionTypes (subjectType) {
   return {
     REQUEST: {
-      CREATE: `repress/${actionType}/${BaseActionTypes.REQUEST.CREATE}`,
-      START: `repress/${actionType}/${BaseActionTypes.REQUEST.START}`,
-      FAIL: `repress/${actionType}/${BaseActionTypes.REQUEST.FAIL}`,
-      COMPLETE: `repress/${actionType}/${BaseActionTypes.REQUEST.COMPLETE}`
+      CREATE: `repress/${subjectType}/${BaseActionTypes.REQUEST.CREATE}`,
+      START: `repress/${subjectType}/${BaseActionTypes.REQUEST.START}`,
+      FAIL: `repress/${subjectType}/${BaseActionTypes.REQUEST.FAIL}`,
+      COMPLETE: `repress/${subjectType}/${BaseActionTypes.REQUEST.COMPLETE}`
     },
-    RECEIVE: `repress/${actionType}/${BaseActionTypes.RECEIVE}`,
-    INVALIDATE: `repress/${actionType}/${BaseActionTypes.INVALIDATE}`
+    RECEIVE: `repress/${subjectType}/${BaseActionTypes.RECEIVE}`,
+    INVALIDATE: `repress/${subjectType}/${BaseActionTypes.INVALIDATE}`
   };
 }
 
