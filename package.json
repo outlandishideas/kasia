@@ -1,7 +1,7 @@
 {
   "name": "repress",
   "version": "0.0.1",
-  "description": "A React Redux Toolset for the Wordpress API",
+  "description": "A React Redux Toolset for the WordPress API",
   "main": "index.js",
   "directories": {
     "example": "examples",
@@ -18,6 +18,15 @@
   },
   "author": "",
   "license": "ISC",
+  "dependencies": {
+    "jest-cli": "^11.0.2",
+    "normalizr": "^2.0.1",
+    "react": "^15.0.1",
+    "react-dom": "^15.0.1",
+    "react-redux": "^4.4.5",
+    "redux": "^3.4.0",
+    "redux-saga": "^0.9.5"
+  },
   "devDependencies": {
     "babel-cli": "6.6.5",
     "babel-core": "6.7.2",
@@ -52,13 +61,10 @@
       "<rootDir>/node_modules/react-dom",
       "<rootDir>/node_modules/react-addons-test-utils",
       "<rootDir>/node_modules/enzyme"
+    ],
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "/fixtures/"
     ]
-  },
-  "dependencies": {
-    "jest-cli": "^11.0.2",
-    "react": "^15.0.1",
-    "react-dom": "^15.0.1",
-    "react-redux": "^4.4.5",
-    "redux": "^3.4.0"
   }
 }
