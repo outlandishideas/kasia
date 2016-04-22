@@ -51,7 +51,7 @@ export default function repressConnect ({
 
     function mapStateToProps (state, ownProps) {
       const params = ownProps[routeParamsPropName];
-      const collection = state.$$repress[contentTypeOptions.namePlural];
+      const collection = state.$$repress.entities[contentTypeOptions.namePlural];
       const value = collection ? collection[params.id] : null;
       return { [contentTypeOptions.name]: value };
     }

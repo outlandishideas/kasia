@@ -3,8 +3,13 @@ import { merge } from 'lodash';
 import { BaseActionTypes } from './constants/ActionTypes';
 import normalisers from './normalisers';
 
+export const defaultState = {
+  config: {},
+  entities: {}
+};
+
 export default {
-  $$repress: function repressReducer (state = {}, action) {
+  $$repress: function repressReducer (state = defaultState, action) {
     const [actionNamespace, contentType, actionType] = action.type.split('/');
 
     if (actionNamespace !== 'repress') {
@@ -26,7 +31,7 @@ export default {
 
       case BaseActionTypes.RECEIVE:
         const normalisedData = normalisers[contentType](action.data);
-        return merge({}, state, normalisedData.entities);
+        return merge({}, state, { entities: normalisedData.entities });
 
       case BaseActionTypes.INVALIDATE:
         delete state[contentType][action.id];
