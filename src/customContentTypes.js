@@ -1,4 +1,5 @@
 import humps from 'humps';
+import invariant from 'invariant';
 
 import ContentTypes from './constants/ContentTypes';
 
@@ -11,19 +12,19 @@ export function registerCustomContentType (name, {
   namePlural = null,
   requestSlug = null
 } = {}) {
-  if (typeof name !== 'string') {
-    throw new Error('Expecting name of Custom Content Type to be a string.');
-  }
+  invariant(
+    typeof name === 'string',
+    'Expecting name of Custom Content Type to be a string.'
+  );
 
   const contentTypeNameTaken = Object.keys(customContentTypes).includes(name) ||
     contentTypeNames.includes(name);
 
-  if (contentTypeNameTaken) {
-    throw new Error(
-      `The Content Type name "${name}" is already taken. ` +
-      `Choose another non-conflicting name.`
-    );
-  }
+  invariant(
+    !contentTypeNameTaken,
+    `The Content Type name "${name}" is already taken. ` +
+    `Choose another non-conflicting name.`
+  );
 
   namePlural = namePlural || name + 's';
   requestSlug = requestSlug || humps.decamelize(namePlural, { separator: '-' });

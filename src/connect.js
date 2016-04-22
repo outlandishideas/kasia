@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { connect as reduxConnect } from 'react-redux';
+import invariant from 'invariant';
 
 import ContentTypes, { mapToCamelCase, mapToCamelCasePlural } from './constants/ContentTypes';
 import { customContentTypes } from './customContentTypes';
@@ -27,7 +28,7 @@ function makeContentTypeOptions (contentType) {
 /**
  * Repress connect.
  * TODO write better doc
- * @param {String} [contentTypeName] The subject type for which the WP-API request will be made.
+ * @param {String} [contentType] The subject type for which the WP-API request will be made.
  * @param {String} [routeParamsPropName] From which object on props will the WP-API route parameters be derived?
  * @param {Boolean} [useEmbedRequestQuery] Will the request to WP-API be made with the `_embed` query parameter?
  * @returns {Function}
@@ -38,21 +39,21 @@ export default function repressConnect ({
   useEmbedRequestQuery = true
 } = {}) {
   return (target) => {
-    if (target.__repress) {
-      throw new Error(`The component "${target.name}" is already wrapped by Repress.`);
-    }
+    invariant(
+      !target.__repress,
+      `The component "${target.name}" is already wrapped by Repress.`
+    );
 
     contentType = contentType ||
       customContentTypes[contentType] ||
       deriveContentType(target.name);
 
-    if (!contentType) {
-      throw new Error(
+    invariant(
+        contentType,
         'Could not derive content type from class name. ' +
         'Pass built-ins using Repress.ContentTypes. For example, ContentTypes.POST. ' +
         'Custom Content Types should be registered with Repress#registerCustomContentType.'
-      );
-    }
+    );
 
     const isCustomContentType = !!customContentTypes[contentType];
 
