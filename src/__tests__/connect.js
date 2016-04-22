@@ -3,9 +3,12 @@ jest.disableAutomock();
 import React  from 'react';
 import { mount } from 'enzyme';
 
+import postJson from './fixtures/wp-api-responses/post'
+
 import ActionTypes from '../constants/ActionTypes';
 import ContentTypes from '../constants/ContentTypes';
 import configureStore from './util/configureStore';
+import { receive } from '../actionCreators';
 
 import BuiltInContentType from './components/BuiltInContentType';
 import DerivedContentType from './components/DerivedContentType';
@@ -16,7 +19,7 @@ const { store, interceptReducer } = configureStore();
 const testProps = {
   store,
   params: {
-    id: 'test_post_id'
+    id: String(postJson.id)
   }
 };
 
@@ -42,12 +45,19 @@ describe('Repress connect', () => {
   });
 
   describe('with derived built-in content type', () => {
-    mount(<DerivedContentType {...testProps} testProp={true}/>);
+    store.dispatch(receive(ContentTypes.POST, postJson));
+
+    const rendered = mount(<DerivedContentType {...testProps} testProp={true}/>);
 
     it('should dispatch an action corresponding to given configuration', () => {
-      const action = interceptReducer.mock.calls[4][1];
+      const action = interceptReducer.mock.calls[5][1];
       expect(action.type).toEqual(ActionTypes.POST.REQUEST.CREATE);
       expect(action.options.contentType).toEqual(ContentTypes.POST);
+    });
+
+    // TODO this is surely wrong... how to access final props properly?
+    it('should receive post on props', () => {
+      expect(rendered.nodes[0].mergedProps.post.id).toEqual(postJson.id);
     });
   });
 
@@ -55,7 +65,7 @@ describe('Repress connect', () => {
     mount(<CustomContentType {...testProps} testProp={true}/>);
 
     it('should dispatch an action corresponding to given configuration', () => {
-      const action = interceptReducer.mock.calls[5][1];
+      const action = interceptReducer.mock.calls[6][1];
       expect(action.type).toEqual(ActionTypes.CUSTOM_CONTENT_TYPE.REQUEST.CREATE);
       expect(action.options.contentType).toEqual('CustomContentType');
     });

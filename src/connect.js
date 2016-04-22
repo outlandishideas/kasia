@@ -70,7 +70,7 @@ export default function repressConnect ({
           params: this.props[routeParamsPropName],
           contentType,
           useEmbedRequestQuery
-        })
+        });
       }
 
       render () {
@@ -81,7 +81,7 @@ export default function repressConnect ({
     RepressComponentWrapper.__repress = true;
 
     RepressComponentWrapper.fetchData = () => [
-      [fetchResource, contentType, fetchDataOptions]
+      [fetchResource, contentType]
     ];
 
     return reduxConnect(mapStateToProps)(RepressComponentWrapper);
