@@ -20,7 +20,6 @@
   "license": "ISC",
   "dependencies": {
     "humps": "^1.0.0",
-    "jest-cli": "^11.0.2",
     "react": "^15.0.1",
     "react-dom": "^15.0.1",
     "react-redux": "^4.4.5",
@@ -39,6 +38,7 @@
     "eslint": "^2.8.0",
     "eslint-config-airbnb-base": "^1.0.1",
     "eslint-plugin-import": "^1.5.0",
+    "jest-cli": "^11.0.2",
     "react-addons-test-utils": "^15.0.1",
     "sinon": "^1.17.3"
   },

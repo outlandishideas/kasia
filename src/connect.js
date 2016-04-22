@@ -17,10 +17,17 @@ function deriveContentType (targetName) {
   }
 }
 
+function makeContentTypeOptions (contentType) {
+  return {
+    name: mapToCamelCase(contentType),
+    namePlural: mapToCamelCasePlural(contentType)
+  };
+}
+
 /**
  * Repress connect.
  * TODO write better doc
- * @param {String} [contentType] The subject type for which the WP-API request will be made.
+ * @param {String} [contentTypeName] The subject type for which the WP-API request will be made.
  * @param {String} [routeParamsPropName] From which object on props will the WP-API route parameters be derived?
  * @param {Boolean} [useEmbedRequestQuery] Will the request to WP-API be made with the `_embed` query parameter?
  * @returns {Function}
@@ -48,22 +55,28 @@ export default function repressConnect ({
     }
 
     const isCustomContentType = !!customContentTypes[contentType];
-    const camelCaseContentTypeSingular = mapToCamelCase(contentType);
-    const camelCaseContentTypePlural = mapToCamelCasePlural(contentType);
+
+    const contentTypeOptions = isCustomContentType
+      ? customContentTypes[contentType]
+      : makeContentTypeOptions(contentType);
 
     function mapStateToProps (state, ownProps) {
       const params = ownProps[routeParamsPropName];
-      const collection = state.$$repress[camelCaseContentTypePlural];
+      const collection = state.$$repress[contentTypeOptions.namePlural];
       const value = collection ? collection[params.id] : null;
-      return { [camelCaseContentTypeSingular]: value };
+      return { [contentTypeOptions.name]: value };
     }
 
     class RepressComponentWrapper extends Component {
       componentWillMount () {
-        this.props.dispatch(this.createInitAction());
+        const params = this.props[routeParamsPropName];
+        const collection = this.props[contentTypeOptions.name];
+        if (!collection || !collection[params.id]) {
+          this.props.dispatch(this.createRequestAction());
+        }
       }
 
-      createInitAction () {
+      createRequestAction () {
         const contentTypeNamespace = isCustomContentType
           ? ContentTypes.CUSTOM_CONTENT_TYPE
           : contentType;

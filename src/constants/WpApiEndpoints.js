@@ -44,5 +44,9 @@ export default {
   [ContentTypes.USER]: {
     SINGLE: '/users/:id',
     PLURAL: '/users'
+  },
+  [ContentTypes.CUSTOM_CONTENT_TYPE]: {
+    SINGLE: '/:slug/:id',
+    PLURAL: '/:slug'
   }
 };
