@@ -1,3 +1,4 @@
+import WpApiEndpoints from './constants/WpApiEndpoints';
 // TODO import a request lib
 
 export function requestResource (contentType, options) {

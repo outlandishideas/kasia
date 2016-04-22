@@ -2,7 +2,7 @@ jest.disableAutomock();
 
 import React, { Component } from 'react';
 
-import { registerCustomContentType } from '../../customContentTypes';
+import { registerCustomContentType } from '../../contentTypes';
 import repressConnect from '../../connect';
 
 const contentType = 'CustomContentType';
