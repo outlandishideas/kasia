@@ -23,14 +23,12 @@ function deriveContentType (targetName) {
  * @param {String} [contentType] The subject type for which the WP-API request will be made.
  * @param {String} [routeParamsPropName] From which object on props will the WP-API route parameters be derived?
  * @param {Boolean} [useEmbedRequestQuery] Will the request to WP-API be made with the `_embed` query parameter?
- * @param {Object} [fetchDataOptions] Object to merge with the action that is dispatched in content request.
  * @returns {Function}
  */
 export default function repressConnect ({
   contentType = null,
   routeParamsPropName = 'params',
-  useEmbedRequestQuery = true,
-  fetchDataOptions = {}
+  useEmbedRequestQuery = true
 } = {}) {
   return (target) => {
     if (target.__repress) {
@@ -47,6 +45,7 @@ export default function repressConnect ({
       );
     }
 
+    const isCustomContentType = !!customContentTypes[contentType];
     const camelCaseContentTypeSingular = mapToCamelCase(contentType);
     const camelCaseContentTypePlural = mapToCamelCasePlural(contentType);
 
@@ -59,12 +58,19 @@ export default function repressConnect ({
 
     class RepressComponentWrapper extends Component {
       componentWillMount () {
-        this.props.dispatch(createRequest(contentType, {
+        this.props.dispatch(this.createInitAction());
+      }
+
+      createInitAction () {
+        const contentTypeNamespace = isCustomContentType
+          ? ContentTypes.CUSTOM_CONTENT_TYPE
+          : contentType;
+
+        return createRequest(contentTypeNamespace, {
           params: this.props[routeParamsPropName],
-            contentType,
-            useEmbedRequestQuery,
-            fetchDataOptions
-        }));
+          contentType,
+          useEmbedRequestQuery
+        })
       }
 
       render () {

@@ -35,5 +35,6 @@ export default {
   [ContentTypes.TAXONOMY]: makeActionTypes(ContentTypes.TAXONOMY),
   [ContentTypes.CATEGORY]: makeActionTypes(ContentTypes.CATEGORY),
   [ContentTypes.TAG]: makeActionTypes(ContentTypes.TAG),
-  [ContentTypes.USER]: makeActionTypes(ContentTypes.USER)
+  [ContentTypes.USER]: makeActionTypes(ContentTypes.USER),
+  [ContentTypes.CUSTOM_CONTENT_TYPE]: makeActionTypes(ContentTypes.CUSTOM_CONTENT_TYPE)
 };

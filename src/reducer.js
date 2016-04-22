@@ -25,9 +25,8 @@ export default {
         return state;
 
       case BaseActionTypes.RECEIVE:
-        const nextState = Object.assign({}, state);
         const normalisedData = normalisers[contentType](action.data);
-        return merge(state, nextState, normalisedData.entities);
+        return merge({}, state, normalisedData.entities);
 
       case BaseActionTypes.INVALIDATE:
         delete state[contentType][action.id];

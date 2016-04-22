@@ -1,25 +1,17 @@
 jest.disableAutomock();
 
-import React, { Component } from 'react';
-import { combineReducers, createStore} from 'redux';
+import React  from 'react';
 import { mount } from 'enzyme';
 
 import ActionTypes from '../constants/ActionTypes';
 import ContentTypes from '../constants/ContentTypes';
-import repressReducer from '../reducer';
-import repressConnect from '../connect';
+import configureStore from './util/configureStore';
 
-// TODO add saga middleware
+import BuiltInContentType from './components/BuiltInContentType';
+import DerivedContentType from './components/DerivedContentType';
+import CustomContentType from './components/CustomContentType';
 
-const interceptReducer = jest.fn();
-interceptReducer.mockReturnValue({});
-
-const rootReducer = combineReducers({
-  intercept: interceptReducer,
-  ...repressReducer
-});
-
-const store = createStore(rootReducer, {});
+const { store, interceptReducer } = configureStore();
 
 const testProps = {
   store,
@@ -28,43 +20,44 @@ const testProps = {
   }
 };
 
-const testConnectOptions = {
-  contentType: ContentTypes.POST,
-  useEmbedRequestQuery: true,
-  fetchDataOptions: {}
-};
+describe('Repress connect', () => {
+  describe('with built-in content type', () => {
+    const rendered = mount(
+      <BuiltInContentType {...testProps} testProp={true}/>
+    );
 
-@repressConnect(testConnectOptions)
-class ConnectedComponent extends Component {
-  constructor (props, context) {
-    super(props, context);
-  }
+    it('should wrap the component', () => {
+      expect(BuiltInContentType.__repress).toBe(true);
+    });
 
-  render () {
-    return <div>Hello, World!</div>;
-  }
-}
+    it('should pass props down', () => {
+      expect(rendered.props().testProp).toBe(true);
+    });
 
-describe('Repress connect decorator', () => {
-  const rendered = mount(
-    <ConnectedComponent {...testProps} testProp={true} />
-  );
-
-  it('wraps a component...', () => {
-    expect(ConnectedComponent.__repress).toBe(true);
+    it('should dispatch an action corresponding to given configuration', () => {
+      const action = interceptReducer.mock.calls[3][1];
+      expect(action.type).toEqual(ActionTypes.POST.REQUEST.CREATE);
+      expect(action.options.contentType).toEqual(ContentTypes.POST);
+    });
   });
 
-  it('...that passes props down', () => {
-    expect(rendered.props().testProp).toBe(true);
+  describe('with derived built-in content type', () => {
+    mount(<DerivedContentType {...testProps} testProp={true}/>);
+
+    it('should dispatch an action corresponding to given configuration', () => {
+      const action = interceptReducer.mock.calls[4][1];
+      expect(action.type).toEqual(ActionTypes.POST.REQUEST.CREATE);
+      expect(action.options.contentType).toEqual(ContentTypes.POST);
+    });
   });
 
-  it('...that dispatches an action corresponding to given configuration', () => {
-    expect(interceptReducer.mock.calls[3][1]).toEqual({
-      type: ActionTypes.POST.REQUEST.CREATE,
-      options: {
-        params: testProps.params,
-        ...testConnectOptions
-      }
+  describe('with custom content type', () => {
+    mount(<CustomContentType {...testProps} testProp={true}/>);
+
+    it('should dispatch an action corresponding to given configuration', () => {
+      const action = interceptReducer.mock.calls[5][1];
+      expect(action.type).toEqual(ActionTypes.CUSTOM_CONTENT_TYPE.REQUEST.CREATE);
+      expect(action.options.contentType).toEqual('CustomContentType');
     });
   });
 });

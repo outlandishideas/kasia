@@ -9,7 +9,8 @@ const ContentTypes = {
   POST_STATUS: 'POST_STATUS',
   TAG: 'TAG',
   TAXONOMY: 'TAXONOMY',
-  USER: 'USER'
+  USER: 'USER',
+  CUSTOM_CONTENT_TYPE: 'CUSTOM_CONTENT_TYPE'
 };
 
 export default ContentTypes;

@@ -64,7 +64,9 @@
     ],
     "testPathIgnorePatterns": [
       "/node_modules/",
-      "/fixtures/"
+      "/fixtures/",
+      "/components/",
+      "/util/"
     ]
   }
 }

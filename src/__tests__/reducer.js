@@ -11,7 +11,7 @@ import { receive } from '../actionCreators';
 const rootReducer = combineReducers(repressReducer);
 const store = createStore(rootReducer, {});
 
-describe('Repress reducer', () => {
+describe('Reducer basics', () => {
   const initialStore = { $$repress: {} };
 
   it('has namespaced "repress" object on store', () => {
@@ -22,12 +22,10 @@ describe('Repress reducer', () => {
     store.dispatch({ type: 'someOtherNamespace/' });
     expect(store.getState()).toEqual(initialStore);
   });
+});
 
-  it('calls appropriate saga when dispatching REQUEST_CREATE action', () => {
-
-  });
-
-  it('normalises a WP-API response and places result in the store', () => {
+describe('Reduce RECEIVE', () => {
+  it('normalises the WP-API response and places result in the store', () => {
     const normalisedData = normalisers[ContentTypes.POST](postJson);
 
     store.dispatch(
