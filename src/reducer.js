@@ -1,6 +1,5 @@
 import { merge } from 'lodash';
 
-import { mapToCamelCasePlural } from './constants/ContentTypes';
 import { BaseActionTypes } from './constants/ActionTypes';
 import normalisers from './normalisers';
 
