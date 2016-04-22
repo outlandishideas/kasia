@@ -1,30 +1,18 @@
-jest.unmock('redux')
-jest.unmock('redux-saga')
-jest.unmock('normalizr')
-
-jest.unmock('../constants/ContentTypes');
-jest.unmock('../reducer');
-jest.unmock('../normalisers/index');
-jest.unmock('../normalisers/post');
-jest.unmock('../actionCreators');
+jest.disableAutomock();
 
 import { combineReducers, createStore } from 'redux';
 
 import postJson from './fixtures/wp-api-responses/post'
-
 import ContentTypes from '../constants/ContentTypes';
 import repressReducer from '../reducer';
 import normalisers from '../normalisers';
 import { receive } from '../actionCreators';
 
-const rootReducer = combineReducers({
-  repress: repressReducer
-});
-
-let store = createStore(rootReducer, {});
+const rootReducer = combineReducers(repressReducer);
+const store = createStore(rootReducer, {});
 
 describe('Repress reducer', () => {
-  const initialStore = { repress: {} };
+  const initialStore = { $$repress: {} };
 
   it('has namespaced "repress" object on store', () => {
     expect(store.getState()).toEqual(initialStore);
@@ -39,18 +27,15 @@ describe('Repress reducer', () => {
 
   });
 
-  it('normalises a WP-API response and places in store', () => {
+  it('normalises a WP-API response and places result in the store', () => {
     const normalisedData = normalisers[ContentTypes.POST](postJson);
-    const entities = normalisedData.entities.posts;
 
     store.dispatch(
       receive(ContentTypes.POST, postJson)
     );
 
     expect(store.getState()).toEqual({
-      repress: {
-        posts: entities
-      }
-    })
+      $$repress: normalisedData.entities
+    });
   });
 });

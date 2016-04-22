@@ -19,8 +19,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "humps": "^1.0.0",
     "jest-cli": "^11.0.2",
-    "normalizr": "^2.0.1",
     "react": "^15.0.1",
     "react-dom": "^15.0.1",
     "react-redux": "^4.4.5",

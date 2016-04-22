@@ -1,24 +1,22 @@
-jest.unmock('redux');
-
-jest.unmock('../constants/ActionTypes');
-jest.unmock('../sagas');
-jest.unmock('../reducer');
-jest.unmock('../connect');
+jest.disableAutomock();
 
 import React, { Component } from 'react';
 import { combineReducers, createStore} from 'redux';
 import { mount } from 'enzyme';
 
 import ActionTypes from '../constants/ActionTypes';
+import ContentTypes from '../constants/ContentTypes';
 import repressReducer from '../reducer';
 import repressConnect from '../connect';
+
+// TODO add saga middleware
 
 const interceptReducer = jest.fn();
 interceptReducer.mockReturnValue({});
 
 const rootReducer = combineReducers({
   intercept: interceptReducer,
-  repress: repressReducer
+  ...repressReducer
 });
 
 const store = createStore(rootReducer, {});
@@ -31,7 +29,7 @@ const testProps = {
 };
 
 const testConnectOptions = {
-  postType: 'testPostType',
+  contentType: ContentTypes.POST,
   useEmbedRequestQuery: true,
   fetchDataOptions: {}
 };
@@ -62,9 +60,11 @@ describe('Repress connect decorator', () => {
 
   it('...that dispatches an action corresponding to given configuration', () => {
     expect(interceptReducer.mock.calls[3][1]).toEqual({
-      type: ActionTypes.POST.REQUEST,
-      params: testProps.params,
-      options: testConnectOptions
+      type: ActionTypes.POST.REQUEST.CREATE,
+      options: {
+        params: testProps.params,
+        ...testConnectOptions
+      }
     });
   });
 });

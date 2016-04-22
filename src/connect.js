@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
-import { connect } from 'react-redux';
+import { connect as reduxConnect } from 'react-redux';
 
 import ContentTypes, { mapToCamelCase, mapToCamelCasePlural } from './constants/ContentTypes';
+import { customContentTypes } from './customContentTypes';
 import { createRequest } from './actionCreators';
 import { fetchResource } from './sagas';
 
@@ -16,14 +17,19 @@ function deriveContentType (targetName) {
   }
 }
 
+/**
+ * Repress connect.
+ * TODO write better doc
+ * @param {String} [contentType] The subject type for which the WP-API request will be made.
+ * @param {String} [routeParamsPropName] From which object on props will the WP-API route parameters be derived?
+ * @param {Boolean} [useEmbedRequestQuery] Will the request to WP-API be made with the `_embed` query parameter?
+ * @param {Object} [fetchDataOptions] Object to merge with the action that is dispatched in content request.
+ * @returns {Function}
+ */
 export default function repressConnect ({
-  /** The subject type for which the WP-API request will be made. */
   contentType = null,
-  /** From which property on the component's props will the WP-API route parameters be derived? */
   routeParamsPropName = 'params',
-  /** Will the request to WP-API be made with the `_embed` query parameter? */
   useEmbedRequestQuery = true,
-  /** Object to merge with the action that is dispatched in order to request post data. */
   fetchDataOptions = {}
 } = {}) {
   return (target) => {
@@ -31,17 +37,22 @@ export default function repressConnect ({
       throw new Error(`The component "${target.name}" is already wrapped by Repress.`);
     }
 
-    if (!(contentType = contentType || deriveContentType(target))) {
-      throw new Error('Could not derive content type from class name. Pass a content type explicitly.');
+    contentType = contentType || customContentTypes[contentType] || deriveContentType(target.name);
+
+    if (!contentType) {
+      throw new Error(
+        'Could not derive content type from class name. ' +
+        'Pass built-ins using Repress.ContentTypes. For example, ContentTypes.POST. ' +
+        'Custom Content Types should be registered with Repress#registerCustomContentType.'
+      );
     }
 
-    const isCustomContentType = !contentTypeNames.includes(contentType);
     const camelCaseContentTypeSingular = mapToCamelCase(contentType);
     const camelCaseContentTypePlural = mapToCamelCasePlural(contentType);
 
-    function repressMapStateToProps (state, ownProps) {
+    function mapStateToProps (state, ownProps) {
       const params = ownProps[routeParamsPropName];
-      const collection = state.repress[camelCaseContentTypePlural];
+      const collection = state.$$repress[camelCaseContentTypePlural];
       const value = collection ? collection[params.id] : null;
       return { [camelCaseContentTypeSingular]: value };
     }
@@ -50,15 +61,14 @@ export default function repressConnect ({
       componentWillMount () {
         this.props.dispatch(createRequest(contentType, {
           params: this.props[routeParamsPropName],
-          contentType,
-          useEmbedRequestQuery,
-          fetchDataOptions,
-          isCustomContentType
+            contentType,
+            useEmbedRequestQuery,
+            fetchDataOptions
         }));
       }
 
       render () {
-        return <target {...this.props} __repress={true} />;
+        return <target {...this.props} />;
       }
     }
 
@@ -68,6 +78,6 @@ export default function repressConnect ({
       [fetchResource, contentType, fetchDataOptions]
     ];
 
-    return connect(repressMapStateToProps)(RepressComponentWrapper);
+    return reduxConnect(mapStateToProps)(RepressComponentWrapper);
   };
 };
