@@ -35,7 +35,9 @@ export default function repressConnect ({
       throw new Error(`The component "${target.name}" is already wrapped by Repress.`);
     }
 
-    contentType = contentType || customContentTypes[contentType] || deriveContentType(target.name);
+    contentType = contentType ||
+      customContentTypes[contentType] ||
+      deriveContentType(target.name);
 
     if (!contentType) {
       throw new Error(

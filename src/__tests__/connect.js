@@ -13,6 +13,7 @@ import { receive } from '../actionCreators';
 import BuiltInContentType from './components/BuiltInContentType';
 import DerivedContentType from './components/DerivedContentType';
 import CustomContentType from './components/CustomContentType';
+import makeBadContentTypeComponent from './components/BadContentType';
 
 const { store, interceptReducer } = configureStore();
 
@@ -26,7 +27,7 @@ const testProps = {
 describe('Repress connect', () => {
   describe('with built-in content type', () => {
     const rendered = mount(
-      <BuiltInContentType {...testProps} testProp={true}/>
+      <BuiltInContentType {...testProps} testProp={true} />
     );
 
     it('should wrap the component', () => {
@@ -47,7 +48,7 @@ describe('Repress connect', () => {
   describe('with derived built-in content type', () => {
     store.dispatch(receive(ContentTypes.POST, postJson));
 
-    const rendered = mount(<DerivedContentType {...testProps} testProp={true}/>);
+    const rendered = mount(<DerivedContentType {...testProps} testProp={true} />);
 
     it('should dispatch an action corresponding to given configuration', () => {
       const action = interceptReducer.mock.calls[5][1];
@@ -62,12 +63,18 @@ describe('Repress connect', () => {
   });
 
   describe('with custom content type', () => {
-    mount(<CustomContentType {...testProps} testProp={true}/>);
+    mount(<CustomContentType {...testProps} testProp={true} />);
 
     it('should dispatch an action corresponding to given configuration', () => {
       const action = interceptReducer.mock.calls[6][1];
       expect(action.type).toEqual(ActionTypes.CUSTOM_CONTENT_TYPE.REQUEST.CREATE);
       expect(action.options.contentType).toEqual('CustomContentType');
+    });
+  });
+
+  describe('with bad content type', () => {
+    it('should throw error informing', () => {
+      expect(makeBadContentTypeComponent).toThrowError(/Could not derive/);
     });
   });
 });
