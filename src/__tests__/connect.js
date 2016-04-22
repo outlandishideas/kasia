@@ -1,70 +1,80 @@
-jest.unmock('redux');
+jest.disableAutomock();
 
-jest.unmock('../ActionTypes');
-jest.unmock('../sagas');
-jest.unmock('../reducer');
-jest.unmock('../connect');
-
-import React, { Component } from 'react';
-import { combineReducers, createStore } from 'redux';
+import React  from 'react';
 import { mount } from 'enzyme';
 
-import ActionTypes from '../ActionTypes';
-import repressReducer from '../reducer';
-import repressConnect from '../connect';
+import postJson from './fixtures/wp-api-responses/post'
 
-const interceptReducer = jest.fn();
-interceptReducer.mockReturnValue({});
+import ActionTypes from '../constants/ActionTypes';
+import ContentTypes from '../constants/ContentTypes';
+import configureStore from './util/configureStore';
+import { receive } from '../actionCreators';
 
-const rootReducer = combineReducers({
-  intercept: interceptReducer,
-  repress: repressReducer
-});
+import BuiltInContentType from './components/BuiltInContentType';
+import DerivedContentType from './components/DerivedContentType';
+import CustomContentType from './components/CustomContentType';
+import makeBadContentTypeComponent from './components/BadContentType';
 
-const store = createStore(rootReducer, { repress: {} });
+const { store, interceptReducer } = configureStore();
 
 const testProps = {
   store,
   params: {
-    id: 'test_post_id'
+    id: String(postJson.id)
   }
 };
 
-const testConnectOptions = {
-  postType: 'testPostType',
-  useEmbedRequestQuery: true,
-  fetchDataOptions: {}
-};
+describe('Repress connect', () => {
+  describe('with built-in content type', () => {
+    const rendered = mount(
+      <BuiltInContentType {...testProps} testProp={true} />
+    );
 
-@repressConnect(testConnectOptions)
-class ConnectedComponent extends Component {
-  constructor (props, context) {
-    super(props, context);
-  }
+    it('should wrap the component', () => {
+      expect(BuiltInContentType.__repress).toBe(true);
+    });
 
-  render () {
-    return <div>Hello, World!</div>;
-  }
-}
+    it('should pass props down', () => {
+      expect(rendered.props().testProp).toBe(true);
+    });
 
-describe('Repress connect decorator', () => {
-  it('wraps a component...', () => {
-    expect(ConnectedComponent.__repress).toBe(true);
+    it('should dispatch an action corresponding to given configuration', () => {
+      const action = interceptReducer.mock.calls[3][1];
+      expect(action.type).toEqual(ActionTypes.POST.REQUEST.CREATE);
+      expect(action.options.contentType).toEqual(ContentTypes.POST);
+    });
   });
 
-  const rendered = mount(
-    <ConnectedComponent {...testProps} testProp={true} />
-  );
+  describe('with derived built-in content type', () => {
+    store.dispatch(receive(ContentTypes.POST, postJson));
 
-  it('...that passes props down', () => {
-    expect(rendered.props().testProp).toBe(true);
+    const rendered = mount(<DerivedContentType {...testProps} testProp={true} />);
+
+    it('should dispatch an action corresponding to given configuration', () => {
+      const action = interceptReducer.mock.calls[5][1];
+      expect(action.type).toEqual(ActionTypes.POST.REQUEST.CREATE);
+      expect(action.options.contentType).toEqual(ContentTypes.POST);
+    });
+
+    // TODO this is surely wrong... how to access final props properly?
+    it('should receive post on props', () => {
+      expect(rendered.nodes[0].mergedProps.post.id).toEqual(postJson.id);
+    });
   });
 
-  it('...that dispatches an action corresponding to given configuration', () => {
-    expect(interceptReducer.mock.calls[3][1]).toEqual({
-      type: ActionTypes.REQUEST_POST,
-      params: testProps.params,
-      options: testConnectOptions
+  describe('with custom content type', () => {
+    mount(<CustomContentType {...testProps} testProp={true} />);
+
+    it('should dispatch an action corresponding to given configuration', () => {
+      const action = interceptReducer.mock.calls[6][1];
+      expect(action.type).toEqual(ActionTypes.CUSTOM_CONTENT_TYPE.REQUEST.CREATE);
+      expect(action.options.contentType).toEqual('CustomContentType');
+    });
+  });
+
+  describe('with bad content type', () => {
+    it('should throw error informing', () => {
+      expect(makeBadContentTypeComponent).toThrowError(/Could not derive/);
     });
   });
 });

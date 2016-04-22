@@ -1,27 +1,39 @@
-import ActionTypes from './ActionTypes';
+import { merge } from 'lodash';
 
-export default function repressReducer (state = {}, action) {
-  switch (action.type) {
-    case ActionTypes.RECEIVE_POST:
-      const nextState = Object.assign({}, state);
+import { BaseActionTypes } from './constants/ActionTypes';
+import normalisers from './normalisers';
 
-      if (!nextState.repress[action.postType]) {
-        nextState.repress[action.postType] = {};
-      }
+export default {
+  $$repress: function repressReducer (state = {}, action) {
+    const [actionNamespace, contentType, actionType] = action.type.split('/');
 
-      return Object.assign(nextState, {
-        repress: {
-          [action.postType]: {
-            [action.id]: action.data
-          }
-        }
-      });
-
-    case ActionTypes.INVALIDATE_POST:
-      delete state.repress[action.postType][action.id];
-      return Object.assign({}, state);
-
-    default:
+    if (actionNamespace !== 'repress') {
       return state;
+    }
+
+    switch (actionType) {
+      case BaseActionTypes.REQUEST.START:
+        // TODO implement REQUEST.START
+        return state;
+
+      case BaseActionTypes.REQUEST.FAIL:
+        // TODO implement REQUEST.FAIL
+        return state;
+
+      case BaseActionTypes.REQUEST.COMPLETE:
+        // TODO implement REQUEST.COMPLETE
+        return state;
+
+      case BaseActionTypes.RECEIVE:
+        const normalisedData = normalisers[contentType](action.data);
+        return merge({}, state, normalisedData.entities);
+
+      case BaseActionTypes.INVALIDATE:
+        delete state[contentType][action.id];
+        return Object.assign({}, state);
+
+      default:
+        return state;
+    }
   }
-}
+};
