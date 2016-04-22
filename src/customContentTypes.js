@@ -5,12 +5,6 @@ import ContentTypes from './constants/ContentTypes';
 const contentTypeNames = Object.keys(ContentTypes)
   .map((name) => humps.camelize(name));
 
-function makePluralContentTypeName (name) {
-  return name[name.length - 1] === 'y'
-    ? name.substr(0, name.length - 1) + 'ies'
-    : name + 's'
-}
-
 export const customContentTypes = {};
 
 export function registerCustomContentType (name, {
@@ -21,15 +15,18 @@ export function registerCustomContentType (name, {
     throw new Error('Expecting name of Custom Content Type to be a string.');
   }
 
-  if (contentTypeNames.includes(name.toLowerCase())) {
+  const contentTypeNameTaken = Object.keys(customContentTypes).includes(name) ||
+    contentTypeNames.includes(name);
+
+  if (contentTypeNameTaken) {
     throw new Error(
-      `The Content Type name "${name}" is already taken by a built-in. ` +
+      `The Content Type name "${name}" is already taken. ` +
       `Choose another non-conflicting name.`
     );
   }
 
-  namePlural = namePlural || makePluralContentTypeName(name);
-  requestSlug = requestSlug || humps.decamelize(name.toLowerCase(), { split: /_/, separator: '-' });
+  namePlural = namePlural || name + 's';
+  requestSlug = requestSlug || humps.decamelize(namePlural, { separator: '-' });
 
   return customContentTypes[name] = {
     name,
