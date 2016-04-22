@@ -37,12 +37,12 @@ function flattenPost (post) {
 
   if (hasEmbeddedContent) {
     flattened.author = post.embedded.author
-      .find((author) => author.id === post.author);
+      .find(author => author.id === post.author);
   }
 
   if (hasEmbeddedContent && hasEmbeddedFeaturedMedia) {
     flattened.featuredMedia = post.embedded['wp:featuredmedia']
-      .find((media) => media.id === post.featuredMedia);
+      .find(media => media.id === post.featuredMedia);
   }
 
   return flattened;

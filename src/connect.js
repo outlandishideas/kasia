@@ -38,7 +38,7 @@ export default function repressConnect ({
   routeParamsPropName = 'params',
   useEmbedRequestQuery = true
 } = {}) {
-  return (target) => {
+  return target => {
     invariant(
       !target.__repress,
       `The component "${target.name}" is already wrapped by Repress.`

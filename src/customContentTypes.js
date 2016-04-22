@@ -4,7 +4,7 @@ import invariant from 'invariant';
 import ContentTypes from './constants/ContentTypes';
 
 const contentTypeNames = Object.keys(ContentTypes)
-  .map((name) => humps.camelize(name));
+  .map(name => humps.camelize(name));
 
 export const customContentTypes = {};
 
