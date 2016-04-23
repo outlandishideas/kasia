@@ -10,8 +10,4 @@ const contentType = 'CustomContentType';
 registerCustomContentType(contentType);
 
 @connectWordPress({ contentType })
-export default class CustomContentType extends Component {
-  constructor (props, context) {
-    super(props, context);
-  }
-}
+export default class CustomContentType extends Component {}

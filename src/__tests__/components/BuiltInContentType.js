@@ -12,8 +12,4 @@ const testConnectOptions = {
 };
 
 @connectWordPress(testConnectOptions)
-export default class BuiltInContentType extends Component {
-  constructor (props, context) {
-    super(props, context);
-  }
-}
+export default class BuiltInContentType extends Component {}
