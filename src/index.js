@@ -1,26 +1,41 @@
+import invariant from 'invariant';
+
 import ContentTypes from './constants/ContentTypes';
-import reducer from './reducer';
+import makeReducer from './reducer';
 import connect from './connect';
 import { registerCustomContentType } from './contentTypes';
 
 /**
  * TODO docs
- * @param {String} [apiUrl] Location of the WP-API.
+ * @param {String} [wpApiUrl] Location of the WP-API.
  * @param {Boolean} [useEmbedRequestQuery] Should all requests use `_embed` query by default?
+ * @param {Array} [customContentTypes] Array of objects describing the custom content types available through WP-API.
  */
-function configure ({
-  apiUrl = null,
+export default function configureRepress ({
+  wpApiUrl = null,
   useEmbedRequestQuery = true,
+  customContentTypes = []
 } = {}) {
   if (typeof arguments[0] === 'string') {
-    apiUrl = arguments[0];
+    wpApiUrl = arguments[0];
   }
-  // TODO place config in store, will require nesting content data so no longer top-level, e.g. store = { config, entities } 
-  return reducer;
+
+  invariant(
+    typeof wpApiUrl === 'string',
+    'Expecting WP-API URL to be a string, got "%s".',
+    typeof wpApiUrl
+  );
+
+  customContentTypes
+    .map(registerCustomContentType);
+
+  return makeReducer({
+    wpApiUrl,
+    useEmbedRequestQuery
+  });
 }
 
-export default {
-  configure,
+export {
   ContentTypes,
   connect,
   registerCustomContentType

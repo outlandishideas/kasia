@@ -3,9 +3,9 @@ import invariant from 'invariant';
 
 import ContentTypes from './constants/ContentTypes';
 
-const contentTypeNames = Object.keys(ContentTypes);
-
 const contentTypeOptions = {};
+
+const contentTypeNames = Object.keys(ContentTypes);
 
 const contentTypeNamesCamelCase = Object.keys(ContentTypes)
   .map(name => humps.camelize(name));

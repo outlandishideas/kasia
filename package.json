@@ -21,6 +21,7 @@
   "dependencies": {
     "humps": "^1.0.0",
     "invariant": "^2.2.1",
+    "lodash.merge": "^4.3.5",
     "react": "^15.0.1",
     "react-dom": "^15.0.1",
     "react-redux": "^4.4.5",

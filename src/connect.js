@@ -86,7 +86,7 @@ export default function repressConnect ({
     RepressComponentWrapper.__repress = true;
 
     RepressComponentWrapper.fetchData = () => [
-      [fetchResource, contentType]
+      [fetchResource, { contentType, useEmbedRequestQuery }]
     ];
 
     return reduxConnect(mapStateToProps)(RepressComponentWrapper);
