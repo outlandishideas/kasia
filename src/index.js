@@ -1,9 +1,16 @@
 import invariant from 'invariant';
 
-import ContentTypes from './constants/ContentTypes';
 import makeReducer from './reducer';
-import connect from './connect';
+import { requestResource } from './api';
 import { registerCustomContentType } from './contentTypes';
+
+export { default as ContentTypes } from './constants/ContentTypes';
+export { default as connectWordPress } from './connect';
+
+export {
+  registerCustomContentType,
+  requestResource
+};
 
 /**
  * TODO docs
@@ -16,10 +23,6 @@ export default function configureRepress ({
   useEmbedRequestQuery = true,
   customContentTypes = []
 } = {}) {
-  if (typeof arguments[0] === 'string') {
-    wpApiUrl = arguments[0];
-  }
-
   invariant(
     typeof wpApiUrl === 'string',
     'Expecting WP-API URL to be a string, got "%s".',
@@ -34,9 +37,3 @@ export default function configureRepress ({
     useEmbedRequestQuery
   });
 }
-
-export {
-  ContentTypes,
-  connect,
-  registerCustomContentType
-};
