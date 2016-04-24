@@ -30,7 +30,7 @@ export default function configureRepress ({
   );
 
   customContentTypes
-    .map(registerCustomContentType);
+    .forEach(registerCustomContentType);
 
   return makeReducer({
     wpApiUrl,

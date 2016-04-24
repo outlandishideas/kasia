@@ -37,10 +37,11 @@ export default function repressConnect ({
       deriveContentType(target.name);
 
     invariant(
-        contentType,
-        'Could not derive content type from class name. ' +
-        'Pass built-ins using Repress.ContentTypes. For example, ContentTypes.POST. ' +
-        'Custom Content Types should be registered with Repress#registerCustomContentType.'
+      contentType,
+      'Could not derive content type from class name "%s". ' +
+      'Pass built-ins using Repress.ContentTypes. For example, ContentTypes.POST. ' +
+      'Custom Content Types should be registered with Repress#registerCustomContentType.',
+      target.name
     );
 
     const isCustomContentType = !!customContentTypes[contentType];

@@ -4,10 +4,10 @@ import { combineReducers, createStore } from 'redux';
 
 import postJson from './fixtures/wp-api-responses/post'
 import ContentTypes from '../constants/ContentTypes';
-import { defaultState } from '../reducer';
 import normalisers from '../normalisers';
-import { receive } from '../actionCreators';
 import repress from '../index';
+import { receive } from '../actionCreators';
+import { defaultState } from '../reducer';
 
 const repressReducer = repress({ wpApiUrl: 'test' });
 const rootReducer = combineReducers(repressReducer);
