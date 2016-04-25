@@ -61,6 +61,17 @@
     "extends": "airbnb-base",
     "globals": {
       "fetch": false
+    },
+    "parserOptions": {
+      "ecmaFeatures": {
+          "jsx": true
+      }
+    },
+    "rules": {
+      "comma-dangle": [2, "never"]
+    },
+    "env": {
+        "jest": true
     }
   },
   "jest": {
