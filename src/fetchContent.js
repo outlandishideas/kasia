@@ -63,10 +63,10 @@ export default function fetchContent (contentType, subject, config, options = {}
     }, '');
 
   if (requestType === RequestTypes.SINGLE) {
-    options.params = options.params || { ':id': subject };
+    options.params = options.params || { 'id': subject };
     EndpointParams.forEach(param => {
       if (options.params[param]) {
-        endpoint = endpoint.replace(param, options.params[param]);
+        endpoint = endpoint.replace(':' + param, options.params[param]);
       }
     });
   }

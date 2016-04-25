@@ -1,9 +1,9 @@
 import ContentTypes from './ContentTypes';
 
 export const EndpointParams = [
-  ':id',
-  ':postId',
-  ':slug'
+  'id',
+  'postId',
+  'slug'
 ];
 
 export const RequestTypes = {
