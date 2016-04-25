@@ -1,7 +1,7 @@
 import invariant from 'invariant';
 
 import makeReducer from './reducer';
-import { requestResource } from './api';
+import { fetchContent } from './api';
 import { registerCustomContentType } from './contentTypes';
 
 export { default as ContentTypes } from './constants/ContentTypes';
@@ -9,7 +9,7 @@ export { default as connectWordPress } from './connect';
 
 export {
   registerCustomContentType,
-  requestResource
+  fetchContent
 };
 
 /**

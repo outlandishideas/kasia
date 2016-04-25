@@ -20,7 +20,7 @@ import {
  * @param {Boolean} [useEmbedRequestQuery] Override global default for using `_embed` query parameter in WP-API request.
  * @returns {Function}
  */
-export default function repressConnect ({
+export default function connectWordPress ({
   contentType = null,
   routeParamsPropName = 'params',
   useEmbedRequestQuery = true
