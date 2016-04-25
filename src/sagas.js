@@ -16,11 +16,11 @@ export function* fetchResource (action) {
 
   if (error) {
     return put({ type: BaseActionTypes.FAIL, error });
-  } 
-  
+  }
+
   return put({ type: BaseActionTypes.COMPLETE, slug, data });
 }
 
-export default function* API() {
+export default function* takeEvery () {
   yield* takeEvery(BaseActionTypes.CREATE, fetchResource);
 }

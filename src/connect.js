@@ -2,35 +2,22 @@ import React, { Component } from 'react';
 import { connect as reduxConnect } from 'react-redux';
 import invariant from 'invariant';
 
-import ContentTypes, { mapToCamelCase, mapToCamelCasePlural } from './constants/ContentTypes';
-import { customContentTypes } from './customContentTypes';
+import ContentTypes from './constants/ContentTypes';
 import { createRequest } from './actionCreators';
 import { fetchResource } from './sagas';
 
-const contentTypeNames = Object.keys(ContentTypes);
-
-function deriveContentType (targetName) {
-  for (let i = 0; i < contentTypeNames.length; i++) {
-    const contentTypeName = contentTypeNames[i];
-    if (targetName.toLowerCase().includes(contentTypeName.toLowerCase())) {
-      return contentTypeName;
-    }
-  }
-}
-
-function makeContentTypeOptions (contentType) {
-  return {
-    name: mapToCamelCase(contentType),
-    namePlural: mapToCamelCasePlural(contentType)
-  };
-}
+import {
+  customContentTypes,
+  makeContentTypeOptions,
+  deriveContentType
+} from './contentTypes';
 
 /**
  * Repress connect.
  * TODO write better doc
- * @param {String} [contentType] The subject type for which the WP-API request will be made.
+ * @param {String} [contentType] The content type for which the WP-API request will be made.
  * @param {String} [routeParamsPropName] From which object on props will the WP-API route parameters be derived?
- * @param {Boolean} [useEmbedRequestQuery] Will the request to WP-API be made with the `_embed` query parameter?
+ * @param {Boolean} [useEmbedRequestQuery] Override global default for using `_embed` query parameter in WP-API request.
  * @returns {Function}
  */
 export default function repressConnect ({
@@ -41,7 +28,8 @@ export default function repressConnect ({
   return target => {
     invariant(
       !target.__repress,
-      `The component "${target.name}" is already wrapped by Repress.`
+      'The component "%s" is already wrapped by Repress.',
+      target.name
     );
 
     contentType = contentType ||
@@ -49,10 +37,11 @@ export default function repressConnect ({
       deriveContentType(target.name);
 
     invariant(
-        contentType,
-        'Could not derive content type from class name. ' +
-        'Pass built-ins using Repress.ContentTypes. For example, ContentTypes.POST. ' +
-        'Custom Content Types should be registered with Repress#registerCustomContentType.'
+      contentType,
+      'Could not derive content type from class name "%s". ' +
+      'Pass built-ins using Repress.ContentTypes. For example, ContentTypes.POST. ' +
+      'Custom Content Types should be registered with Repress#registerCustomContentType.',
+      target.name
     );
 
     const isCustomContentType = !!customContentTypes[contentType];
@@ -63,13 +52,14 @@ export default function repressConnect ({
 
     function mapStateToProps (state, ownProps) {
       const params = ownProps[routeParamsPropName];
-      const collection = state.$$repress[contentTypeOptions.namePlural];
+      const collection = state.$$repress.entities[contentTypeOptions.namePlural];
       const value = collection ? collection[params.id] : null;
       return { [contentTypeOptions.name]: value };
     }
 
     class RepressComponentWrapper extends Component {
       componentWillMount () {
+        // TODO allow some method of forcing re-fetch, or should this be done manually be invalidate action?
         const params = this.props[routeParamsPropName];
         const collection = this.props[contentTypeOptions.name];
         if (!collection || !collection[params.id]) {
@@ -96,8 +86,12 @@ export default function repressConnect ({
 
     RepressComponentWrapper.__repress = true;
 
-    RepressComponentWrapper.fetchData = () => [
-      [fetchResource, contentType]
+    /**
+     * Fetch the content data according to the configuration in `store`.
+     * @param {Object} store The redux store
+     */
+    RepressComponentWrapper.fetchData = store => [
+      [fetchResource, { contentType, useEmbedRequestQuery }]
     ];
 
     return reduxConnect(mapStateToProps)(RepressComponentWrapper);

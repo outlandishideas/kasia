@@ -3,7 +3,7 @@ jest.disableAutomock();
 import React, { Component } from 'react';
 
 import ContentTypes from '../../constants/ContentTypes';
-import repressConnect from '../../connect';
+import connectWordPress from '../../connect';
 
 const testConnectOptions = {
   contentType: ContentTypes.POST,
@@ -11,13 +11,5 @@ const testConnectOptions = {
   fetchDataOptions: {}
 };
 
-@repressConnect(testConnectOptions)
-export default class BuiltInContentType extends Component {
-  constructor (props, context) {
-    super(props, context);
-  }
-
-  render () {
-    return <div>Hello, World!</div>;
-  }
-}
+@connectWordPress(testConnectOptions)
+export default class BuiltInContentType extends Component {}

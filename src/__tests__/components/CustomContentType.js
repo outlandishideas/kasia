@@ -2,20 +2,12 @@ jest.disableAutomock();
 
 import React, { Component } from 'react';
 
-import { registerCustomContentType } from '../../customContentTypes';
-import repressConnect from '../../connect';
+import connectWordPress from '../../connect';
+import { registerCustomContentType } from '../../contentTypes';
 
 const contentType = 'CustomContentType';
 
 registerCustomContentType(contentType);
 
-@repressConnect({ contentType })
-export default class CustomContentType extends Component {
-  constructor (props, context) {
-    super(props, context);
-  }
-
-  render () {
-    return <div>Hello, World!</div>;
-  }
-}
+@connectWordPress({ contentType })
+export default class CustomContentType extends Component {}
