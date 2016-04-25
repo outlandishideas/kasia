@@ -88,10 +88,14 @@ export default function connectWordPress ({
 
     /**
      * Fetch the content data according to the configuration in `store`.
-     * @param {Object} store The redux store
+     * @param {String} subject The subject identifier (id or slug)
      */
-    RepressComponentWrapper.fetchData = store => [
-      [fetchResource, { contentType, useEmbedRequestQuery }]
+    RepressComponentWrapper.fetchData = subject => [
+      [fetchResource, {
+        contentType,
+        subject,
+        useEmbedRequestQuery
+      }]
     ];
 
     return reduxConnect(mapStateToProps)(RepressComponentWrapper);

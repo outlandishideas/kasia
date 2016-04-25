@@ -1,26 +1,30 @@
 import { takeEvery } from 'redux-saga';
-import { call, put } from 'redux-saga/effects';
+import { call, put, select } from 'redux-saga/effects';
 
-import { BaseActionTypes } from './constants/ActionTypes';
-import { fetchContent } from './api';
+import ActionTypes, { BaseActionTypes } from './constants/ActionTypes';
+import fetchContent from './fetchContent';
 
 export function* fetchResource (action) {
-  const { slug, useEmbedRequestQuery } = action;
+  const { subject } = action;
+  const [, contentType] = action.type.split('/');
+  const requestActions = ActionTypes[contentType].REQUEST;
 
-  yield put({ type: BaseActionTypes.START, slug });
+  const config = yield select(state => state.$$repress.config);
 
-  const { error, data } = yield call(fetchContent, {
-    slug,
-    useEmbedRequestQuery
-  });
+  yield put({ type: requestActions.START });
+
+  const { error, data } = yield call(fetchContent, contentType, subject, config, action.options);
 
   if (error) {
-    return put({ type: BaseActionTypes.FAIL, error });
+    return put({ type: requestActions.FAIL, error });
   }
 
-  return put({ type: BaseActionTypes.COMPLETE, slug, data });
+  return put({ type: requestActions.COMPLETE, subject, data });
 }
 
-export default function* api () {
-  yield* takeEvery(BaseActionTypes.CREATE, fetchResource);
+export default function* fetchSaga () {
+  yield* takeEvery(action => {
+    const [,, actionType] = action.split('/');
+    return actionType === BaseActionTypes.CREATE;
+  }, fetchResource);
 }

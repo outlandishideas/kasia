@@ -1,16 +1,18 @@
 import invariant from 'invariant';
+import es6promise from 'es6-promise';
+import 'isomorphic-fetch';
 
 import makeReducer from './reducer';
-import { fetchContent } from './api';
 import { registerCustomContentType } from './contentTypes';
 
+export { registerCustomContentType };
 export { default as ContentTypes } from './constants/ContentTypes';
 export { default as connectWordPress } from './connect';
 
-export {
-  registerCustomContentType,
-  fetchContent
-};
+export { fetchCategory, fetchComment, fetchCustomContentType, fetchMedia, fetchPage, fetchPost, fetchPostRevision,
+  fetchPostStatus, fetchPostStatus, fetchPostType, fetchTag, fetchTaxonomy, fetchUser } from './actionCreators';
+
+es6promise.polyfill();
 
 /**
  * TODO docs
