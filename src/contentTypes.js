@@ -8,7 +8,7 @@ const contentTypeOptions = {};
 const contentTypeNames = Object.keys(ContentTypes);
 
 const contentTypeNamesCamelCase = Object.keys(ContentTypes)
-  .map(name => humps.camelize(name));
+  .map(humps.camelize);
 
 export const customContentTypes = {};
 

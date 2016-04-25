@@ -90,7 +90,7 @@ export default function repressConnect ({
      * Fetch the content data according to the configuration in `store`.
      * @param {Object} store The redux store
      */
-    RepressComponentWrapper.fetchData = (store) => [
+    RepressComponentWrapper.fetchData = store => [
       [fetchResource, { contentType, useEmbedRequestQuery }]
     ];
 
