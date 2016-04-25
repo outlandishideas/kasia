@@ -16,11 +16,11 @@ export const createRequest = (contentType, options) =>
 export const startRequest = (contentType, options) =>
   ({ type: ActionTypes[contentType].REQUEST.START, options });
 
-export const failRequest = (contentType, options) =>
-  ({ type: ActionTypes[contentType].REQUEST.FAIL, options });
+export const failRequest = (contentType, error) =>
+  ({ type: ActionTypes[contentType].REQUEST.FAIL, error });
 
-export const completeRequest = (contentType, options) =>
-  ({ type: ActionTypes[contentType].REQUEST.COMPLETE, options });
+export const completeRequest = (contentType, subject, data) =>
+  ({ type: ActionTypes[contentType].REQUEST.COMPLETE, subject, data });
 
 export const receive = (contentType, data) =>
   ({ type: ActionTypes[contentType].RECEIVE, data });
