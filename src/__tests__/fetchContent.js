@@ -21,7 +21,7 @@ const config = {
   wpApiUrl: 'http://test'
 };
 
-describe('fetchContent function', () => {
+describe('fetchContent', () => {
   afterEach(() => global.fetch.mockClear());
 
   it('makes request for single content by numeric id', () => {

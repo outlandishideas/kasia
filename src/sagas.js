@@ -10,11 +10,13 @@ import {
   failRequest
 } from './actionCreators';
 
+export const configSelector = state => state.$$repress.config;
+
 export function* fetchResource (action) {
   const { subject } = action;
   const [, contentType] = action.type.split('/');
 
-  const config = yield select(state => state.$$repress.config);
+  const config = yield select(configSelector);
 
   yield put(startRequest(contentType));
 

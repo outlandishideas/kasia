@@ -18,12 +18,14 @@ import {
  * @param {String} [contentType] The content type for which the WP-API request will be made.
  * @param {String} [routeParamsPropName] From which object on props will the WP-API route parameters be derived?
  * @param {Boolean} [useEmbedRequestQuery] Override global default for using `_embed` query parameter in WP-API request.
+ * @param {Boolean} [routeParamSubjectKey] The key on `params` that will be used as the ID of desired content.
  * @returns {Function}
  */
 export default function connectWordPress ({
   contentType = null,
   routeParamsPropName = 'params',
-  useEmbedRequestQuery = true
+  useEmbedRequestQuery = true,
+  routeParamSubjectKey = 'id'
 } = {}) {
   return target => {
     invariant(
@@ -68,15 +70,19 @@ export default function connectWordPress ({
       }
 
       createRequestAction () {
+        const params = this.props[routeParamsPropName];
+
         const contentTypeNamespace = isCustomContentType
           ? ContentTypes.CUSTOM_CONTENT_TYPE
           : contentType;
-
-        return createRequest(contentTypeNamespace, {
-          params: this.props[routeParamsPropName],
+        
+        const options = {
+          params,
           contentType,
           useEmbedRequestQuery
-        });
+        };
+
+        return createRequest(contentTypeNamespace, params[routeParamSubjectKey], options);
       }
 
       render () {

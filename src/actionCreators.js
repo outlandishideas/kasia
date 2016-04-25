@@ -10,17 +10,17 @@ import { customContentTypes } from './contentTypes';
 // Private
 // ---
 
-export const createRequest = (contentType, options) =>
-  ({ type: ActionTypes[contentType].REQUEST.CREATE, options });
+export const createRequest = (contentType, subject, options = {}) =>
+  ({ type: ActionTypes[contentType].REQUEST.CREATE, subject, options });
 
-export const startRequest = (contentType, options) =>
-  ({ type: ActionTypes[contentType].REQUEST.START, options });
+export const startRequest = (contentType) =>
+  ({ type: ActionTypes[contentType].REQUEST.START });
 
 export const failRequest = (contentType, error) =>
   ({ type: ActionTypes[contentType].REQUEST.FAIL, error });
 
-export const completeRequest = (contentType, subject, data) =>
-  ({ type: ActionTypes[contentType].REQUEST.COMPLETE, subject, data });
+export const completeRequest = (contentType, data) =>
+  ({ type: ActionTypes[contentType].REQUEST.COMPLETE, data });
 
 export const receive = (contentType, data) =>
   ({ type: ActionTypes[contentType].RECEIVE, data });
@@ -32,7 +32,7 @@ export const invalidate = (contentType, id) =>
 // Public
 // ---
 
-export const fetchCategory = (subject, options = {}) => 
+export const fetchCategory = (subject, options = {}) =>
   ({ type: ActionTypes[ContentTypes.CATEGORY].REQUEST.CREATE, subject, options });
 
 export const fetchComment = (subject, options = {}) =>
