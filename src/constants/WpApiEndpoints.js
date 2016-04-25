@@ -42,8 +42,8 @@ export default {
     [RequestTypes.PLURAL]: '/posts'
   },
   [ContentTypes.POST_REVISION]: {
-    [RequestTypes.SINGLE]: '/:postId/revisions/:id',
-    [RequestTypes.PLURAL]: '/:postId/revisions'
+    [RequestTypes.SINGLE]: '/posts/:postId/revisions/:id',
+    [RequestTypes.PLURAL]: '/posts/:postId/revisions'
   },
   [ContentTypes.POST_TYPE]: {
     [RequestTypes.SINGLE]: '/types/:id',

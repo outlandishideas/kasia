@@ -53,4 +53,14 @@ describe('fetchContent function', () => {
 
     expect(fetchCall()).toEqual('http://test/posts/1337?page=5&context=embed&search=me%2Cmyself%26i');
   });
+
+  it('builds endpoint for content type that requires multiple route parameters', () => {
+    fetchContent(ContentTypes.POST_REVISION, 1337, config, {
+      params: {
+        postId: 13,
+        id: 37
+      }
+    });
+    expect(fetchCall()).toEqual('http://test/posts/13/revisions/37')
+  });
 });
