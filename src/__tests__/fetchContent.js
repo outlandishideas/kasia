@@ -55,12 +55,13 @@ describe('fetchContent function', () => {
   });
 
   it('builds endpoint for content type that requires multiple route parameters', () => {
-    fetchContent(ContentTypes.POST_REVISION, 1337, config, {
-      params: {
-        postId: 13,
-        id: 37
-      }
-    });
+    const options = { params: {
+      postId: 13,
+      id: 37
+    }};
+    
+    fetchContent(ContentTypes.POST_REVISION, 1337, config, options);
+    
     expect(fetchCall()).toEqual('http://test/posts/13/revisions/37')
   });
 });

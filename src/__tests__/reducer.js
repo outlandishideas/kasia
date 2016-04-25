@@ -29,7 +29,9 @@ describe('Reducer basics', () => {
 describe('Reduce RECEIVE', () => {
   it('normalises the WP-API response and places result in the store', () => {
     const normalisedData = normalisers[ContentTypes.POST](postJson);
+
     store.dispatch(receive(ContentTypes.POST, postJson));
+
     expect(store.getState().$$repress.entities).toEqual(normalisedData.entities);
   });
 });
