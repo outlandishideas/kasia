@@ -7,6 +7,11 @@ import { registerCustomContentType } from '../contentTypes';
 import makeReducer from '../reducer';
 
 describe('configureRepress', () => {
+  beforeEach(() => {
+    invariant.mockClear();
+    registerCustomContentType.mockClear();
+    makeReducer.mockClear();
+  });
 
   it('exports a function', () => {
     expect(typeof configureRepress).toEqual('function');
@@ -21,6 +26,18 @@ describe('configureRepress', () => {
       false,
       'Expecting WP-API URL to be a string, got "%s".',
       'number'
+    );
+  });
+
+  it('throws an invariant violation when wpApiUrl is undefined', () => {
+    configureRepress({
+      wpApiUrl: undefined
+    });
+
+    expect(invariant).toBeCalledWith(
+      false,
+      'Expecting WP-API URL to be a string, got "%s".',
+      'object'
     );
   });
 
