@@ -44,14 +44,14 @@ describe('configureRepress', () => {
       useEmbedRequestQuery: false
     };
 
-    const completeConfig = Object.assign({}, expected, {
+    const completeConfigWithCustomPostTypes = Object.assign({}, expected, {
       customContentTypes: [
         'first-custom-post-type',
         'second-custom-post-type'
       ]
     });
 
-    configureRepress(completeConfig);
+    configureRepress(completeConfigWithCustomPostTypes);
 
     expect(makeReducer).toBeCalledWith(expected);
   });
