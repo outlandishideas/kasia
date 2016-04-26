@@ -2,7 +2,7 @@ jest.disableAutomock();
 
 import { combineReducers, createStore } from 'redux';
 
-import repress from '../../index';
+import pepperoni from '../../index';
 
 export default function configureStore () {
   const interceptReducer = jest.fn();
@@ -11,7 +11,7 @@ export default function configureStore () {
 
   const rootReducer = combineReducers({
     intercept: interceptReducer,
-    ...repress({ wpApiUrl: 'test' })
+    ...pepperoni({ wpApiUrl: 'test' })
   });
 
   return {

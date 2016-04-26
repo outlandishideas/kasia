@@ -15,12 +15,13 @@ export { fetchCategory, fetchComment, fetchCustomContentType, fetchMedia, fetchP
 es6promise.polyfill();
 
 /**
- * TODO docs
+ * Configure Pepperoni.
  * @param {String} [wpApiUrl] Location of the WP-API.
  * @param {Boolean} [useEmbedRequestQuery] Should all requests use `_embed` query by default?
  * @param {Array} [customContentTypes] Array of objects describing the custom content types available through WP-API.
+ * @returns {Object} Pepperoni reducer
  */
-export default function configureRepress ({
+export default function configurePepperoni ({
   wpApiUrl = null,
   useEmbedRequestQuery = true,
   customContentTypes = []

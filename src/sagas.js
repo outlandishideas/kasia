@@ -10,7 +10,7 @@ import {
   failRequest
 } from './actionCreators';
 
-export const configSelector = state => state.$$repress.config;
+export const configSelector = state => state.$$pepperoni.config;
 
 export function* fetchResource (action) {
   const { subject } = action;

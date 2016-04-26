@@ -13,7 +13,7 @@ import {
 } from './contentTypes';
 
 /**
- * Repress connect.
+ * Pepperoni connect.
  * TODO write better doc
  * @param {String} [contentType] The content type for which the WP-API request will be made.
  * @param {String} [routeParamsPropName] From which object on props will the WP-API route parameters be derived?
@@ -29,8 +29,8 @@ export default function connectWordPress ({
 } = {}) {
   return target => {
     invariant(
-      !target.__repress,
-      'The component "%s" is already wrapped by Repress.',
+      !target.__pepperoni,
+      'The component "%s" is already wrapped by Pepperoni.',
       target.name
     );
 
@@ -41,8 +41,8 @@ export default function connectWordPress ({
     invariant(
       contentType,
       'Could not derive content type from class name "%s". ' +
-      'Pass built-ins using Repress.ContentTypes. For example, ContentTypes.POST. ' +
-      'Custom Content Types should be registered with Repress#registerCustomContentType.',
+      'Pass built-ins using Pepperoni.ContentTypes. For example, ContentTypes.POST. ' +
+      'Custom Content Types should be registered with Pepperoni#registerCustomContentType.',
       target.name
     );
 
@@ -54,12 +54,12 @@ export default function connectWordPress ({
 
     function mapStateToProps (state, ownProps) {
       const params = ownProps[routeParamsPropName];
-      const collection = state.$$repress.entities[contentTypeOptions.namePlural];
+      const collection = state.$$pepperoni.entities[contentTypeOptions.namePlural];
       const value = collection ? collection[params.id] : null;
       return { [contentTypeOptions.name]: value };
     }
 
-    class RepressComponentWrapper extends Component {
+    class PepperoniComponentWrapper extends Component {
       componentWillMount () {
         // TODO allow some method of forcing re-fetch, or should this be done manually be invalidate action?
         const params = this.props[routeParamsPropName];
@@ -90,13 +90,13 @@ export default function connectWordPress ({
       }
     }
 
-    RepressComponentWrapper.__repress = true;
+    PepperoniComponentWrapper.__pepperoni = true;
 
     /**
      * Fetch the content data according to the configuration in `store`.
      * @param {String} subject The subject identifier (id or slug)
      */
-    RepressComponentWrapper.fetchData = subject => [
+    PepperoniComponentWrapper.fetchData = subject => [
       [fetchResource, {
         contentType,
         subject,
@@ -104,6 +104,6 @@ export default function connectWordPress ({
       }]
     ];
 
-    return reduxConnect(mapStateToProps)(RepressComponentWrapper);
+    return reduxConnect(mapStateToProps)(PepperoniComponentWrapper);
   };
 };

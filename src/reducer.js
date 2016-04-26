@@ -13,10 +13,10 @@ export default function makeReducer (config) {
   defaultState.config = config;
 
   return {
-    $$repress: function repressReducer (state = defaultState, action) {
+    $$pepperoni: function pepperoniReducer (state = defaultState, action) {
       const [actionNamespace, contentType, actionType] = action.type.split('/');
 
-      if (actionNamespace !== 'repress') {
+      if (actionNamespace !== 'pepperoni') {
         return state;
       }
 
