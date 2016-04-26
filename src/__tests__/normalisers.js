@@ -10,14 +10,11 @@ describe('POST normaliser', () => {
   const postJson2 = cloneDeep(postJson);
   const postJsons = [postJson1, postJson2];
 
-  postJson2.id = 100;
-
   const postId = String(postJson1.id);
   const authorId = String(postJson1.author);
   const mediaId = String(postJson1.featured_media);
 
-  function assertPostNormalised (flattened) {
-  }
+  postJson2.id = 100;
 
   it('should pull nested content types', () => {
     const flattened = normalisers.POST(postJson1);
