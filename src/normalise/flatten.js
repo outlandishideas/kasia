@@ -8,8 +8,8 @@ const renderedProps = [
   'excerpt'
 ];
 
-// Rename keys under `links` in order that normalizr doesn't
-// treat them as entities, e.g. `links.author` -> `links.links:author`
+// Rename keys under `links` in order that normalizr doesn't treat them as entities
+// e.g. `links.author` -> `links.links:author`
 function renameLinksProps (original, flattened) {
   if (typeof original.links !== 'undefined') {
     flattened.links = Object.keys(original.links)

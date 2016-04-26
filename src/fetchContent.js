@@ -69,7 +69,7 @@ export default function fetchContent (contentType, subject, config, options = {}
 
   let didAddQueryParams = false;
 
-  // TODO support more complicated query params? e.g. filter[post__in]
+  // TODO support more complicated query params by key -> Array? e.g. filter[post__in]
   // Append all query parameters to the endpoint
   endpoint += Object.keys(options.query)
     .reduce((str, optionKey) => {
