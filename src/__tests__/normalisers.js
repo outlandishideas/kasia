@@ -1,32 +1,83 @@
 jest.disableAutomock();
 
-import cloneDeep from 'lodash.cloneDeep';
+import merge from 'lodash.merge';
+import cloneDeep from 'lodash.clonedeep';
 
-import postJson from './fixtures/wp-api-responses/post'
-import normalisers from '../normalisers';
+import ContentTypes from '../constants/ContentTypes'
+import EntityKeyPropNames from '../constants/EntityKeyPropNames';
+import WpApiResponses from './fixtures/wp-api-responses'
+import normalise from '../normalise';
 
-describe('POST normaliser', () => {
-  const postJson1 = postJson;
-  const postJson2 = cloneDeep(postJson);
-  const postJsons = [postJson1, postJson2];
+function makeNormaliserTestData (contentType) {
+  const first = WpApiResponses[contentType];
+  const second = merge({}, cloneDeep(first), { id: first.id + 1, slug: first.slug + '1' });
+  const multiple = [first, second];
+  return { first, second, multiple };
+}
 
-  const postId = String(postJson1.id);
-  const authorId = String(postJson1.author);
-  const mediaId = String(postJson1.featured_media);
+const tests = {
+  [ContentTypes.CATEGORY]: {
+    expectedEntities: ['categories'],
+    bySlug: true,
+    byId: true
+  },
+  [ContentTypes.COMMENT]: {
+    expectedEntities: ['comments'],
+    bySlug: true,
+    byId: false
+  },
+  [ContentTypes.MEDIA]: {
+    expectedEntities: ['media', 'users'],
+    bySlug: true,
+    byId: true
+  },
+  [ContentTypes.PAGE]:  {
+    expectedEntities: ['pages', 'users', 'media'],
+    bySlug: true,
+    byId: true
+  },
+  [ContentTypes.POST]:  {
+    expectedEntities: ['posts', 'users', 'media'],
+    bySlug: true,
+    byId: true
+  },
+  [ContentTypes.POST_STATUS]:  {
+    expectedEntities: ['postStatuses'],
+    bySlug: true,
+    byId: false
+  }
+};
 
-  postJson2.id = 100;
+Object.keys(tests).forEach(contentType => {
+  describe(`${contentType} normaliser`, () => {
+    const { first, second, multiple } = makeNormaliserTestData(contentType);
+    const { expectedEntities, bySlug, byId } = tests[contentType];
 
-  it('should pull nested content types', () => {
-    const flattened = normalisers.POST(postJson1);
-    expect(flattened.result).toEqual(16);
-    expect(Object.keys(flattened.entities)).toEqual(['posts', 'users', 'media']);
-    expect(typeof flattened.entities.posts[postId]).toEqual('object');
-    expect(typeof flattened.entities.users[authorId]).toEqual('object');
-    expect(typeof flattened.entities.media[mediaId]).toEqual('object');
+    if (byId) {
+      it(`should normalise a single ${contentType} by ID`, () => {
+        const flattened = normalise(contentType, first, EntityKeyPropNames.ID, true);
+        expect(flattened.result).toEqual(first.id);
+        expect(Object.keys(flattened.entities)).toEqual(expectedEntities);
+      });
+
+      it(`should normalise multiple ${contentType} by ID`, () => {
+        const flattened = normalise(contentType, multiple, EntityKeyPropNames.ID, true);
+        expect(flattened.result).toEqual([first.id, second.id]);
+
+      });
+    }
+
+    if (bySlug) {
+      it(`should normalise a single ${contentType} by SLUG`, () => {
+        const flattened = normalise(contentType, first, EntityKeyPropNames.SLUG, true);
+        expect(flattened.result).toEqual(first.slug);
+        expect(Object.keys(flattened.entities)).toEqual(expectedEntities);
+      });
+
+      it(`should normalise multiple ${contentType} by SLUG`, () => {
+        const flattened = normalise(contentType, multiple, EntityKeyPropNames.SLUG, true);
+        expect(flattened.result).toEqual([first.slug, second.slug]);
+      });
+    }
   });
-
-  it('should normalise multiple posts', () => {
-    const flattened = normalisers.POST(postJsons);
-    expect(flattened.result).toEqual([16, 100]);
-  });
-})
+});

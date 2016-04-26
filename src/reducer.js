@@ -2,7 +2,7 @@ import merge from 'lodash.merge';
 
 import { makeContentTypeOptions } from './contentTypes';
 import { BaseActionTypes } from './constants/ActionTypes';
-import normalisers from './normalisers';
+import normalise from './normalise';
 
 export const defaultState = {
   config: {},
@@ -19,28 +19,18 @@ export default function makeReducer (config) {
       if (actionNamespace !== 'pepperoni') {
         return state;
       }
+      
+      const { entityKeyPropName } = state.config;
 
       switch (actionType) {
-        case BaseActionTypes.REQUEST.START:
-          // TODO implement REQUEST.START
-          return state;
-
-        case BaseActionTypes.REQUEST.FAIL:
-          // TODO implement REQUEST.FAIL
-          return state;
-
-        case BaseActionTypes.REQUEST.COMPLETE:
-          // TODO implement REQUEST.COMPLETE
-          return state;
-
         case BaseActionTypes.RECEIVE:
-          const normalisedData = normalisers[contentType](action.data);
+          const normalisedData = normalise(contentType, action.data, entityKeyPropName);
           return merge({}, state, { entities: normalisedData.entities });
 
         case BaseActionTypes.INVALIDATE:
           const contentTypeCamelCasePlural = makeContentTypeOptions(contentType);
           delete state.entities[contentTypeCamelCasePlural][action.id];
-          return Object.assign({}, state);
+          return merge({}, state);
 
         default:
           return state;

@@ -3,8 +3,9 @@ jest.disableAutomock();
 import { combineReducers, createStore } from 'redux';
 
 import postJson from './fixtures/wp-api-responses/post'
+import EntityKeyPropNames from '../constants/EntityKeyPropNames';
 import ContentTypes from '../constants/ContentTypes';
-import normalisers from '../normalisers';
+import normalise from '../normalise';
 import pepperoni from '../index';
 import { receive } from '../actionCreators';
 import { defaultState } from '../reducer';
@@ -28,7 +29,7 @@ describe('Reducer basics', () => {
 
 describe('Reduce RECEIVE', () => {
   it('normalises the WP-API response and places result in the store', () => {
-    const normalisedData = normalisers[ContentTypes.POST](postJson);
+    const normalisedData = normalise(ContentTypes.POST, postJson, EntityKeyPropNames.ID);
 
     store.dispatch(receive(ContentTypes.POST, postJson));
 

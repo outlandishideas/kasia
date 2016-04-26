@@ -47,7 +47,7 @@ export function registerCustomContentType (name, {
 export function deriveContentType (targetName) {
   for (let i = 0; i < contentTypeNames.length; i++) {
     const contentTypeName = contentTypeNames[i];
-    if (targetName.toLowerCase().includes(contentTypeName.toLowerCase())) {
+    if (targetName.toLowerCase().indexOf(contentTypeName.toLowerCase()) !== -1) {
       return contentTypeName;
     }
   }

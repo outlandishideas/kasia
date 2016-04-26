@@ -1,6 +1,6 @@
 import ContentTypes from './ContentTypes';
 
-export const EndpointParams = [
+export const EndpointRouteParams = [
   'id',
   'postId',
   'slug'

@@ -1,10 +1,10 @@
 import invariant from 'invariant';
-import merge from 'lodash.merge';
 import urlencode from 'urlencode';
+import merge from 'lodash.merge';
 
 import WpApiEndpoints, {
   RequestTypes,
-  EndpointParams,
+  EndpointRouteParams,
   QueryableBySlug
 } from './constants/WpApiEndpoints';
 
@@ -37,7 +37,7 @@ export default function fetchContent (contentType, subject, config, options = {}
 
   if (isSlugRequest) {
     invariant(
-      isSlugRequest && QueryableBySlug.includes(contentType),
+      QueryableBySlug.indexOf(contentType) !== -1,
       'Got a slug ("%s") as the identifier, but Pepperoni cannot query the content type "%s" by slug. ' +
       'Content types queryable by slug in Pepperoni are: %s. ' +
       'For other content types, provide the slug as a query parameter in `options.query`.',
@@ -61,7 +61,7 @@ export default function fetchContent (contentType, subject, config, options = {}
 
   // Modify request type from SINGLE to PLURAL in the case of a request by slug
   if (isSlugRequest) {
-    Object.assign(options.query, { slug: subject });
+    merge(options.query, { slug: subject });
     endpoint += endpointObj[RequestTypes.PLURAL];
   } else {
     endpoint += endpointObj[requestType];
@@ -87,7 +87,7 @@ export default function fetchContent (contentType, subject, config, options = {}
   }
 
   // Replace route parameter placeholders with corresponding values from `options.params`
-  EndpointParams.forEach(param => {
+  EndpointRouteParams.forEach(param => {
     if (options.params[param]) {
       endpoint = endpoint.replace(':' + param, options.params[param]);
     }

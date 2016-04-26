@@ -17,14 +17,12 @@ import {
  * TODO write better doc
  * @param {String} [contentType] The content type for which the WP-API request will be made.
  * @param {String} [routeParamsPropName] From which object on props will the WP-API route parameters be derived?
- * @param {Boolean} [useEmbedRequestQuery] Override global default for using `_embed` query parameter in WP-API request.
  * @param {Boolean} [routeParamSubjectKey] The key on `params` that will be used as the ID of desired content.
  * @returns {Function}
  */
 export default function connectWordPress ({
   contentType = null,
   routeParamsPropName = 'params',
-  useEmbedRequestQuery = true,
   routeParamSubjectKey = 'id'
 } = {}) {
   return target => {
@@ -78,8 +76,7 @@ export default function connectWordPress ({
         
         const options = {
           params,
-          contentType,
-          useEmbedRequestQuery
+          contentType
         };
 
         return createRequest(contentTypeNamespace, params[routeParamSubjectKey], options);
@@ -99,8 +96,7 @@ export default function connectWordPress ({
     PepperoniComponentWrapper.fetchData = subject => [
       [fetchResource, {
         contentType,
-        subject,
-        useEmbedRequestQuery
+        subject
       }]
     ];
 
