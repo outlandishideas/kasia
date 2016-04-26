@@ -5,22 +5,22 @@ import { combineReducers, createStore } from 'redux';
 import postJson from './fixtures/wp-api-responses/post'
 import ContentTypes from '../constants/ContentTypes';
 import normalisers from '../normalisers';
-import repress from '../index';
+import pepperoni from '../index';
 import { receive } from '../actionCreators';
 import { defaultState } from '../reducer';
 
-const repressReducer = repress({ wpApiUrl: 'test' });
-const rootReducer = combineReducers(repressReducer);
+const pepperoniReducer = pepperoni({ wpApiUrl: 'test' });
+const rootReducer = combineReducers(pepperoniReducer);
 const store = createStore(rootReducer);
 
 describe('Reducer basics', () => {
-  const initialStore = { $$repress: defaultState };
+  const initialStore = { $$pepperoni: defaultState };
 
-  it('has namespaced "repress" object on store', () => {
+  it('has namespaced "pepperoni" object on store', () => {
     expect(store.getState()).toEqual(initialStore);
   });
 
-  it('does not modify store if action type is not namespaced "repress"', () => {
+  it('does not modify store if action type is not namespaced "pepperoni"', () => {
     store.dispatch({ type: 'someOtherNamespace/' });
     expect(store.getState()).toEqual(initialStore);
   });
@@ -32,6 +32,6 @@ describe('Reduce RECEIVE', () => {
 
     store.dispatch(receive(ContentTypes.POST, postJson));
 
-    expect(store.getState().$$repress.entities).toEqual(normalisedData.entities);
+    expect(store.getState().$$pepperoni.entities).toEqual(normalisedData.entities);
   });
 });

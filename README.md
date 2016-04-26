@@ -1,63 +1,63 @@
-# RePress
+# Pepperoni
 
-RePress is a set of tools for developing React websites with WordPress via WordPress REST API.
+> A React Redux toolset for the WordPress API.
 
-It brings in three things:
+## Features:
 
-- A way of connecting up React components to data from the WordPress API in a simple and seamless way.
-- A set of simple components for common elements used in WordPress themes for you to use with this data.
-- A boilerplate for writing projects with React and WordPress that provides a quick way into the process.
+- Declaratively connect React components to data from the WordPress API.
+- Register and consume Custom Content Types with very little configuration.
+- Provides a common sense interface for making requests to the WP-API.
+- All content data received is placed on the store for caching (and can be invalidated).
+- Built-in isomorphism.
+- An official boilerplate for getting started with Pepperoni in a matter of minutes, should you need it.
 
-Behind the scenes RePress is using `redux` alongside `redux-saga` to handle data fetching and management.
+Behind the scenes Pepperoni uses `redux` and `redux-saga` in order that it can be dropped into any React
+Redux application with ease.
 
-You don't need to worry about this however. This complexity is more or less hidden from you and you can just get on with building your site with this data.
+Check out the [Pepperoni boilerplate]() based on [WordPress Bedrock](https://github.com/roots/bedrock)
+if you are starting from scratch.
 
-## Requirements On The WordPress Side
+## Requirements
 
-You need to have a working installation of WordPress that has the [WP REST API](http://v2.wp-api.org/) installed. That's it.
+- React >0.14 ??????
+- A working installation of WordPress.
+- The [WP REST API](http://v2.wp-api.org/) plugin installed.
+- That's it!
 
-We have [a boilerplate]() for this based on [WordPress Bedrock](https://github.com/roots/bedrock) to get you started with all this set up.
+## Install
 
-## Requirements On The React Side
+`npm install pepperoni --save`
 
-We assume that you are using React and [Redux](https://github.com/reactjs/redux) as an implementation of the Flux pattern.
+## Configure
 
-If you want to avoid setting this up yourself we have a boilerplate [you can use]() with instructions on how to start a project. Its a universal application as well.
-
-## Using RePress
-
-First grab RePress using `npm`:
-
-`npm install repress --save`
-
-The follow example shows how to add the reducers provided by RePress to the reducers in your application. Examples add RePress to something like the [Redux examples](https://github.com/reactjs/redux/tree/master/examples/universal).
-
-`reducers/index.js`
+Create and then include the Pepperoni reducer when composing
+your application's root reducer with `redux#combineReducers`:
 
 ```js
-import { combineReducers } from 'redux'
-import { createRePressReducers } from 'repress';
+import { combineReducers } from 'redux';
+import pepperoni from 'pepperoni';
 
-// Is this going to cut it?
-repressReducers = createRePressReducers({api: 'https://example.com/wp-api/v2/'});
-
-const rootReducer = combineReducers({
-  repress: repressReducers
+const pepperoniReducer = pepperoni({
+  wpApiUrl: 'https://example.com/wp-api/v2/'
 });
 
-export default rootReducer
+const rootReducer = combineReducers({
+  ...pepperoniReducer
+});
+
+export default rootReducer;
 ```
 
-`stores/configureStore.js`
+Use the root reducer when creating your redux store, passing
+in Pepperoni's own saga middleware to `redux#applyMiddleware`:
 
 ```js
 import { createStore, applyMiddleware } from 'redux';
+import { createSagaMiddleware } from 'pepperoni';
 
-import { createSagaMiddleware } from 'repress';
+import rootReducer from '../reducers';
 
-import rootReducer from '../reducers'
-
-export default function configureStore(initialState) {
+export default function configureStore (initialState) {
   const sagaMiddleware = createSagaMiddleware();
 
   const store = createStore(
@@ -72,18 +72,17 @@ export default function configureStore(initialState) {
 
 If you are already using `redux-saga` for managing side-effects you don't need to add its middleware to Redux as shown in the `stores/configureStore.js` example.
 
-### Connecting Whole Components
+## Connect a Component
 
-Decide a component that is going to connect to WordPress and decorate that component with `connectToWordPress`.
-
+After configuration you can connect a component in order that it receives content data via `props` by decorating
+that component with `connectWordPress`:
 
 ```js
 import React, { Component } from 'react';
-
-import { connectToWordPress } from 'repress';
+import { connectWordPress } from 'pepperoni';
 
 class MyPost extends Component {
-  render() {
+  render () {
     const { post } = this.props;
 
     if (!post) {
@@ -95,7 +94,7 @@ class MyPost extends Component {
 }
 
 // Connect to WordPress
-connectToWordPress()(MyPost);
+connectWordPress()(MyPost);
 ```
 
 Assuming this post is connected up to [react-router](https://github.com/reactjs/react-router) in the following manner and the above other work is done:
@@ -121,21 +120,21 @@ It will just work. Eventually `MyPost` will receive the post information as `thi
 
 The works by simple convention. Anything with `Post` in it is assumed to be a wanted the post post type in WordPress, anything with `Page` is assumed to be wanting that, anything with `Taxonomy` is assumed to be a taxonomy and so on. The information from React Router passed as props (for example `slug` or `id`) is assumed to correspond to those meanings in WordPress REST API generally. You can also override this if neccessary as we will see.
 
-RePress delivers the data to you straight out of WordPress by default. We have found this data to be excessively nested and this to be a problem. Therefore if you set up as follows, you will receive information from the WordPress API in a lightly restructured format that makes it easier to handle in Javascript - for example keys are camel-cased and nesting is reduced. See [below](#) for how this data is structured internal to Redux store.
+Pepperoni delivers the data to you straight out of WordPress by default. We have found this data to be excessively nested and this to be a problem. Therefore if you set up as follows, you will receive information from the WordPress API in a lightly restructured format that makes it easier to handle in Javascript - for example keys are camel-cased and nesting is reduced. See [below](#) for how this data is structured internal to Redux store.
 
 ```js
-repressReducers = createRePressReducers({
+pepperoniReducers = createPepperoniReducers({
   api: 'https://example.com/wp-api/v2/',
   restructureData: true
 });
 ```
 
-Sometimes you might not want to make these assumptions. `connectToWordPress` accepts a number of possible arguments to explicitly tell RePress what data is wanted from WordPress REST API.
+Sometimes you might not want to make these assumptions. `connectToWordPress` accepts a number of possible arguments to explicitly tell Pepperoni what data is wanted from WordPress REST API.
 
 ```js
 // Connect to WordPress
 connectToWordPress({
-  routeParamsPropName: 'params.slug', //  From which property on the component's props will the route parameters be derived?  
+  routeParamsPropName: 'params.slug', //  From which property on the component's props will the route parameters be derived?
   type 'post', // The type of thing to get from WordPress - can be any provided by WordPress API - e.g. post, page, taxonomy and so on
   mapStateToProps: someFunction // A custom version of Redux's mapStateToProps that will be passed the store so you can perform your own mapping here.
   useEmbedRequestQuery: true // - on by default, should WordPress REST API
@@ -156,8 +155,8 @@ For example, if we wanted to fetch a post for our own component.
 ```js
 import React, { Component } from 'react';
 
-import { connectToWordPressDirectly } from 'repress';
-import { fetchPost } from 'repress/action';
+import { connectToWordPressDirectly } from 'pepperoni';
+import { fetchPost } from 'pepperoni/action';
 
 class MyComponent extends Component {
   componentDidMount() {
@@ -204,8 +203,8 @@ For simple mapping of state to props we provide an example implementation of `ma
 ```js
 import React, { Component } from 'react';
 
-import { connectToWordPressDirectly } from 'repress';
-import { fetchPost } from 'repress/action';
+import { connectToWordPressDirectly } from 'pepperoni';
+import { fetchPost } from 'pepperoni/action';
 
 class MyComponent extends Component {
   componentDidMount() {
@@ -230,7 +229,7 @@ connectToWordPressDirectly({ automap: true })(MyPost);
 
 ## Components
 
-RePress contains a series of components that can be used for implementing common WordPress style functionality. There are.
+Pepperoni contains a series of components that can be used for implementing common WordPress style functionality. There are.
 
 [...etc....]
 

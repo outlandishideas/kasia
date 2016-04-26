@@ -1,52 +1,72 @@
 import ContentTypes from './ContentTypes';
 
+export const EndpointParams = [
+  'id',
+  'postId',
+  'slug'
+];
+
+export const RequestTypes = {
+  SINGLE: 'SINGLE',
+  PLURAL: 'PLURAL'
+};
+
+export const QueryableBySlug = [
+  ContentTypes.CATEGORY,
+  ContentTypes.MEDIA,
+  ContentTypes.PAGE,
+  ContentTypes.POST,
+  ContentTypes.TAG,
+  ContentTypes.USER
+];
+
 export default {
   [ContentTypes.CATEGORY]: {
-    PLURAL: '/categories',
-    SINGLE: '/categories/:id'
+    [RequestTypes.SINGLE]: '/categories/:id',
+    [RequestTypes.PLURAL]: '/categories'
   },
   [ContentTypes.COMMENT]: {
-    SINGLE: '/comments/:id',
-    PLURAL: '/comments'
+    [RequestTypes.SINGLE]: '/comments/:id',
+    [RequestTypes.PLURAL]: '/comments'
   },
   [ContentTypes.MEDIA]: {
-    SINGLE: '/media/:id',
-    PLURAL: '/media'
+    [RequestTypes.SINGLE]: '/media/:id',
+    [RequestTypes.PLURAL]: '/media'
   },
   [ContentTypes.PAGE]: {
-    SINGLE: '/pages/:id',
-    PLURAL: '/pages'
+    [RequestTypes.SINGLE]: '/pages/:id',
+    [RequestTypes.PLURAL]: '/pages'
   },
   [ContentTypes.POST]: {
-    SINGLE: '/posts/:id',
-    PLURAL: '/posts'
+    [RequestTypes.SINGLE]: '/posts/:id',
+    [RequestTypes.PLURAL]: '/posts'
   },
   [ContentTypes.POST_REVISION]: {
-    SINGLE: '/:postId/revisions/:id',
-    PLURAL: '/:postId/revisions'
+    [RequestTypes.SINGLE]: '/posts/:postId/revisions/:id',
+    [RequestTypes.PLURAL]: '/posts/:postId/revisions'
   },
   [ContentTypes.POST_TYPE]: {
-    SINGLE: '/types/:id',
-    PLURAL: '/types'
+    [RequestTypes.SINGLE]: '/types/:id',
+    [RequestTypes.PLURAL]: '/types'
   },
   [ContentTypes.POST_STATUS]: {
-    SINGLE: '/statuses/:id',
-    PLURAL: '/statuses'
+    [RequestTypes.SINGLE]: '/statuses/:id',
+    [RequestTypes.PLURAL]: '/statuses'
   },
   [ContentTypes.TAG]: {
-    SINGLE: '/tags/:id',
-    PLURAL: '/tags'
+    [RequestTypes.SINGLE]: '/tags/:id',
+    [RequestTypes.PLURAL]: '/tags'
   },
   [ContentTypes.TAXONOMY]: {
-    SINGLE: '/taxonomies/:id',
-    PLURAL: '/taxonomies'
+    [RequestTypes.SINGLE]: '/taxonomies/:id',
+    [RequestTypes.PLURAL]: '/taxonomies'
   },
   [ContentTypes.USER]: {
-    SINGLE: '/users/:id',
-    PLURAL: '/users'
+    [RequestTypes.SINGLE]: '/users/:id',
+    [RequestTypes.PLURAL]: '/users'
   },
   [ContentTypes.CUSTOM_CONTENT_TYPE]: {
-    SINGLE: '/:slug/:id',
-    PLURAL: '/:slug'
+    [RequestTypes.SINGLE]: '/:slug/:id',
+    [RequestTypes.PLURAL]: '/:slug'
   }
 };

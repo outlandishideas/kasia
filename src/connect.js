@@ -13,22 +13,24 @@ import {
 } from './contentTypes';
 
 /**
- * Repress connect.
+ * Pepperoni connect.
  * TODO write better doc
  * @param {String} [contentType] The content type for which the WP-API request will be made.
  * @param {String} [routeParamsPropName] From which object on props will the WP-API route parameters be derived?
  * @param {Boolean} [useEmbedRequestQuery] Override global default for using `_embed` query parameter in WP-API request.
+ * @param {Boolean} [routeParamSubjectKey] The key on `params` that will be used as the ID of desired content.
  * @returns {Function}
  */
-export default function repressConnect ({
+export default function connectWordPress ({
   contentType = null,
   routeParamsPropName = 'params',
-  useEmbedRequestQuery = true
+  useEmbedRequestQuery = true,
+  routeParamSubjectKey = 'id'
 } = {}) {
   return target => {
     invariant(
-      !target.__repress,
-      'The component "%s" is already wrapped by Repress.',
+      !target.__pepperoni,
+      'The component "%s" is already wrapped by Pepperoni.',
       target.name
     );
 
@@ -39,8 +41,8 @@ export default function repressConnect ({
     invariant(
       contentType,
       'Could not derive content type from class name "%s". ' +
-      'Pass built-ins using Repress.ContentTypes. For example, ContentTypes.POST. ' +
-      'Custom Content Types should be registered with Repress#registerCustomContentType.',
+      'Pass built-ins using Pepperoni.ContentTypes. For example, ContentTypes.POST. ' +
+      'Custom Content Types should be registered with Pepperoni#registerCustomContentType.',
       target.name
     );
 
@@ -52,12 +54,12 @@ export default function repressConnect ({
 
     function mapStateToProps (state, ownProps) {
       const params = ownProps[routeParamsPropName];
-      const collection = state.$$repress.entities[contentTypeOptions.namePlural];
+      const collection = state.$$pepperoni.entities[contentTypeOptions.namePlural];
       const value = collection ? collection[params.id] : null;
       return { [contentTypeOptions.name]: value };
     }
 
-    class RepressComponentWrapper extends Component {
+    class PepperoniComponentWrapper extends Component {
       componentWillMount () {
         // TODO allow some method of forcing re-fetch, or should this be done manually be invalidate action?
         const params = this.props[routeParamsPropName];
@@ -68,15 +70,19 @@ export default function repressConnect ({
       }
 
       createRequestAction () {
+        const params = this.props[routeParamsPropName];
+
         const contentTypeNamespace = isCustomContentType
           ? ContentTypes.CUSTOM_CONTENT_TYPE
           : contentType;
-
-        return createRequest(contentTypeNamespace, {
-          params: this.props[routeParamsPropName],
+        
+        const options = {
+          params,
           contentType,
           useEmbedRequestQuery
-        });
+        };
+
+        return createRequest(contentTypeNamespace, params[routeParamSubjectKey], options);
       }
 
       render () {
@@ -84,16 +90,20 @@ export default function repressConnect ({
       }
     }
 
-    RepressComponentWrapper.__repress = true;
+    PepperoniComponentWrapper.__pepperoni = true;
 
     /**
      * Fetch the content data according to the configuration in `store`.
-     * @param {Object} store The redux store
+     * @param {String} subject The subject identifier (id or slug)
      */
-    RepressComponentWrapper.fetchData = store => [
-      [fetchResource, { contentType, useEmbedRequestQuery }]
+    PepperoniComponentWrapper.fetchData = subject => [
+      [fetchResource, {
+        contentType,
+        subject,
+        useEmbedRequestQuery
+      }]
     ];
 
-    return reduxConnect(mapStateToProps)(RepressComponentWrapper);
+    return reduxConnect(mapStateToProps)(PepperoniComponentWrapper);
   };
 };

@@ -1,26 +1,37 @@
 import { takeEvery } from 'redux-saga';
-import { call, put } from 'redux-saga/effects';
+import { call, put, select } from 'redux-saga/effects';
 
 import { BaseActionTypes } from './constants/ActionTypes';
-import { requestResource } from './api';
+import fetchContent from './fetchContent';
+
+import {
+  startRequest,
+  completeRequest,
+  failRequest
+} from './actionCreators';
+
+export const configSelector = state => state.$$pepperoni.config;
 
 export function* fetchResource (action) {
-  const { slug, useEmbedRequestQuery } = action;
+  const { subject } = action;
+  const [, contentType] = action.type.split('/');
 
-  yield put({ type: BaseActionTypes.START, slug });
+  const config = yield select(configSelector);
 
-  const { error, data } = yield call(requestResource, {
-    slug,
-    useEmbedRequestQuery
-  });
+  yield put(startRequest(contentType));
+
+  const { error, data } = yield call(fetchContent, contentType, subject, config, action.options);
 
   if (error) {
-    return put({ type: BaseActionTypes.FAIL, error });
+    return put(failRequest(contentType, error));
   }
 
-  return put({ type: BaseActionTypes.COMPLETE, slug, data });
+  return put(completeRequest(contentType, subject, data));
 }
 
-export default function* takeEvery () {
-  yield* takeEvery(BaseActionTypes.CREATE, fetchResource);
+export default function* fetchSaga () {
+  yield* takeEvery(action => {
+    const [,, actionType] = action.split('/');
+    return actionType === BaseActionTypes.CREATE;
+  }, fetchResource);
 }

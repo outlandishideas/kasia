@@ -14,13 +14,13 @@ export const BaseActionTypes = {
 function makeActionTypes (contentType) {
   return {
     REQUEST: {
-      CREATE: `repress/${contentType}/${BaseActionTypes.REQUEST.CREATE}`,
-      START: `repress/${contentType}/${BaseActionTypes.REQUEST.START}`,
-      FAIL: `repress/${contentType}/${BaseActionTypes.REQUEST.FAIL}`,
-      COMPLETE: `repress/${contentType}/${BaseActionTypes.REQUEST.COMPLETE}`
+      CREATE: `pepperoni/${contentType}/${BaseActionTypes.REQUEST.CREATE}`,
+      START: `pepperoni/${contentType}/${BaseActionTypes.REQUEST.START}`,
+      FAIL: `pepperoni/${contentType}/${BaseActionTypes.REQUEST.FAIL}`,
+      COMPLETE: `pepperoni/${contentType}/${BaseActionTypes.REQUEST.COMPLETE}`
     },
-    RECEIVE: `repress/${contentType}/${BaseActionTypes.RECEIVE}`,
-    INVALIDATE: `repress/${contentType}/${BaseActionTypes.INVALIDATE}`
+    RECEIVE: `pepperoni/${contentType}/${BaseActionTypes.RECEIVE}`,
+    INVALIDATE: `pepperoni/${contentType}/${BaseActionTypes.INVALIDATE}`
   };
 }
 

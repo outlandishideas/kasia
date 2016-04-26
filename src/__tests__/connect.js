@@ -42,12 +42,12 @@ function nextActionOfType (actionType) {
   return false;
 }
 
-describe('Repress connect', () => {
+describe('Pepperoni connect', () => {
   describe('with built-in content type', () => {
     const rendered = mount(<BuiltInContentType {...testProps} testProp={true} />);
 
     it('should wrap the component', () => {
-      expect(BuiltInContentType.__repress).toBe(true);
+      expect(BuiltInContentType.__pepperoni).toBe(true);
     });
 
     it('should pass props down', () => {
