@@ -1,6 +1,7 @@
-import invariant from 'invariant';
-import es6promise from 'es6-promise';
+import "babel-polyfill";
 import 'isomorphic-fetch';
+
+import invariant from 'invariant';
 
 import makeReducer from './reducer';
 import { registerCustomContentType } from './contentTypes';
@@ -11,8 +12,6 @@ export { default as connectWordPress } from './connect';
 
 export { fetchCategory, fetchComment, fetchCustomContentType, fetchMedia, fetchPage, fetchPost, fetchPostRevision,
   fetchPostStatus, fetchPostStatus, fetchPostType, fetchTag, fetchTaxonomy, fetchUser } from './actionCreators';
-
-es6promise.polyfill();
 
 /**
  * Configure Pepperoni.
