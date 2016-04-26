@@ -4,8 +4,7 @@
   "description": "A React Redux Toolset for the WordPress API",
   "main": "index.js",
   "directories": {
-    "example": "examples",
-    "test": "tests"
+    "example": "examples"
   },
   "scripts": {
     "test": "jest",
