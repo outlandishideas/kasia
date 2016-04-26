@@ -22,6 +22,7 @@
     "humps": "^1.0.0",
     "invariant": "^2.2.1",
     "isomorphic-fetch": "^2.2.1",
+    "lodash.clonedeep": "^4.1.0",
     "lodash.merge": "^4.3.5",
     "normalizr": "^2.0.1",
     "react": "^15.0.1",

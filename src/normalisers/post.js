@@ -16,6 +16,10 @@ postSchema.define({
 });
 
 function flattenPost (post) {
+  if (Array.isArray(post)) {
+    return post.map(flattenPost);
+  }
+
   const flattened = Object.assign({}, post);
 
   const hasLinks = typeof post.links !== 'undefined';
