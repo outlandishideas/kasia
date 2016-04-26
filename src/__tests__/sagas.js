@@ -1,5 +1,7 @@
 jest.unmock('redux-saga');
 jest.unmock('redux-saga/effects');
+jest.unmock('lodash.merge');
+jest.unmock('invariant');
 
 jest.unmock('../constants/ActionTypes');
 jest.unmock('../constants/ContentTypes');
