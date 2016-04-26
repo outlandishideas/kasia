@@ -58,7 +58,10 @@
     ]
   },
   "eslintConfig": {
-    "extends": "airbnb-base"
+    "extends": "airbnb-base",
+    "globals": {
+      "fetch": false
+    }
   },
   "jest": {
     "unmockedModulePathPatterns": [

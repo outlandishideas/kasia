@@ -1,5 +1,3 @@
-/* global fetch:false */
-
 jest.unmock('invariant');
 jest.unmock('lodash.merge');
 jest.unmock('urlencode');
@@ -59,9 +57,20 @@ describe('fetchContent', () => {
       postId: 13,
       id: 37
     }};
-    
+
     fetchContent(ContentTypes.POST_REVISION, 1337, config, options);
-    
+
     expect(fetchCall()).toEqual('http://test/posts/13/revisions/37')
+  });
+
+  it('makes request for multiple subjects by constructing multiple filter[post__in] query parameters', () => {
+    fetchContent(ContentTypes.POST, [1, 2], config);
+    expect(fetchCall()).toEqual('http://test/posts?filter[post__in][]=1&filter[post__in][]=2');
+  });
+
+  it('throws when multiple subject identifiers are not numeric', () => {
+    expect(() => {
+      return fetchContent(ContentTypes.POST, [1, 'uh-oh'], config);
+    }).toThrowError(/should be made using numeric/);
   });
 });
