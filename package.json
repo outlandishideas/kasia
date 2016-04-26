@@ -19,7 +19,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "axios": "^0.10.0",
     "es6-promise": "^3.1.2",
     "humps": "^1.0.0",
     "invariant": "^2.2.1",
