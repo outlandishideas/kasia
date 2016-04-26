@@ -3,14 +3,7 @@ import humps from 'humps';
 
 export const revisionSchema = new Schema('revisions');
 
-revisionSchema.define({
-
-});
-
 export default function normaliseRevision (revision) {
-  return normalize(humps.camelizeKeys(revision), revisionSchema);
+  const schema = Array.isArray(revision) ? arrayOf(revisionSchema) : revisionSchema;
+  return normalize(humps.camelizeKeys(revision), schema);
 };
-
-export function normaliseRevisions (revisions) {
-  return normalize(humps.camelizeKeys(revisions), arrayOf(revisionSchema));
-}

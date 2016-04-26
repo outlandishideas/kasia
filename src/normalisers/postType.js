@@ -3,14 +3,7 @@ import humps from 'humps';
 
 export const postTypeSchema = new Schema('postTypes');
 
-postTypeSchema.define({
-
-});
-
 export default function normalisePostType (postType) {
-  return normalize(humps.camelizeKeys(postType), postTypeSchema);
+  const schema = Array.isArray(postType) ? arrayOf(postTypeSchema) : postTypeSchema;
+  return normalize(humps.camelizeKeys(postType), schema);
 };
-
-export function normalisePostType (postTypes) {
-  return normalize(humps.camelizeKeys(postTypes), arrayOf(postTypeSchema));
-}

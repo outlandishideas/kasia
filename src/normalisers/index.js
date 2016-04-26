@@ -10,6 +10,7 @@ import postStatus from './postStatus';
 import tag from './tag';
 import taxonomy from './taxonomy';
 import user from './user';
+import customContentType from './customContentType';
 
 export default {
   [ContentTypes.CATEGORY]: category,
@@ -21,5 +22,6 @@ export default {
   [ContentTypes.POST_STATUS]: postStatus,
   [ContentTypes.TAG]: tag,
   [ContentTypes.TAXONOMY]: taxonomy,
-  [ContentTypes.USER]: user
+  [ContentTypes.USER]: user,
+  [ContentTypes.CUSTOM_CONTENT_TYPE]: customContentType
 };

@@ -3,14 +3,7 @@ import humps from 'humps';
 
 export const mediaSchema = new Schema('media');
 
-mediaSchema.define({
-
-});
-
 export default function normaliseMedia (media) {
-  return normalize(humps.camelizeKeys(media), mediaSchema);
+  const schema = Array.isArray(media) ? arrayOf(mediaSchema) : mediaSchema;
+  return normalize(humps.camelizeKeys(media), schema);
 };
-
-export function normaliseMedias (medias) {
-  return normalize(humps.camelizeKeys(medias), arrayOf(mediaSchema));
-}

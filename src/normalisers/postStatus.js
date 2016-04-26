@@ -3,14 +3,7 @@ import humps from 'humps';
 
 export const postStatusSchema = new Schema('postStatuses');
 
-postStatusSchema.define({
-
-});
-
 export default function normaliseStatus (status) {
-  return normalize(humps.camelizeKeys(status), postStatusSchema);
+  const schema = Array.isArray(status) ? arrayOf(postStatusSchema) : postStatusSchema;
+  return normalize(humps.camelizeKeys(status), schema);
 };
-
-export function normaliseStatuses (statuses) {
-  return normalize(humps.camelizeKeys(statuses), arrayOf(postStatusSchema));
-}

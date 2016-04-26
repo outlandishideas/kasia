@@ -49,9 +49,6 @@ function flattenPost (post) {
 }
 
 export default function normalisePost (post) {
-  return normalize(flattenPost(humps.camelizeKeys(post)), postSchema);
+  const schema = Array.isArray(post) ? arrayOf(postSchema) : postSchema;
+  return normalize(flattenPost(humps.camelizeKeys(post)), schema);
 };
-
-export function normalisePosts (posts) {
-  return normalize(flattenPost(humps.camelizeKeys(posts)), arrayOf(postSchema));
-}

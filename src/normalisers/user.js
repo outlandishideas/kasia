@@ -4,9 +4,6 @@ import humps from 'humps';
 export const userSchema = new Schema('users');
 
 export default function normaliseUser (user) {
-  return normalize(humps.camelizeKeys(user), userSchema);
+  const schema = Array.isArray(user) ? arrayOf(userSchema) : userSchema;
+  return normalize(humps.camelizeKeys(user), schema);
 };
-
-export function normaliseUsers (users) {
-  return normalize(humps.camelizeKeys(users), arrayOf(userSchema));
-}

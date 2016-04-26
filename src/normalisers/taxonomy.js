@@ -3,14 +3,7 @@ import humps from 'humps';
 
 export const taxonomySchema = new Schema('taxonomies');
 
-taxonomySchema.define({
-
-});
-
 export default function normaliseTaxonomy (taxonomy) {
-  return normalize(humps.camelizeKeys(taxonomy), taxonomySchema);
+  const schema = Array.isArray(taxonomy) ? arrayOf(taxonomySchema) : taxonomySchema;
+  return normalize(humps.camelizeKeys(taxonomy), schema);
 };
-
-export function normaliseTaxonomies (taxonomies) {
-  return normalize(humps.camelizeKeys(taxonomies), arrayOf(taxonomySchema));
-}

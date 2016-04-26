@@ -3,14 +3,7 @@ import humps from 'humps';
 
 export const commentSchema = new Schema('comments');
 
-commentSchema.define({
-
-});
-
 export default function normaliseComment (comment) {
-  return normalize(humps.camelizeKeys(comment), commentSchema);
+  const schema = Array.isArray(comment) ? arrayOf(commentSchema) : commentSchema;
+  return normalize(humps.camelizeKeys(comment), schema);
 };
-
-export function normaliseComments (comments) {
-  return normalize(humps.camelizeKeys(comments), arrayOf(commentSchema));
-}

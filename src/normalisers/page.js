@@ -3,14 +3,7 @@ import humps from 'humps';
 
 export const pageSchema = new Schema('pages');
 
-pageSchema.define({
-
-});
-
 export default function normalisePage (page) {
-  return normalize(humps.camelizeKeys(page), pageSchema);
+  const schema = Array.isArray(page) ? arrayOf(pageSchema) : pageSchema;
+  return normalize(humps.camelizeKeys(page), schema);
 };
-
-export function normalisePages (pages) {
-  return normalize(humps.camelizeKeys(pages), arrayOf(pageSchema));
-}
