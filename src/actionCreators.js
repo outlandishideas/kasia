@@ -3,7 +3,7 @@ import merge from 'lodash.merge';
 
 import ActionTypes from './constants/ActionTypes';
 import ContentTypes from './constants/ContentTypes';
-import { customContentTypes } from './contentTypes';
+import { registerCustomContentType } from './contentTypes';
 
 // ---
 // Private

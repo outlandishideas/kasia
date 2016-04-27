@@ -24,6 +24,8 @@ function makeActionTypes (contentType) {
   };
 }
 
+export const REGISTER_CUSTOM_CONTENT_TYPE = 'REGISTER_CUSTOM_CONTENT_TYPE';
+
 export default {
   [ContentTypes.POST]: makeActionTypes(ContentTypes.POST),
   [ContentTypes.POST_REVISION]: makeActionTypes(ContentTypes.POST_REVISION),

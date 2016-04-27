@@ -2,6 +2,7 @@ import humps from 'humps';
 import invariant from 'invariant';
 
 import ContentTypes from './constants/ContentTypes';
+import { RequestTypes } from './constants/WpApiEndpoints';
 
 const contentTypeOptions = {};
 
@@ -10,13 +11,13 @@ const contentTypeNames = Object.keys(ContentTypes);
 const contentTypeNamesCamelCase = Object.keys(ContentTypes)
   .map(humps.camelize);
 
+export const customContentTypes = {};
+
 function contentNameTaken(name) {
   return []
     .concat(contentTypeNames, contentTypeNamesCamelCase)
     .includes(name);
 }
-
-export const customContentTypes = {};
 
 export function registerCustomContentType (name, {
   namePlural = null,
@@ -34,13 +35,12 @@ export function registerCustomContentType (name, {
     name
   );
 
-  namePlural = namePlural || name + 's';
-  requestSlug = requestSlug || humps.decamelize(namePlural, { separator: '-' });
-
-  return customContentTypes[name] = {
-    name,
-    namePlural,
-    requestSlug
+  return {
+    slug: requestSlug || humps.decamelize(namePlural, { separator: '-' }),
+    name: {
+      [RequestTypes.SINGLE]: name,
+      [RequestTypes.PLURAL]: namePlural || name + 's'
+    }
   };
 }
 
