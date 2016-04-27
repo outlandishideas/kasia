@@ -10,6 +10,12 @@ const contentTypeNames = Object.keys(ContentTypes);
 const contentTypeNamesCamelCase = Object.keys(ContentTypes)
   .map(humps.camelize);
 
+function contentNameTaken(name) {
+  return []
+    .concat(contentTypeNames, contentTypeNamesCamelCase)
+    .includes(name);
+}
+
 export const customContentTypes = {};
 
 export function registerCustomContentType (name, {
@@ -21,12 +27,8 @@ export function registerCustomContentType (name, {
     'Expecting name of custom content type to be a string.'
   );
 
-  const contentTypeNameTaken = []
-    .concat(contentTypeNames, contentTypeNamesCamelCase)
-    .includes(name);
-
   invariant(
-    !contentTypeNameTaken,
+    !contentNameTaken(name),
     'The content type "%s" is already taken. ' +
     'Choose another non-conflicting name.',
     name
