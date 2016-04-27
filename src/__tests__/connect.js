@@ -5,9 +5,9 @@ import { mount } from 'enzyme';
 
 import postJson from './fixtures/wp-api-responses/post'
 
-import ActionTypes from '../constants/ActionTypes';
 import ContentTypes from '../constants/ContentTypes';
 import configureStore from './util/configureStore';
+import { REQUEST } from '../constants/ActionTypes';
 import { receive } from '../actionCreators';
 
 import BuiltInContentType from './components/BuiltInContentType';
@@ -55,7 +55,7 @@ describe('Pepperoni connect', () => {
     });
 
     it('should dispatch an action corresponding to given configuration', () => {
-      const action = nextActionOfType(ActionTypes.POST.REQUEST.CREATE);
+      const action = nextActionOfType(REQUEST.CREATE);
       expect(action).toBeTruthy();
       expect(action.options.contentType).toEqual(ContentTypes.POST);
     });
@@ -68,7 +68,7 @@ describe('Pepperoni connect', () => {
     const rendered = mount(<DerivedContentType {...testProps} testProp={true} />);
 
     it('should dispatch an action corresponding to given configuration', () => {
-      const action = nextActionOfType(ActionTypes.POST.REQUEST.CREATE);
+      const action = nextActionOfType(REQUEST.CREATE);
       expect(action).toBeTruthy();
       expect(action.options.contentType).toEqual(ContentTypes.POST);
     });
@@ -83,7 +83,7 @@ describe('Pepperoni connect', () => {
     mount(<CustomContentType {...testProps} testProp={true} />);
 
     it('should dispatch an action corresponding to given configuration', () => {
-      const action = nextActionOfType(ActionTypes.CUSTOM_CONTENT_TYPE.REQUEST.CREATE);
+      const action = nextActionOfType(REQUEST.CREATE);
       expect(action).toBeTruthy();
       expect(action.options.contentType).toEqual('CustomContentType');
     });

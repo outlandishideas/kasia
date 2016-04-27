@@ -2,7 +2,7 @@ import invariant from 'invariant';
 import urlencode from 'urlencode';
 import merge from 'lodash.merge';
 
-import WpApiEndpoints, {
+import {
   RequestTypes,
   EndpointRouteParams,
   QueryableBySlug
@@ -14,12 +14,12 @@ const defaultOptions = {
 
 /**
  * Make a request to the WP-API for content data.
- * @param {String} contentType The type of content that is being requested, e.g. post / page
+ * @param {Object} contentTypeOptions Options for the content that is being requested.
  * @param {Array|Number|String} subject Numeric ID or slug
  * @param {Object} config Configuration object from the store
  * @param {Object} [options]
  */
-export default function fetchContent (contentType, subject, config, options = {}) {
+export default function fetchContent (contentTypeOptions, subject, config, options = {}) {
   options = merge({}, defaultOptions, options);
 
   options.params = options.params || {};
@@ -28,21 +28,21 @@ export default function fetchContent (contentType, subject, config, options = {}
     ? RequestTypes.PLURAL
     : RequestTypes.SINGLE;
 
-  const endpointObj = WpApiEndpoints[contentType];
-
   const isSlugRequest = requestType === RequestTypes.SINGLE
     && typeof subject === 'string';
 
   let endpoint = config.wpApiUrl;
 
   if (isSlugRequest) {
+    const name = contentTypeOptions.name.canonical;
+
     invariant(
-      QueryableBySlug.indexOf(contentType) !== -1,
+      QueryableBySlug.indexOf(name) !== -1,
       'Got a slug ("%s") as the identifier, but Pepperoni cannot query the content type "%s" by slug. ' +
       'Content types queryable by slug in Pepperoni are: %s. ' +
       'For other content types, provide the slug as a query parameter in `options.query`.',
       subject,
-      contentType,
+      name,
       QueryableBySlug.join(', ')
     );
   }
@@ -62,9 +62,9 @@ export default function fetchContent (contentType, subject, config, options = {}
   // Modify request type from SINGLE to PLURAL in the case of a request by slug
   if (isSlugRequest) {
     merge(options.query, { slug: subject });
-    endpoint += endpointObj[RequestTypes.PLURAL];
+    endpoint += contentTypeOptions.slug[RequestTypes.PLURAL];
   } else {
-    endpoint += endpointObj[requestType];
+    endpoint += contentTypeOptions.slug[requestType];
   }
 
   let didAddQueryParams = false;

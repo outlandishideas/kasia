@@ -1,22 +1,27 @@
 import { takeEvery } from 'redux-saga';
 import { call, put, select } from 'redux-saga/effects';
+import invariant from 'invariant';
 
-import { BaseActionTypes } from './constants/ActionTypes';
+import { REQUEST } from './constants/ActionTypes';
 import fetchContent from './fetchContent';
-
-import {
-  startRequest,
-  completeRequest,
-  failRequest
-} from './actionCreators';
+import { startRequest, completeRequest, failRequest } from './actionCreators';
 
 export const configSelector = state => state.$$pepperoni.config;
 
 export function* fetchResource (action) {
-  const { subject } = action;
-  const [, contentType] = action.type.split('/');
+  const { contentType, subject } = action;
 
   const config = yield select(configSelector);
+
+  const contentTypeOptions = config.contentTypes
+    .find(contentTypeObj => contentTypeObj.name === contentType);
+
+  invariant(
+    contentTypeOptions,
+    'The content type "%s" is not recognised. ' +
+    'Register custom content types at initialisation or by calling Pepperoni#registerCustomContentType.',
+    action.subject
+  );
 
   yield put(startRequest(contentType));
 
@@ -30,8 +35,5 @@ export function* fetchResource (action) {
 }
 
 export default function* fetchSaga () {
-  yield* takeEvery(action => {
-    const [,, actionType] = action.split('/');
-    return actionType === BaseActionTypes.CREATE;
-  }, fetchResource);
+  yield* takeEvery(action => action.type === REQUEST.CREATE, fetchResource);
 }

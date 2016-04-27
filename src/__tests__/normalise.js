@@ -18,42 +18,43 @@ function makeNormaliserTestData (contentType) {
 const tests = {
   [ContentTypes.CATEGORY]: {
     expectedEntities: ['categories'],
-    bySlug: true,
-    byId: true
+    testKeyBySlug: true,
+    testKeyById: true
   },
   [ContentTypes.COMMENT]: {
     expectedEntities: ['comments'],
-    bySlug: true,
-    byId: false
+    testKeyBySlug: true,
+    testKeyById: false
   },
   [ContentTypes.MEDIA]: {
     expectedEntities: ['media', 'users'],
-    bySlug: true,
-    byId: true
+    testKeyBySlug: true,
+    testKeyById: true
   },
   [ContentTypes.PAGE]:  {
     expectedEntities: ['pages', 'users', 'media'],
-    bySlug: true,
-    byId: true
+    testKeyBySlug: true,
+    testKeyById: true
   },
   [ContentTypes.POST]:  {
     expectedEntities: ['posts', 'users', 'media'],
-    bySlug: true,
-    byId: true
+    testKeyBySlug: true,
+    testKeyById: true
   },
   [ContentTypes.POST_STATUS]:  {
     expectedEntities: ['postStatuses'],
-    bySlug: true,
-    byId: false
+    testKeyBySlug: true,
+    testKeyById: false
   }
+  // TODO remaining content types + a custom content type
 };
 
 Object.keys(tests).forEach(contentType => {
   describe(`${contentType} normaliser`, () => {
     const { first, second, multiple } = makeNormaliserTestData(contentType);
-    const { expectedEntities, bySlug, byId } = tests[contentType];
+    const { expectedEntities, testKeyBySlug, testKeyById } = tests[contentType];
 
-    if (byId) {
+    if (testKeyById) {
       it(`should normalise a single ${contentType} by ID`, () => {
         const flattened = normalise(contentType, first, EntityKeyPropNames.ID, true);
         expect(flattened.result).toEqual(first.id);
@@ -67,7 +68,7 @@ Object.keys(tests).forEach(contentType => {
       });
     }
 
-    if (bySlug) {
+    if (testKeyBySlug) {
       it(`should normalise a single ${contentType} by SLUG`, () => {
         const flattened = normalise(contentType, first, EntityKeyPropNames.SLUG, true);
         expect(flattened.result).toEqual(first.slug);

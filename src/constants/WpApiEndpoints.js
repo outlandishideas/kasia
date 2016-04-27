@@ -20,7 +20,7 @@ export const QueryableBySlug = [
   ContentTypes.USER
 ];
 
-export default {
+export const Slugs = {
   [ContentTypes.CATEGORY]: {
     [RequestTypes.SINGLE]: '/categories/:id',
     [RequestTypes.PLURAL]: '/categories'
@@ -64,9 +64,5 @@ export default {
   [ContentTypes.USER]: {
     [RequestTypes.SINGLE]: '/users/:id',
     [RequestTypes.PLURAL]: '/users'
-  },
-  [ContentTypes.CUSTOM_CONTENT_TYPE]: {
-    [RequestTypes.SINGLE]: '/:slug/:id',
-    [RequestTypes.PLURAL]: '/:slug'
   }
 };
