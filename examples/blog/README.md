@@ -1,1 +1,1 @@
-# A Simple Blog Using Repress
+# A Simple Blog Using Pepperoni

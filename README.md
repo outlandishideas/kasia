@@ -2,7 +2,7 @@
 
 > A React Redux toolset for the WordPress API.
 
-## Features:
+## Features
 
 - Declaratively connect React components to data from the WordPress API.
 - Register and consume Custom Content Types with very little configuration.
@@ -110,7 +110,7 @@ class MyPost extends Component {
 connectWordPress()(MyPost);
 ```
 
-## The Shape of Data
+## Use a Connected Component
 
 Assuming this post is connected up to [react-router](https://github.com/reactjs/react-router) in the following manner:
 
@@ -136,6 +136,71 @@ The works by simple convention. Anything with `Post` in it is assumed to be a wa
 anything with `Page` is assumed to be wanting that, anything with `Taxonomy` is assumed to be a taxonomy and so on.
 The information from React Router passed as props (for example `slug` or `id`) is assumed to correspond to those
 meanings in WordPress REST API generally. You can also override this if neccessary as we will see.
+
+## The Shape of Data
+
+__Pepperoni restructures data returned from the WP-API__.
+
+
+> Why?
+
+The JSON returned from WP-API contains such things as objects with a single property (e.g. objects with `rendered`),
+property names prefixed with underscores (e.g. `_links`) and most importantly it does not by default embed content
+types within one another without the use of the `_embed` query parameter.
+
+> What changes should I be aware of?
+
+- __The `_embed` query parameter is enabled by default in Pepperoni.__
+
+- All properties are camel-cased.
+
+    ```js
+    "featured_media" => "featuredMedia"
+    ```
+
+- All keys of the `links` object are prefixed with `link:`. This is to avoid `normalizr` picking up link objects as entities.
+
+    ```js
+    link['author]' => link['link:author']
+    ```
+
+- Objects that have a single property `'rendered'` are flattened.
+
+    ```js
+    {
+      content: {
+        rendered: '<h1>Hello, World!</h1>'
+      }
+    }
+
+    =>
+
+    { content: '<h1>Hello, World!</h1>' }
+    ```
+
+- Wherever a nested content type appears under `embedded` that content type is flattened into the parent. It is also
+lifted into the store as a separate entity and so can be accessed independently of the parent content.
+
+    So in the following instance, both the post and user (authors are users) become available in their respective
+    collections within the store.
+
+
+   ```js
+    {
+      id: 10,
+      author: 50,
+      embedded: {
+        author: { id: 50, name: "Special Agent Pepperoni" }
+      }
+    }
+
+    =>
+
+    {
+      id: 10,
+      author: { id: 50, name: "Special Agent Pepperoni" }
+    }
+  ```
 
 ## API
 
