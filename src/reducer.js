@@ -1,13 +1,13 @@
 import merge from 'lodash.merge';
 
-import { makeContentTypeOptions } from './contentTypes';
-import { RECEIVE, INVALIDATE, REGISTER_CUSTOM_CONTENT_TYPE } from './constants/ActionTypes';
-import { RequestTypes } from './constants/WpApiEndpoints';
+import Plurality from './constants/Plurality';
 import normalise from './normalise';
+import { makeBuiltInContentTypeOptions } from './contentTypes';
+import { RECEIVE, INVALIDATE } from './constants/ActionTypes';
 
 export const defaultState = {
   config: {
-    contentTypes: makeContentTypeOptions()
+    contentTypes: makeBuiltInContentTypeOptions()
   },
   entities: {}
 };
@@ -32,7 +32,7 @@ export default function makeReducer (config) {
           return merge({}, state, { entities: normalisedData.entities });
 
         case INVALIDATE:
-          const namePlural = contentTypes[contentType].name[RequestTypes.PLURAL];
+          const namePlural = contentTypes[contentType].name[Plurality.PLURAL];
           delete state.entities[namePlural][action.id];
           return merge({}, state);
 

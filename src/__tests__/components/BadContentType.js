@@ -4,7 +4,5 @@ import React, { Component } from 'react';
 
 import connectWordPress from '../../connect';
 
-export default function makeBadContentTypeComponent () {
-  @connectWordPress()
-  class BadContentType extends Component {}
-}
+@connectWordPress()
+export default class BadContentType extends Component {}

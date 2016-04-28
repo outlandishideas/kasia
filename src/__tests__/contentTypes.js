@@ -1,7 +1,7 @@
 jest.disableAutomock();
 
 import configureStore from './util/configureStore';
-import { RequestTypes } from '../constants/WpApiEndpoints';
+import Plurality from '../constants/Plurality';
 
 const builtInContentTypes = [
   'category',
@@ -31,12 +31,12 @@ function makeContentTypeObj (single, plural, slug) {
   return {
     name: {
       canonical: single,
-      [RequestTypes.SINGLE]: single,
-      [RequestTypes.PLURAL]: plural
+      [Plurality.SINGULAR]: single,
+      [Plurality.PLURAL]: plural
     },
     slug: {
-      [RequestTypes.SINGLE]: `/${slug}/:id`,
-      [RequestTypes.PLURAL]: `/${slug}`
+      [Plurality.SINGULAR]: `/${slug}/:id`,
+      [Plurality.PLURAL]: `/${slug}`
     }
   };
 }

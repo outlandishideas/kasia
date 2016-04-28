@@ -13,11 +13,11 @@ import 'isomorphic-fetch';
 
 import ContentTypes from '../constants/ContentTypes';
 import fetchContent from '../fetchContent';
-import { makeContentTypeOptions } from '../contentTypes';
+import { makeBuiltInContentTypeOptions } from '../contentTypes';
 
 global.fetch = jest.fn();
 
-const contentTypeOptions = makeContentTypeOptions();
+const contentTypeOptions = makeBuiltInContentTypeOptions();
 
 const fetchCall = () => fetch.mock.calls[0][0];
 
@@ -79,6 +79,6 @@ describe('fetchContent', () => {
       return fetchContent(contentTypeOptions[ContentTypes.POST], [1, 'uh-oh'], config);
     }).toThrowError(/should be made using numeric/);
   });
-  
+
   // TODO test post revisions route as has different route parameters requirement than the other routes
 });

@@ -13,9 +13,11 @@ import { receive } from '../actionCreators';
 import BuiltInContentType from './components/BuiltInContentType';
 import DerivedContentType from './components/DerivedContentType';
 import CustomContentType from './components/CustomContentType';
-import makeBadContentTypeComponent from './components/BadContentType';
+import BadContentTypeComponent from './components/BadContentType';
 
-const { store, interceptReducer } = configureStore();
+const { store, interceptReducer } = configureStore({
+  customContentTypes: ['CustomContentType']
+});
 
 const testProps = {
   store,
@@ -55,9 +57,9 @@ describe('Pepperoni connect', () => {
     });
 
     it('should dispatch an action corresponding to given configuration', () => {
-      const action = nextActionOfType(REQUEST.CREATE);
+      const action = nextActionOfType(REQUEST.CREATE)
       expect(action).toBeTruthy();
-      expect(action.options.contentType).toEqual(ContentTypes.POST);
+      expect(action.contentType).toEqual(ContentTypes.POST);
     });
   });
 
@@ -65,13 +67,7 @@ describe('Pepperoni connect', () => {
     // Imitate WP-API response prior to rendering so that the post data is on the store
     store.dispatch(receive(ContentTypes.POST, postJson));
 
-    const rendered = mount(<DerivedContentType {...testProps} testProp={true} />);
-
-    it('should dispatch an action corresponding to given configuration', () => {
-      const action = nextActionOfType(REQUEST.CREATE);
-      expect(action).toBeTruthy();
-      expect(action.options.contentType).toEqual(ContentTypes.POST);
-    });
+    const rendered = mount(<DerivedContentType {...testProps} />);
 
     // TODO this is surely wrong... how to access final props properly?
     it('should receive post data on props', () => {
@@ -80,18 +76,20 @@ describe('Pepperoni connect', () => {
   });
 
   describe('with custom content type', () => {
-    mount(<CustomContentType {...testProps} testProp={true} />);
+    mount(<CustomContentType {...testProps} />);
 
     it('should dispatch an action corresponding to given configuration', () => {
       const action = nextActionOfType(REQUEST.CREATE);
       expect(action).toBeTruthy();
-      expect(action.options.contentType).toEqual('CustomContentType');
+      expect(action.contentType).toEqual('CustomContentType');
     });
   });
 
   describe('with bad content type', () => {
-    it('should throw error informing', () => {
-      expect(makeBadContentTypeComponent).toThrowError(/Could not derive/);
+    it('should throw error informing of failure to derive content type', () => {
+      expect(() => {
+        mount(<BadContentTypeComponent {...testProps} />);
+      }).toThrowError(/Could not derive/);
     });
   });
 });

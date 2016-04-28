@@ -8,20 +8,20 @@ jest.unmock('../constants/ContentTypes');
 jest.unmock('../actionCreators');
 jest.unmock('../sagas');
 jest.unmock('../fetchContent');
+jest.unmock('../contentTypes');
 
 import { put, call, select } from 'redux-saga/effects';
 
 import ContentTypes from '../constants/ContentTypes';
 import fetchContent from '../fetchContent';
+import { makeBuiltInContentTypeOptions } from '../contentTypes';
 import { configSelector, fetchResource } from '../sagas';
+import { createRequest, startRequest } from '../actionCreators';
 
-import {
-  createRequest,
-  startRequest
-} from '../actionCreators';
-
+const contentTypes = makeBuiltInContentTypeOptions();
 const contentType = ContentTypes.POST;
 const createRequestOptions = { params: { id: 1337 }};
+const mockConfig = { contentTypes };
 
 describe('sagas', () => {
   const generator = fetchResource(
@@ -33,12 +33,12 @@ describe('sagas', () => {
   });
 
   it('puts a create request action', () => {
-    expect(generator.next().value).toEqual(put(startRequest(contentType)));
+    expect(generator.next(mockConfig).value).toEqual(put(startRequest(contentType)));
   });
 
-  it('yields a call to fetchContent with ', () => {
+  it('yields a call to fetchContent with original arguments', () => {
     expect(generator.next().value).toEqual(
-      call(fetchContent, contentType, createRequestOptions, undefined, {})
+      call(fetchContent, contentType, createRequestOptions, mockConfig, {})
     );
   });
 });

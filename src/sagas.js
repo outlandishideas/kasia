@@ -2,8 +2,9 @@ import { takeEvery } from 'redux-saga';
 import { call, put, select } from 'redux-saga/effects';
 import invariant from 'invariant';
 
-import { REQUEST } from './constants/ActionTypes';
 import fetchContent from './fetchContent';
+import { REQUEST } from './constants/ActionTypes';
+import { findContentTypeOptions } from './contentTypes';
 import { startRequest, completeRequest, failRequest } from './actionCreators';
 
 export const configSelector = state => state.$$pepperoni.config;
@@ -13,13 +14,12 @@ export function* fetchResource (action) {
 
   const config = yield select(configSelector);
 
-  const contentTypeOptions = config.contentTypes
-    .find(contentTypeObj => contentTypeObj.name === contentType);
+  const contentTypeOptions = findContentTypeOptions(contentType, config.contentTypes);
 
   invariant(
     contentTypeOptions,
     'The content type "%s" is not recognised. ' +
-    'Register custom content types at initialisation or by calling Pepperoni#registerCustomContentType.',
+    'Register custom content types at initialisation.',
     action.subject
   );
 

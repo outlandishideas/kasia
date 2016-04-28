@@ -2,11 +2,8 @@ import invariant from 'invariant';
 import urlencode from 'urlencode';
 import merge from 'lodash.merge';
 
-import {
-  RequestTypes,
-  EndpointRouteParams,
-  QueryableBySlug
-} from './constants/WpApiEndpoints';
+import Plurality from './constants/Plurality';
+import { EndpointRouteParams, QueryableBySlug } from './constants/WpApiEndpoints';
 
 const defaultOptions = {
   query: {}
@@ -25,10 +22,10 @@ export default function fetchContent (contentTypeOptions, subject, config, optio
   options.params = options.params || {};
 
   const requestType = Array.isArray(subject)
-    ? RequestTypes.PLURAL
-    : RequestTypes.SINGLE;
+    ? Plurality.PLURAL
+    : Plurality.SINGULAR;
 
-  const isSlugRequest = requestType === RequestTypes.SINGLE
+  const isSlugRequest = requestType === Plurality.SINGULAR
     && typeof subject === 'string';
 
   let endpoint = config.wpApiUrl;
@@ -47,11 +44,11 @@ export default function fetchContent (contentTypeOptions, subject, config, optio
     );
   }
 
-  if (requestType === RequestTypes.PLURAL) {
+  if (requestType === Plurality.PLURAL) {
     const nonNumericIds = subject.filter(id => typeof id !== 'number');
 
     invariant(
-      requestType === RequestTypes.PLURAL && !nonNumericIds.length,
+      requestType === Plurality.PLURAL && !nonNumericIds.length,
       'A request for multiple content items should be made using numeric identifiers. ' +
       'The subject array contains %s non-numeric identifiers: %s',
       nonNumericIds.length,
@@ -62,7 +59,7 @@ export default function fetchContent (contentTypeOptions, subject, config, optio
   // Modify request type from SINGLE to PLURAL in the case of a request by slug
   if (isSlugRequest) {
     merge(options.query, { slug: subject });
-    endpoint += contentTypeOptions.slug[RequestTypes.PLURAL];
+    endpoint += contentTypeOptions.slug[Plurality.PLURAL];
   } else {
     endpoint += contentTypeOptions.slug[requestType];
   }
@@ -78,7 +75,7 @@ export default function fetchContent (contentTypeOptions, subject, config, optio
       return str + (str.length ? `&${keyVal}` : `?${keyVal}`);
     }, '');
 
-  if (requestType === RequestTypes.SINGLE) {
+  if (requestType === Plurality.SINGULAR) {
     options.params.id = options.params.id || subject;
   } else {
     const postInFilter = subject.map(id => `filter[post__in][]=${id}`).join('&');

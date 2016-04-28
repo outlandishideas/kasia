@@ -1,3 +1,4 @@
+import Plurality from './Plurality';
 import ContentTypes from './ContentTypes';
 
 export const EndpointRouteParams = [
@@ -5,11 +6,6 @@ export const EndpointRouteParams = [
   'postId',
   'slug'
 ];
-
-export const RequestTypes = {
-  SINGLE: 'SINGLE',
-  PLURAL: 'PLURAL'
-};
 
 export const QueryableBySlug = [
   ContentTypes.CATEGORY,
@@ -22,47 +18,47 @@ export const QueryableBySlug = [
 
 export const Slugs = {
   [ContentTypes.CATEGORY]: {
-    [RequestTypes.SINGLE]: '/categories/:id',
-    [RequestTypes.PLURAL]: '/categories'
+    [Plurality.SINGULAR]: '/categories/:id',
+    [Plurality.PLURAL]: '/categories'
   },
   [ContentTypes.COMMENT]: {
-    [RequestTypes.SINGLE]: '/comments/:id',
-    [RequestTypes.PLURAL]: '/comments'
+    [Plurality.SINGULAR]: '/comments/:id',
+    [Plurality.PLURAL]: '/comments'
   },
   [ContentTypes.MEDIA]: {
-    [RequestTypes.SINGLE]: '/media/:id',
-    [RequestTypes.PLURAL]: '/media'
+    [Plurality.SINGULAR]: '/media/:id',
+    [Plurality.PLURAL]: '/media'
   },
   [ContentTypes.PAGE]: {
-    [RequestTypes.SINGLE]: '/pages/:id',
-    [RequestTypes.PLURAL]: '/pages'
+    [Plurality.SINGULAR]: '/pages/:id',
+    [Plurality.PLURAL]: '/pages'
   },
   [ContentTypes.POST]: {
-    [RequestTypes.SINGLE]: '/posts/:id',
-    [RequestTypes.PLURAL]: '/posts'
+    [Plurality.SINGULAR]: '/posts/:id',
+    [Plurality.PLURAL]: '/posts'
   },
   [ContentTypes.POST_REVISION]: {
-    [RequestTypes.SINGLE]: '/posts/:postId/revisions/:id',
-    [RequestTypes.PLURAL]: '/posts/:postId/revisions'
+    [Plurality.SINGULAR]: '/posts/:postId/revisions/:id',
+    [Plurality.PLURAL]: '/posts/:postId/revisions'
   },
   [ContentTypes.POST_TYPE]: {
-    [RequestTypes.SINGLE]: '/types/:id',
-    [RequestTypes.PLURAL]: '/types'
+    [Plurality.SINGULAR]: '/types/:id',
+    [Plurality.PLURAL]: '/types'
   },
   [ContentTypes.POST_STATUS]: {
-    [RequestTypes.SINGLE]: '/statuses/:id',
-    [RequestTypes.PLURAL]: '/statuses'
+    [Plurality.SINGULAR]: '/statuses/:id',
+    [Plurality.PLURAL]: '/statuses'
   },
   [ContentTypes.TAG]: {
-    [RequestTypes.SINGLE]: '/tags/:id',
-    [RequestTypes.PLURAL]: '/tags'
+    [Plurality.SINGULAR]: '/tags/:id',
+    [Plurality.PLURAL]: '/tags'
   },
   [ContentTypes.TAXONOMY]: {
-    [RequestTypes.SINGLE]: '/taxonomies/:id',
-    [RequestTypes.PLURAL]: '/taxonomies'
+    [Plurality.SINGULAR]: '/taxonomies/:id',
+    [Plurality.PLURAL]: '/taxonomies'
   },
   [ContentTypes.USER]: {
-    [RequestTypes.SINGLE]: '/users/:id',
-    [RequestTypes.PLURAL]: '/users'
+    [Plurality.SINGULAR]: '/users/:id',
+    [Plurality.PLURAL]: '/users'
   }
 };

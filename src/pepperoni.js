@@ -3,8 +3,9 @@ import 'isomorphic-fetch';
 import invariant from 'invariant';
 
 import makeReducer from './reducer';
-import { makeCustomContentType } from './contentTypes';
+import fetchSaga from './sagas';
 import EntityKeyPropNames from './constants/EntityKeyPropNames'
+import { makeCustomContentTypeOptions } from './contentTypes';
 
 export { default as ContentTypes } from './constants/ContentTypes';
 export { default as connectWordPress } from './connect';
@@ -41,6 +42,10 @@ export default function pepperoni ({
   return makeReducer({
     wpApiUrl,
     entityKeyPropName,
-    contentTypes: customContentTypes.map(makeCustomContentType)
+    contentTypes: makeCustomContentTypeOptions(customContentTypes)
   });
 }
+
+export const pepperoniSagas = {
+  $$pepperoniFetch: fetchSaga
+};

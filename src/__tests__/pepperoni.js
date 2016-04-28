@@ -8,7 +8,7 @@ import invariant from 'invariant';
 
 import pepperoni from '../pepperoni';
 import makeReducer from '../reducer';
-import { RequestTypes } from '../constants/WpApiEndpoints';
+import Plurality from '../constants/Plurality';
 
 describe('pepperoni', () => {
   beforeEach(() => {
@@ -21,9 +21,7 @@ describe('pepperoni', () => {
   });
 
   it('throws an invariant violation when wpApiUrl is not a string', () => {
-    pepperoni({
-      wpApiUrl: 11111
-    });
+    pepperoni({ wpApiUrl: 11111 });
 
     expect(invariant).toBeCalledWith(
       false,
@@ -33,9 +31,7 @@ describe('pepperoni', () => {
   });
 
   it('throws an invariant violation when wpApiUrl is undefined', () => {
-    pepperoni({
-      wpApiUrl: undefined
-    });
+    pepperoni({ wpApiUrl: undefined });
 
     expect(invariant).toBeCalledWith(
       false,
@@ -47,7 +43,6 @@ describe('pepperoni', () => {
   it('calls makeReducer with the correct object shape', () => {
     const input = {
       wpApiUrl: 'some-url.com',
-      useEmbedRequestQuery: false,
       customContentTypes: [
         'FirstCustomPostType',
         'SecondCustomPostType'
@@ -56,36 +51,34 @@ describe('pepperoni', () => {
 
     const expected = {
       wpApiUrl: 'some-url.com',
-      useEmbedRequestQuery: false,
-      contentTypes: [
-        {
+      entityKeyPropName: 'ID',
+      contentTypes: {
+        FirstCustomPostType: {
           slug: {
-            [RequestTypes.SINGLE]: `/first-custom-post-types/:id`,
-            [RequestTypes.PLURAL]: `/first-custom-post-types`
+            [Plurality.SINGULAR]: `/first-custom-post-types/:id`,
+            [Plurality.PLURAL]: `/first-custom-post-types`
           },
           name: {
             canonical: 'FirstCustomPostType',
-            [RequestTypes.SINGLE]: 'firstCustomPostType',
-            [RequestTypes.PLURAL]: 'firstCustomPostTypes'
+            [Plurality.SINGULAR]: 'firstCustomPostType',
+            [Plurality.PLURAL]: 'firstCustomPostTypes'
           }
         },
-        {
+        SecondCustomPostType: {
           slug: {
-            [RequestTypes.SINGLE]: `/second-custom-post-types/:id`,
-            [RequestTypes.PLURAL]: `/second-custom-post-types`
+            [Plurality.SINGULAR]: `/second-custom-post-types/:id`,
+            [Plurality.PLURAL]: `/second-custom-post-types`
           },
           name: {
             canonical: 'SecondCustomPostType',
-            [RequestTypes.SINGLE]: 'secondCustomPostType',
-            [RequestTypes.PLURAL]: 'secondCustomPostTypes'
+            [Plurality.SINGULAR]: 'secondCustomPostType',
+            [Plurality.PLURAL]: 'secondCustomPostTypes'
           }
         }
-      ]
+      }
     };
 
     pepperoni(input);
-
-    console.log(makeReducer.mock.calls[0])
 
     expect(makeReducer).toBeCalledWith(expected);
   });
