@@ -5,7 +5,7 @@ import invariant from 'invariant';
 import Plurality from './constants/Plurality';
 import { createRequest } from './actionCreators';
 import { fetchResource } from './sagas';
-import { findContentTypeOptions, deriveContentTypeOptions } from './contentTypes';
+import { deriveContentTypeOptions } from './contentTypes';
 
 /**
  * Connect a component to data from the WP-API.
@@ -26,10 +26,10 @@ export default function connectWordPress ({
       target.name
     );
 
-    const getContentTypeOptions = config => {
+    const getContentTypeOptions = contentTypes => {
       return typeof contentType === 'undefined'
-        ? deriveContentTypeOptions(target.name, config)
-        : findContentTypeOptions(contentType, config);
+        ? deriveContentTypeOptions(target.name, contentTypes)
+        : contentTypes[contentType];
     };
 
     function mapStateToProps (state, ownProps) {

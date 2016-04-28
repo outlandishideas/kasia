@@ -4,7 +4,6 @@ import invariant from 'invariant';
 
 import fetchContent from './fetchContent';
 import { REQUEST } from './constants/ActionTypes';
-import { findContentTypeOptions } from './contentTypes';
 import { startRequest, completeRequest, failRequest } from './actionCreators';
 
 export const configSelector = state => state.$$pepperoni.config;
@@ -14,7 +13,7 @@ export function* fetchResource (action) {
 
   const config = yield select(configSelector);
 
-  const contentTypeOptions = findContentTypeOptions(contentType, config.contentTypes);
+  const contentTypeOptions = config.contentTypes[contentType];
 
   invariant(
     contentTypeOptions,

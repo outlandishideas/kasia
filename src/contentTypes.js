@@ -28,19 +28,6 @@ export function makeCustomContentTypeOptions (customContentTypes) {
   }, {});
 }
 
-export function findContentTypeOptions (contentTypeName, contentTypes) {
-  const contentTypeNames = Object.keys(contentTypes);
-
-  for (let i = 0; i < contentTypeNames.length; i++) {
-    const name = contentTypeNames[i];
-    const options = contentTypes[name];
-
-    if (options.name.canonical === contentTypeName) {
-      return options;
-    }
-  }
-}
-
 export function deriveContentTypeOptions (str, contentTypes) {
   const contentTypeNames = Object.keys(contentTypes);
   const lowercased = str.toLowerCase();
