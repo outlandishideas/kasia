@@ -7,7 +7,6 @@ import connectWordPress from '../../connect';
 
 const testConnectOptions = {
   contentType: ContentTypes.POST,
-  useEmbedRequestQuery: true,
   fetchDataOptions: {}
 };
 

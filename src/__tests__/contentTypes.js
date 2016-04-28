@@ -1,164 +1,131 @@
-jest.unmock('../contentTypes');
-jest.unmock('humps');
-jest.unmock('../constants/ContentTypes');
+jest.disableAutomock();
 
-import invariant from 'invariant';
+import configureStore from './util/configureStore';
+import Plurality from '../constants/Plurality';
 
-import {
-  registerCustomContentType,
-  customContentTypes
-} from '../contentTypes';
+const builtInContentTypes = [
+  'category',
+  'comment',
+  'media',
+  'page',
+  'post',
+  'postRevision',
+  'postType',
+  'postStatus',
+  'tag',
+  'taxonomy',
+  'user'
+];
 
-describe('registerCustomContentType', () => {
-  beforeEach(() => {
-    invariant.mockClear();
+let store;
 
-    // Required because customContentTypes is a constant and rightly so.
-    Object.keys(customContentTypes).forEach(c => delete customContentTypes[c]);
-    expect(Object.keys(customContentTypes).length).toEqual(0);
-  });
+function createStore (options) {
+  store = configureStore(options).store;
+}
 
+function getConfig () {
+  return store.getState().$$pepperoni.config;
+}
+
+function makeContentTypeObj (single, plural, slug) {
+  return {
+    name: {
+      canonical: single,
+      [Plurality.SINGULAR]: single,
+      [Plurality.PLURAL]: plural
+    },
+    slug: {
+      [Plurality.SINGULAR]: `/${slug}/:id`,
+      [Plurality.PLURAL]: `/${slug}`
+    }
+  };
+}
+
+describe('contentTypes', () => {
   describe('unhappy path', () => {
     it('throws an invariant exception when name is not a string', () => {
-      registerCustomContentType(111);
-
-      expect(invariant).toBeCalledWith(
-        false,
-        'Expecting name of custom content type to be a string.'
-      );
+      expect(() => {
+        createStore({ customContentTypes: [111] });
+      }).toThrowError(/Expecting custom content type name to be a string/);
     });
 
-    [
-      'category',
-      'comment',
-      'media',
-      'page',
-      'post',
-      'postRevision',
-      'postType',
-      'postStatus',
-      'tag',
-      'taxonomy',
-      'user',
-      'customPostType'
-    ].forEach(builtInType => {
+    builtInContentTypes.forEach(builtInType => {
       it(`throws an invariant exception when name is a built in type ${builtInType}`, () => {
-        registerCustomContentType(builtInType);
-
-        // TODO This is wrong! It should be one...
-        expect(invariant.mock.calls.length).toEqual(2);
-        expect(invariant).toBeCalledWith(
-          true,
-          'The content type "%s" is already taken. Choose another non-conflicting name.',
-          builtInType
-        );
+        expect(() => {
+          createStore({ customContentTypes: [builtInType] });
+        }).toThrowError(/taken/);
       });
     });
   });
 
   describe('happy path', () => {
     it('adds contentType to list', () => {
-      registerCustomContentType('article');
+      createStore({ customContentTypes: ['article'] });
 
-      const { article } = customContentTypes;
+      const config = getConfig();
 
-      expect(typeof article).toEqual('object');
-
-      expect(article).toEqual({
-        name: 'article',
-        namePlural: 'articles',
-        requestSlug: 'articles'
-      });
+      expect(config.contentTypes.article).toEqual(
+        makeContentTypeObj('article', 'articles', 'articles')
+      );
     });
 
     it('adds contentType to list with camelCased type', () => {
-      registerCustomContentType('blogPost');
+      createStore({ customContentTypes: ['blogPost'] });
 
-      const { blogPost } = customContentTypes;
+      const config = getConfig();
 
-      expect(typeof blogPost).toEqual('object');
-
-      expect(blogPost).toEqual({
-        name: 'blogPost',
-        namePlural: 'blogPosts',
-        requestSlug: 'blogpost'
-      });
+      expect(config.contentTypes.blogPost).toEqual(
+        makeContentTypeObj('blogPost', 'blogPosts', 'blog-posts')
+      );
     });
 
     it('maintains more than one contentType on list', () => {
-      registerCustomContentType('article');
-
-      const { article } = customContentTypes;
-
-      expect(Object.keys(customContentTypes).length).toEqual(1);
-      expect(typeof article).toEqual('object');
-
-      expect(article).toEqual({
-        name: 'article',
-        namePlural: 'articles',
-        requestSlug: 'articles'
+      createStore({
+        customContentTypes: [
+          'article',
+          'book'
+        ]
       });
 
-      registerCustomContentType('book');
+      let config = getConfig();
 
-      const { book } = customContentTypes;
+      expect(config.contentTypes.article).toEqual(
+        makeContentTypeObj('article', 'articles', 'articles')
+      );
 
-      expect(Object.keys(customContentTypes).length).toEqual(2);
-      expect(typeof book).toEqual('object');
-
-      expect(book).toEqual({
-        name: 'book',
-        namePlural: 'books',
-        requestSlug: 'books'
-      });
+      expect(config.contentTypes.book).toEqual(
+        makeContentTypeObj('book', 'books', 'books')
+      );
     });
 
-    it('adds contentType to list with custom pularisation', () => {
-      registerCustomContentType('owl', {
-        namePlural: 'parliament'
+    it('adds contentType to list with custom pluralisation', () => {
+      createStore({
+        customContentTypes: [{
+          name: 'custom',
+          namePlural: 'plural'
+        }]
       });
 
-      const { owl } = customContentTypes;
+      const config = getConfig();
 
-      expect(typeof owl).toEqual('object');
-
-      expect(owl).toEqual({
-        name: 'owl',
-        namePlural: 'parliament',
-        requestSlug: 'parliament'
-      });
-    });
-
-    it('adds contentType to list with custom pularisation', () => {
-      registerCustomContentType('owl', {
-        namePlural: 'parliament'
-      });
-
-      const { owl } = customContentTypes;
-
-      expect(typeof owl).toEqual('object');
-
-      expect(owl).toEqual({
-        name: 'owl',
-        namePlural: 'parliament',
-        requestSlug: 'parliament'
-      });
+      expect(config.contentTypes.custom).toEqual(
+        makeContentTypeObj('custom', 'plural', 'plural')
+      );
     });
 
     it('adds contentType to list with custom endpoint', () => {
-      registerCustomContentType('owl', {
-        requestSlug: 'parliament'
+      createStore({
+        customContentTypes: [{
+          name: 'owl',
+          requestSlug: 'parliament'
+        }]
       });
 
-      const { owl } = customContentTypes;
+      const config = getConfig();
 
-      expect(typeof owl).toEqual('object');
-
-      expect(owl).toEqual({
-        name: 'owl',
-        namePlural: 'owls',
-        requestSlug: 'parliament'
-      });
+      expect(config.contentTypes.owl).toEqual(
+        makeContentTypeObj('owl', 'owls', 'parliament')
+      );
     });
   });
 });

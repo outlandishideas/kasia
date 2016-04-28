@@ -1,4 +1,4 @@
-import ContentTypes from '../constants/ContentTypes';
+import ContentTypes from '../../../constants/ContentTypes';
 
 import category from './category';
 import comment from './comment';

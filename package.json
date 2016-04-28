@@ -45,6 +45,7 @@
     "eslint-config-airbnb-base": "^1.0.1",
     "eslint-plugin-import": "^1.5.0",
     "jest-cli": "^11.0.2",
+    "lodash.clonedeep": "^4.1.0",
     "react-addons-test-utils": "^15.0.1",
     "sinon": "^1.17.3"
   },

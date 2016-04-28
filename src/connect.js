@@ -2,29 +2,21 @@ import React, { Component } from 'react';
 import { connect as reduxConnect } from 'react-redux';
 import invariant from 'invariant';
 
-import ContentTypes from './constants/ContentTypes';
+import Plurality from './constants/Plurality';
 import { createRequest } from './actionCreators';
 import { fetchResource } from './sagas';
-
-import {
-  customContentTypes,
-  makeContentTypeOptions,
-  deriveContentType
-} from './contentTypes';
+import { deriveContentTypeOptions } from './contentTypes';
 
 /**
- * Pepperoni connect.
- * TODO write better doc
+ * Connect a component to data from the WP-API.
  * @param {String} [contentType] The content type for which the WP-API request will be made.
  * @param {String} [routeParamsPropName] From which object on props will the WP-API route parameters be derived?
- * @param {Boolean} [useEmbedRequestQuery] Override global default for using `_embed` query parameter in WP-API request.
- * @param {Boolean} [routeParamSubjectKey] The key on `params` that will be used as the ID of desired content.
+ * @param {Boolean} [routeParamSubjectKey] The key on `params` that will be used as the identifier of desired content.
  * @returns {Function}
  */
 export default function connectWordPress ({
-  contentType = null,
+  contentType,
   routeParamsPropName = 'params',
-  useEmbedRequestQuery = true,
   routeParamSubjectKey = 'id'
 } = {}) {
   return target => {
@@ -34,55 +26,41 @@ export default function connectWordPress ({
       target.name
     );
 
-    contentType = contentType ||
-      customContentTypes[contentType] ||
-      deriveContentType(target.name);
-
-    invariant(
-      contentType,
-      'Could not derive content type from class name "%s". ' +
-      'Pass built-ins using Pepperoni.ContentTypes. For example, ContentTypes.POST. ' +
-      'Custom Content Types should be registered with Pepperoni#registerCustomContentType.',
-      target.name
-    );
-
-    const isCustomContentType = !!customContentTypes[contentType];
-
-    const contentTypeOptions = isCustomContentType
-      ? customContentTypes[contentType]
-      : makeContentTypeOptions(contentType);
+    const getContentTypeOptions = contentTypes => {
+      return typeof contentType === 'undefined'
+        ? deriveContentTypeOptions(target.name, contentTypes)
+        : contentTypes[contentType];
+    };
 
     function mapStateToProps (state, ownProps) {
-      const params = ownProps[routeParamsPropName];
-      const collection = state.$$pepperoni.entities[contentTypeOptions.namePlural];
-      const value = collection ? collection[params.id] : null;
-      return { [contentTypeOptions.name]: value };
+      const { contentTypes } = state.$$pepperoni.config;
+      const contentTypeOpts = getContentTypeOptions(contentTypes);
+      const nameSingular = contentTypeOpts.name[Plurality.SINGULAR];
+      const namePlural = contentTypeOpts.name[Plurality.PLURAL];
+      const subjectId = ownProps[routeParamsPropName][routeParamSubjectKey];
+      const contentTypeCollection = state.$$pepperoni.entities[namePlural];
+
+      return {
+        $$pepperoni: state.$$pepperoni,
+        [nameSingular]: contentTypeCollection ? contentTypeCollection[subjectId] : null
+      };
     }
 
     class PepperoniComponentWrapper extends Component {
       componentWillMount () {
-        // TODO allow some method of forcing re-fetch, or should this be done manually be invalidate action?
-        const params = this.props[routeParamsPropName];
-        const collection = this.props[contentTypeOptions.name];
-        if (!collection || !collection[params.id]) {
-          this.props.dispatch(this.createRequestAction());
+        const { contentTypes } = this.props.$$pepperoni.config;
+        const contentTypeOpts = getContentTypeOptions(contentTypes);
+        const nameSingular = contentTypeOpts.name[Plurality.SINGULAR];
+
+        if (this.props[nameSingular] == null) {
+          const params = this.props[routeParamsPropName];
+          const subjectId = params[routeParamSubjectKey];
+          const canonicalName = contentTypeOpts.name.canonical;
+
+          this.props.dispatch(
+            createRequest(canonicalName, subjectId, { params })
+          );
         }
-      }
-
-      createRequestAction () {
-        const params = this.props[routeParamsPropName];
-
-        const contentTypeNamespace = isCustomContentType
-          ? ContentTypes.CUSTOM_CONTENT_TYPE
-          : contentType;
-        
-        const options = {
-          params,
-          contentType,
-          useEmbedRequestQuery
-        };
-
-        return createRequest(contentTypeNamespace, params[routeParamSubjectKey], options);
       }
 
       render () {
@@ -93,14 +71,13 @@ export default function connectWordPress ({
     PepperoniComponentWrapper.__pepperoni = true;
 
     /**
-     * Fetch the content data according to the configuration in `store`.
+     * Fetch the content data for the `contentType` that the component represents.
      * @param {String} subject The subject identifier (id or slug)
      */
     PepperoniComponentWrapper.fetchData = subject => [
       [fetchResource, {
         contentType,
-        subject,
-        useEmbedRequestQuery
+        subject
       }]
     ];
 

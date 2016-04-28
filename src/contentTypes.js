@@ -2,82 +2,98 @@ import humps from 'humps';
 import invariant from 'invariant';
 
 import ContentTypes from './constants/ContentTypes';
+import Plurality from './constants/Plurality';
+import { Slugs } from './constants/WpApiEndpoints';
 
-const contentTypeOptions = {};
-
-const contentTypeNames = Object.keys(ContentTypes);
-
-const contentTypeNamesCamelCase = Object.keys(ContentTypes)
-  .map(humps.camelize);
-
-function contentNameTaken(name) {
-  return []
-    .concat(contentTypeNames, contentTypeNamesCamelCase)
-    .includes(name);
+export function makeBuiltInContentTypeOptions () {
+  return Object.keys(ContentTypes).reduce((obj, contentType) => {
+    obj[contentType] = {
+      slug: Slugs[contentType],
+      name: {
+        canonical: contentType,
+        [Plurality.SINGULAR]: humps.camelize(contentType.toLowerCase()),
+        [Plurality.PLURAL]: mapToCamelCasePlural(contentType)
+      }
+    };
+    return obj;
+  }, {});
 }
 
-export const customContentTypes = {};
-
-export function registerCustomContentType (name, {
-  namePlural = null,
-  requestSlug = null
-} = {}) {
-  invariant(
-    typeof name === 'string',
-    'Expecting name of custom content type to be a string.'
-  );
-
-  invariant(
-    !contentNameTaken(name),
-    'The content type "%s" is already taken. ' +
-    'Choose another non-conflicting name.',
-    name
-  );
-
-  namePlural = namePlural || name + 's';
-  requestSlug = requestSlug || humps.decamelize(namePlural, { separator: '-' });
-
-  return customContentTypes[name] = {
-    name,
-    namePlural,
-    requestSlug
-  };
+export function makeCustomContentTypeOptions (customContentTypes) {
+  return customContentTypes.reduce((obj, contentType) => {
+    const options = typeof contentType === 'string' ? { name: contentType } : contentType;
+    const contentTypeOptions = makeCustomContentType(options);
+    obj[contentTypeOptions.name.canonical] = contentTypeOptions;
+    return obj;
+  }, {});
 }
 
-export function deriveContentType (targetName) {
+export function deriveContentTypeOptions (str, contentTypes) {
+  const contentTypeNames = Object.keys(contentTypes);
+  const lowercased = str.toLowerCase();
+
+  let found;
+
   for (let i = 0; i < contentTypeNames.length; i++) {
-    const contentTypeName = contentTypeNames[i];
-    if (targetName.toLowerCase().includes(contentTypeName.toLowerCase())) {
-      return contentTypeName;
+    const name = contentTypeNames[i];
+    const options = contentTypes[name];
+
+    if (lowercased.indexOf(options.name.canonical.toLowerCase()) !== -1) {
+      found = contentTypes[name];
+      break;
     }
   }
+
+  invariant(
+    found,
+    'Could not derive content type from name "%s". ' +
+    'Pass built-ins using Pepperoni.ContentTypes. For example, ContentTypes.POST. ' +
+    'Custom content types should be registered at initialisation and passed in using registered name.',
+    str
+  );
+
+  return found;
 }
 
-export function makeContentTypeOptions (contentType) {
-  if (contentTypeOptions[contentType]) {
-    return contentTypeOptions[contentType];
-  }
+function makeCustomContentType (options = {}) {
+  invariant(
+    typeof options.name === 'string',
+    'Expecting custom content type name to be a string, got "%s".',
+    typeof options.name
+  );
 
-  return contentTypeOptions[contentType] = {
-    name: mapToCamelCase(contentType),
-    namePlural: mapToCamelCasePlural(contentType)
-  };
-}
+  // TODO move this check somewhere that has access to config to prevent custom content types being overridden too
+  const builtInContentNames = Object.keys(ContentTypes).map(s => s.toLowerCase());
+  const camelisedBuiltInContentNames = builtInContentNames.map(s => s.replace('_', ''));
 
-function mapToCamelCase (contentType) {
+  const isConflictingName = []
+      .concat(builtInContentNames, camelisedBuiltInContentNames)
+      .indexOf(options.name.toLowerCase()) !== -1;
+
+  invariant(
+    !isConflictingName,
+    'The content type name "%s" is taken. Choose another non-conflicting name.',
+    options.name
+  );
+
+  options.nameSingle = options.nameSingle || options.name;
+  options.namePlural = options.namePlural || options.name + 's';
+  options.requestSlug = options.requestSlug || humps.decamelize(options.namePlural, { separator: '-' });
+
   return {
-    [ContentTypes.CATEGORY]: 'category',
-    [ContentTypes.COMMENT]: 'comment',
-    [ContentTypes.MEDIA]: 'media',
-    [ContentTypes.PAGE]: 'page',
-    [ContentTypes.POST]: 'post',
-    [ContentTypes.POST_REVISION]: 'postRevision',
-    [ContentTypes.POST_TYPE]: 'postType',
-    [ContentTypes.POST_STATUS]: 'postStatuses',
-    [ContentTypes.TAG]: 'tag',
-    [ContentTypes.TAXONOMY]: 'taxonomy',
-    [ContentTypes.USER]: 'user'
-  }[contentType];
+    slug: {
+      [Plurality.SINGULAR]: `/${options.requestSlug}/:id`,
+      [Plurality.PLURAL]: `/${options.requestSlug}`
+    },
+    name: {
+      // Canonical name is used when querying content types
+      canonical: options.name,
+      // Single name is used for placing an item on a component's state, e.g. `state.postType`
+      [Plurality.SINGULAR]: humps.camelize(options.nameSingle),
+      // Plural name is used for entity collection name in the store, e.g. `entities.postTypes`
+      [Plurality.PLURAL]: humps.camelize(options.namePlural)
+    }
+  };
 }
 
 function mapToCamelCasePlural (contentType) {
