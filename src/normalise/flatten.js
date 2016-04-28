@@ -28,7 +28,7 @@ function flattenRenderedProps (original, flattened) {
   });
 }
 
-function fllattemAuthor (original, flattened) {
+function flattenAuthor (original, flattened) {
   if (original.author && typeof original.embedded !== 'undefined') {
     flattened.author = original.embedded.author
       .find(author => author.id === original.author);
@@ -60,7 +60,7 @@ export default function flatten (obj) {
 
   renameLinksProps(obj, flattened);
   flattenRenderedProps(obj, flattened);
-  fllattemAuthor(obj, flattened);
+  flattenAuthor(obj, flattened);
   flattenFeaturedMedia(obj, flattened);
 
   return flattened;
