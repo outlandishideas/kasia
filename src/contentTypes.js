@@ -89,6 +89,7 @@ function makeCustomContentType (options = {}) {
     options.name
   );
 
+  options.nameSingle = options.nameSingle || options.name;
   options.namePlural = options.namePlural || options.name + 's';
   options.requestSlug = options.requestSlug || humps.decamelize(options.namePlural, { separator: '-' });
 
@@ -101,7 +102,7 @@ function makeCustomContentType (options = {}) {
       // Canonical name is used when querying content types
       canonical: options.name,
       // Single name is used for placing an item on a component's state, e.g. `state.postType`
-      [Plurality.SINGULAR]: humps.camelize(options.name),
+      [Plurality.SINGULAR]: humps.camelize(options.nameSingle),
       // Plural name is used for entity collection name in the store, e.g. `entities.postTypes`
       [Plurality.PLURAL]: humps.camelize(options.namePlural)
     }
