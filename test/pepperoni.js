@@ -6,7 +6,7 @@ jest.mock('../src/reducer');
 
 import invariant from 'invariant';
 
-import pepperoni from '../src/pepperoni';
+import pepperoni from '../src/index';
 import makeReducer from '../src/reducer';
 import Plurality from '../src/constants/Plurality';
 

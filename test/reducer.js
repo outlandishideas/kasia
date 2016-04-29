@@ -6,7 +6,7 @@ import postJson from './fixtures/wp-api-responses/post'
 import EntityKeyPropNames from '../src/constants/EntityKeyPropNames';
 import ContentTypes from '../src/constants/ContentTypes';
 import normalise from '../src/normalise';
-import pepperoni from '../src/pepperoni';
+import pepperoni from '../src/index';
 import { receive } from '../src/actionCreators';
 import { defaultState } from '../src/reducer';
 
