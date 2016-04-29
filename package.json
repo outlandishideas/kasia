@@ -10,7 +10,8 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "lint": "eslint src/"
+    "lint": "eslint src/",
+    "compile": "babel --presets es2015,stage-0 --plugins transform-decorators-legacy -d lib/ src/"
   },
   "repository": {
     "type": "git",
