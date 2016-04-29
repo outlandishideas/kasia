@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { connect as reduxConnect } from 'react-redux';
 import invariant from 'invariant';
+import find from 'lodash.find';
 
 import Plurality from './constants/Plurality';
 import { createRequest } from './actionCreators';
@@ -40,9 +41,17 @@ export default function connectWordPress ({
       const subjectId = ownProps[routeParamsPropName][routeParamSubjectKey];
       const contentTypeCollection = state.$$pepperoni.entities[namePlural];
 
+      let back;
+
+      if (routeParamSubjectKey != 'id') {
+        back = find(contentTypeCollection, a => a[routeParamSubjectKey] === subjectId);
+      } else {
+        back = contentTypeCollection ? contentTypeCollection[subjectId] : null;
+      }
+
       return {
         $$pepperoni: state.$$pepperoni,
-        [nameSingular]: contentTypeCollection ? contentTypeCollection[subjectId] : null
+        [nameSingular]: back
       };
     }
 
