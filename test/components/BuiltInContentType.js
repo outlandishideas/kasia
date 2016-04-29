@@ -2,8 +2,8 @@ jest.disableAutomock();
 
 import React, { Component } from 'react';
 
-import ContentTypes from '../../constants/ContentTypes';
-import connectWordPress from '../../connect';
+import ContentTypes from '../../src/constants/ContentTypes';
+import connectWordPress from '../../src/connect';
 
 const testConnectOptions = {
   contentType: ContentTypes.POST,

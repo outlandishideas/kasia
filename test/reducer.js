@@ -3,12 +3,12 @@ jest.disableAutomock();
 import { combineReducers, createStore } from 'redux';
 
 import postJson from './fixtures/wp-api-responses/post'
-import EntityKeyPropNames from '../constants/EntityKeyPropNames';
-import ContentTypes from '../constants/ContentTypes';
-import normalise from '../normalise';
-import pepperoni from '../pepperoni';
-import { receive } from '../actionCreators';
-import { defaultState } from '../reducer';
+import EntityKeyPropNames from '../src/constants/EntityKeyPropNames';
+import ContentTypes from '../src/constants/ContentTypes';
+import normalise from '../src/normalise';
+import pepperoni from '../src/pepperoni';
+import { receive } from '../src/actionCreators';
+import { defaultState } from '../src/reducer';
 
 const pepperoniReducer = pepperoni({ wpApiUrl: 'test' });
 const rootReducer = combineReducers(pepperoniReducer);

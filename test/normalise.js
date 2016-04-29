@@ -3,10 +3,10 @@ jest.disableAutomock();
 import merge from 'lodash.merge';
 import cloneDeep from 'lodash.clonedeep';
 
-import ContentTypes from '../constants/ContentTypes'
-import EntityKeyPropNames from '../constants/EntityKeyPropNames';
 import WpApiResponses from './fixtures/wp-api-responses'
-import normalise from '../normalise';
+import ContentTypes from '../src/constants/ContentTypes'
+import EntityKeyPropNames from '../src/constants/EntityKeyPropNames';
+import normalise from '../src/normalise';
 
 function makeNormaliserTestData (contentType) {
   const first = WpApiResponses[contentType];

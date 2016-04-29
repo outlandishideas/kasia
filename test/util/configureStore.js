@@ -3,7 +3,7 @@ jest.disableAutomock();
 import merge from 'lodash.merge';
 import { combineReducers, createStore } from 'redux';
 
-import pepperoni  from '../../pepperoni';
+import pepperoni  from '../../src/pepperoni';
 
 export default function configureStore (options) {
   const interceptReducer = jest.fn();

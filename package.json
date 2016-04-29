@@ -4,9 +4,6 @@
   "description": "A React Redux Toolset for the WordPress API",
   "main": "lib/index.js",
   "jsnext:main": "src/index.js",
-  "directories": {
-    "example": "examples"
-  },
   "scripts": {
     "compile": "rimraf lib && babel -d lib/ src/",
     "lint": "eslint src/",
@@ -16,10 +13,23 @@
   },
   "repository": {
     "type": "git",
-    "url": "git@gitlab.outlandish.com:repress/repress.git"
+    "url": "git@gitlab.outlandish.com:pepperoni/pepperoni.git"
   },
+  "keywords": [
+    "javascript",
+    "react",
+    "redux",
+    "wordpress",
+    "word press",
+    "wp-api",
+    "wordpress api"
+  ],
   "author": "Outlandish <hello@outlandish.com>",
   "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/outlandishideas/pepperoni/issues"
+  },
+  "homepage": "https://github.com/outlandishideas/pepperoni#readme",
   "devDependencies": {
     "babel-cli": "6.6.5",
     "babel-core": "6.7.2",
@@ -37,7 +47,6 @@
     "eslint-plugin-import": "^1.5.0",
     "humps": "^1.0.0",
     "invariant": "^2.2.1",
-    "isomorphic-fetch": "^2.2.1",
     "jest": "^0.1.40",
     "jest-cli": "^11.0.2",
     "lodash.clonedeep": "^4.1.0",
@@ -49,12 +58,11 @@
     "redux": "^3.4.0",
     "redux-saga": "^0.9.5",
     "rimraf": "^2.5.2",
-    "urlencode": "^1.1.0",
-    "webpack": "^1.13.0"
+    "urlencode": "^1.1.0"
   },
   "jest": {
-    "testPathDirs": [
-      "./src"
+    "testDirectoryName": [
+      "test"
     ],
     "unmockedModulePathPatterns": [
       "<rootDir>/node_modules/react",

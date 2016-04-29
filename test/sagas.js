@@ -3,20 +3,20 @@ jest.unmock('redux-saga/effects');
 jest.unmock('lodash.merge');
 jest.unmock('invariant');
 
-jest.unmock('../constants/ActionTypes');
-jest.unmock('../constants/ContentTypes');
-jest.unmock('../actionCreators');
-jest.unmock('../sagas');
-jest.unmock('../fetchContent');
-jest.unmock('../contentTypes');
+jest.unmock('../src/constants/ActionTypes');
+jest.unmock('../src/constants/ContentTypes');
+jest.unmock('../src/actionCreators');
+jest.unmock('../src/sagas');
+jest.unmock('../src/fetchContent');
+jest.unmock('../src/contentTypes');
 
 import { put, call, select } from 'redux-saga/effects';
 
-import ContentTypes from '../constants/ContentTypes';
-import fetchContent from '../fetchContent';
-import { makeBuiltInContentTypeOptions } from '../contentTypes';
-import { configSelector, fetchResource } from '../sagas';
-import { createRequest, startRequest } from '../actionCreators';
+import ContentTypes from '../src/constants/ContentTypes';
+import fetchContent from '../src/fetchContent';
+import { makeBuiltInContentTypeOptions } from '../src/contentTypes';
+import { configSelector, fetchResource } from '../src/sagas';
+import { createRequest, startRequest } from '../src/actionCreators';
 
 const contentTypes = makeBuiltInContentTypeOptions();
 const contentType = ContentTypes.POST;
