@@ -1,2 +1,5 @@
-export { default as pepperoni } from './pepperoni';
-export { pepperoniSagas } from './pepperoni';
+import pepperoni, { pepperoniSagas } from './pepperoni';
+
+export default pepperoni;
+
+export { pepperoniSagas };
