@@ -1,5 +1,4 @@
 {
   "presets": ["es2015", "stage-0", "react"],
-  "plugins": ["transform-decorators-legacy"],
-  "ignore": ["src/__tests__/**/*.js"]
+  "plugins": ["transform-decorators-legacy"]
 }
