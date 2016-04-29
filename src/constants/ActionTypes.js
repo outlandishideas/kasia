@@ -5,6 +5,4 @@ export const REQUEST = {
   COMPLETE: 'pepperoni/REQUEST_COMPLETE'
 };
 
-export const RECEIVE = 'pepperoni/RECEIVE';
-
 export const INVALIDATE = 'pepperoni/INVALIDATE';

@@ -1,5 +1,5 @@
 import ContentTypes from './constants/ContentTypes';
-import { REQUEST, RECEIVE, INVALIDATE } from './constants/ActionTypes';
+import { REQUEST, INVALIDATE } from './constants/ActionTypes';
 
 // ---
 // Private
@@ -16,9 +16,6 @@ export const failRequest = (contentType, error) =>
 
 export const completeRequest = (contentType, data) =>
   ({ type: REQUEST.COMPLETE, contentType, data });
-
-export const receive = (contentType, data) =>
-  ({ type: RECEIVE, contentType, data });
 
 export const invalidate = (contentType, id) =>
   ({ type: INVALIDATE, contentType,  id });

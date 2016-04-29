@@ -8,7 +8,7 @@ import postJson from './fixtures/wp-api-responses/post'
 import configureStore from './util/configureStore';
 import ContentTypes from '../src/constants/ContentTypes';
 import { REQUEST } from '../src/constants/ActionTypes';
-import { receive } from '../src/actionCreators';
+import { completeRequest } from '../src/actionCreators';
 
 import BuiltInContentType from './components/BuiltInContentType';
 import DerivedContentType from './components/DerivedContentType';
@@ -65,7 +65,7 @@ describe('Pepperoni connect', () => {
 
   describe('with derived built-in content type', () => {
     // Imitate WP-API response prior to rendering so that the post data is on the store
-    store.dispatch(receive(ContentTypes.POST, postJson));
+    store.dispatch(completeRequest(ContentTypes.POST, postJson));
 
     const rendered = mount(<DerivedContentType {...testProps} />);
 

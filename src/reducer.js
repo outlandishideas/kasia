@@ -3,7 +3,7 @@ import merge from 'lodash.merge';
 import Plurality from './constants/Plurality';
 import normalise from './normalise';
 import { makeBuiltInContentTypeOptions } from './contentTypes';
-import { RECEIVE, INVALIDATE } from './constants/ActionTypes';
+import { REQUEST, INVALIDATE } from './constants/ActionTypes';
 
 export const defaultState = {
   config: {
@@ -27,7 +27,7 @@ export default function makeReducer (config) {
       const { entityKeyPropName, contentTypes } = state.config;
 
       switch (type) {
-        case RECEIVE:
+        case REQUEST.COMPLETE:
           const normalisedData = normalise(contentType, action.data, entityKeyPropName);
           return merge({}, state, { entities: normalisedData.entities });
 

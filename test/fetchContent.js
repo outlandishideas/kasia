@@ -16,6 +16,7 @@ import fetchContent from '../src/fetchContent';
 import { makeBuiltInContentTypeOptions } from '../src/contentTypes';
 
 global.fetch = jest.fn();
+global.fetch.mockReturnValue(Promise.resolve());
 
 const contentTypeOptions = makeBuiltInContentTypeOptions();
 

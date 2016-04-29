@@ -7,7 +7,7 @@ import EntityKeyPropNames from '../src/constants/EntityKeyPropNames';
 import ContentTypes from '../src/constants/ContentTypes';
 import normalise from '../src/normalise';
 import pepperoni from '../src/index';
-import { receive } from '../src/actionCreators';
+import { completeRequest } from '../src/actionCreators';
 import { defaultState } from '../src/reducer';
 
 const pepperoniReducer = pepperoni({ wpApiUrl: 'test' });
@@ -27,11 +27,11 @@ describe('Reducer basics', () => {
   });
 });
 
-describe('Reduce RECEIVE', () => {
+describe('Reduce REQUEST_COMPLETE', () => {
   it('normalises the WP-API response and places result in the store', () => {
     const normalisedData = normalise(ContentTypes.POST, postJson, EntityKeyPropNames.ID);
 
-    store.dispatch(receive(ContentTypes.POST, postJson));
+    store.dispatch(completeRequest(ContentTypes.POST, postJson));
 
     expect(store.getState().$$pepperoni.entities).toEqual(normalisedData.entities);
   });
