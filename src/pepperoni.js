@@ -1,5 +1,3 @@
-import 'isomorphic-fetch';
-
 import invariant from 'invariant';
 
 import makeReducer from './reducer';

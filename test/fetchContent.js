@@ -3,17 +3,17 @@ jest.unmock('lodash.merge');
 jest.unmock('urlencode');
 jest.unmock('humps');
 
-jest.unmock('../constants/WpApiEndpoints');
-jest.unmock('../constants/ActionTypes');
-jest.unmock('../constants/ContentTypes');
-jest.unmock('../contentTypes');
-jest.unmock('../fetchContent');
+jest.unmock('../src/constants/WpApiEndpoints');
+jest.unmock('../src/constants/ActionTypes');
+jest.unmock('../src/constants/ContentTypes');
+jest.unmock('../src/contentTypes');
+jest.unmock('../src/fetchContent');
 
 import 'isomorphic-fetch';
 
-import ContentTypes from '../constants/ContentTypes';
-import fetchContent from '../fetchContent';
-import { makeBuiltInContentTypeOptions } from '../contentTypes';
+import ContentTypes from '../src/constants/ContentTypes';
+import fetchContent from '../src/fetchContent';
+import { makeBuiltInContentTypeOptions } from '../src/contentTypes';
 
 global.fetch = jest.fn();
 

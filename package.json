@@ -2,37 +2,34 @@
   "name": "pepperoni",
   "version": "0.0.1",
   "description": "A React Redux Toolset for the WordPress API",
-  "main": "src/index.js",
-  "directories": {
-    "example": "examples"
-  },
+  "main": "lib/index.js",
+  "jsnext:main": "src/index.js",
   "scripts": {
+    "compile": "rimraf lib && babel -d lib/ src/",
+    "lint": "eslint src/",
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage",
-    "lint": "eslint src/"
+    "test:coverage": "jest --coverage"
   },
   "repository": {
     "type": "git",
-    "url": "git@gitlab.outlandish.com:repress/repress.git"
+    "url": "git@gitlab.outlandish.com:pepperoni/pepperoni.git"
   },
-  "author": "",
+  "keywords": [
+    "javascript",
+    "react",
+    "redux",
+    "wordpress",
+    "word press",
+    "wp-api",
+    "wordpress api"
+  ],
+  "author": "Outlandish <hello@outlandish.com>",
   "license": "ISC",
-  "dependencies": {
-    "humps": "^1.0.0",
-    "invariant": "^2.2.1",
-    "isomorphic-fetch": "^2.2.1",
-    "lodash.merge": "^4.3.5",
-    "normalizr": "^2.0.1",
-    "urlencode": "^1.1.0"
+  "bugs": {
+    "url": "https://github.com/outlandishideas/pepperoni/issues"
   },
-  "peerDependencies": {
-    "react": "^15.0.1",
-    "react-dom": "^15.0.1",
-    "react-redux": "^4.4.5",
-    "redux": "^3.4.0",
-    "redux-saga": "^0.9.5",
-  },
+  "homepage": "https://github.com/outlandishideas/pepperoni#readme",
   "devDependencies": {
     "babel-cli": "6.6.5",
     "babel-core": "6.7.2",
@@ -48,50 +45,25 @@
     "eslint": "^2.8.0",
     "eslint-config-airbnb-base": "^1.0.1",
     "eslint-plugin-import": "^1.5.0",
+    "humps": "^1.0.0",
+    "invariant": "^2.2.1",
     "jest": "^0.1.40",
     "jest-cli": "^11.0.2",
     "lodash.clonedeep": "^4.1.0",
-    "webpack": "^1.13.0"
-  },
-  "babel": {
-    "presets": [
-      "es2015",
-      "react",
-      "stage-0"
-    ],
-    "plugins": [
-      "transform-decorators-legacy"
-    ]
-  },
-  "eslintConfig": {
-    "extends": "airbnb-base",
-    "globals": {
-      "fetch": false
-    },
-    "parserOptions": {
-      "ecmaFeatures": {
-        "jsx": true
-      }
-    },
-    "rules": {
-      "comma-dangle": [
-        2,
-        "never"
-      ],
-      "no-underscore-dangle": [
-        2,
-        {
-          "allow": [
-            "__repress"
-          ]
-        }
-      ]
-    },
-    "env": {
-      "jest": true
-    }
+    "lodash.merge": "^4.3.5",
+    "normalizr": "^2.0.1",
+    "react": "^15.0.1",
+    "react-dom": "^15.0.1",
+    "react-redux": "^4.4.5",
+    "redux": "^3.4.0",
+    "redux-saga": "^0.9.5",
+    "rimraf": "^2.5.2",
+    "urlencode": "^1.1.0"
   },
   "jest": {
+    "testDirectoryName": [
+      "test"
+    ],
     "unmockedModulePathPatterns": [
       "<rootDir>/node_modules/react",
       "<rootDir>/node_modules/react-dom",

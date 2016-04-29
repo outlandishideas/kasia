@@ -5,10 +5,10 @@ import { mount } from 'enzyme';
 
 import postJson from './fixtures/wp-api-responses/post'
 
-import ContentTypes from '../constants/ContentTypes';
 import configureStore from './util/configureStore';
-import { REQUEST } from '../constants/ActionTypes';
-import { receive } from '../actionCreators';
+import ContentTypes from '../src/constants/ContentTypes';
+import { REQUEST } from '../src/constants/ActionTypes';
+import { receive } from '../src/actionCreators';
 
 import BuiltInContentType from './components/BuiltInContentType';
 import DerivedContentType from './components/DerivedContentType';

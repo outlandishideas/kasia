@@ -2,13 +2,13 @@ jest.disableAutomock();
 
 jest.mock('invariant');
 
-jest.mock('../reducer');
+jest.mock('../src/reducer');
 
 import invariant from 'invariant';
 
-import pepperoni from '../pepperoni';
-import makeReducer from '../reducer';
-import Plurality from '../constants/Plurality';
+import pepperoni from '../src/pepperoni';
+import makeReducer from '../src/reducer';
+import Plurality from '../src/constants/Plurality';
 
 describe('pepperoni', () => {
   beforeEach(() => {

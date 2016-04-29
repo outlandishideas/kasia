@@ -1,7 +1,7 @@
 jest.disableAutomock();
 
 import configureStore from './util/configureStore';
-import Plurality from '../constants/Plurality';
+import Plurality from '../src/constants/Plurality';
 
 const builtInContentTypes = [
   'category',
