@@ -47,6 +47,10 @@ export default function connectWordPress ({
     }
 
     class PepperoniComponentWrapper extends Component {
+      constructor (props, context) {
+        super(props, context);
+      }
+
       componentWillMount () {
         const { contentTypes } = this.props.$$pepperoni.config;
         const contentTypeOpts = getContentTypeOptions(contentTypes);
@@ -64,7 +68,7 @@ export default function connectWordPress ({
       }
 
       render () {
-        return <target {...this.props} />;
+        return React.createElement(target, this.props);
       }
     }
 
