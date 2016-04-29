@@ -44,6 +44,6 @@ export default function pepperoni ({
   });
 }
 
-export const pepperoniSagas = {
-  $$pepperoniFetch: fetchSaga
-};
+export const pepperoniSagas = [
+  fetchSaga
+];
