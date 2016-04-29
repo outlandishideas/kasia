@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import { connect as reduxConnect } from 'react-redux';
 import invariant from 'invariant';
-
 import find from 'lodash.find';
 
 import Plurality from './constants/Plurality';
