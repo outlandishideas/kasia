@@ -18,10 +18,13 @@ import { makeBuiltInContentTypeOptions } from '../src/contentTypes';
 import { configSelector, fetchResource } from '../src/sagas';
 import { createRequest, startRequest } from '../src/actionCreators';
 
-const contentTypes = makeBuiltInContentTypeOptions();
+const contentTypeOptions = makeBuiltInContentTypeOptions();
 const contentType = ContentTypes.POST;
 const createRequestOptions = { params: { id: 1337 }};
-const mockConfig = { contentTypes };
+
+const mockConfig = {
+  contentTypes: contentTypeOptions
+};
 
 describe('sagas', () => {
   const generator = fetchResource(
@@ -38,7 +41,7 @@ describe('sagas', () => {
 
   it('yields a call to fetchContent with original arguments', () => {
     expect(generator.next().value).toEqual(
-      call(fetchContent, contentType, createRequestOptions, mockConfig, {})
+      call(fetchContent, contentTypeOptions[ContentTypes.POST], createRequestOptions, mockConfig, {})
     );
   });
 });
