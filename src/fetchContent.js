@@ -92,6 +92,6 @@ export default function fetchContent (contentTypeOptions, subject, config, optio
 
   return fetch(endpoint)
     .then(response => response.json())
-    .then(data => ({ data }))
+    .then(data => isSlugRequest ? data[0] : data)
     .catch(error => ({ error }));
 }
