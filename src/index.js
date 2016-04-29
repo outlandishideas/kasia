@@ -38,7 +38,7 @@ export default function configurePepperoni ({
   invariant(
     Object.keys(EntityKeyPropNames).indexOf(entityKeyPropName) !== -1,
     'Cannot key entities by unknown property "%s". ' +
-    'Pass in a built-in key using Pepperoni.EntityKeys, e.g. Pepperoni.EntityKeys.SLUG.',
+    'Pass in a built-in key using Pepperoni.EntityKeyPropNames, e.g. Pepperoni.EntityKeyPropNames.SLUG.',
     entityKeyPropName
   );
 
