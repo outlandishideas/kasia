@@ -11,4 +11,8 @@ const testConnectOptions = {
 };
 
 @connectWordPress(testConnectOptions)
-export default class BuiltInContentType extends Component {}
+export default class BuiltInContentType extends Component {
+  render () {
+    return <div></div>;
+  }
+}
