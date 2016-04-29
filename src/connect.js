@@ -21,15 +21,19 @@ export default function connectWordPress ({
   routeParamSubjectKey = 'id'
 } = {}) {
   return target => {
+    const targetName = target.displayName
+      ? target.displayName
+      : target.name;
+
     invariant(
       !target.__pepperoni,
       'The component "%s" is already wrapped by Pepperoni.',
-      target.name
+      targetName
     );
 
     const getContentTypeOptions = contentTypes => {
       return typeof contentType === 'undefined'
-        ? deriveContentTypeOptions(target.name, contentTypes)
+        ? deriveContentTypeOptions(targetName, contentTypes)
         : contentTypes[contentType];
     };
 
@@ -43,18 +47,17 @@ export default function connectWordPress ({
       const subjectId = ownProps[routeParamsPropName][routeParamSubjectKey];
       const contentTypeCollection = state.$$pepperoni.entities[namePlural];
 
-      let back;
+      const props = {
+        $$pepperoni: state.$$pepperoni
+      };
 
-      if (routeParamSubjectKey != 'id') {
-        back = find(contentTypeCollection, a => a[routeParamSubjectKey] === subjectId);
-      } else {
-        back = contentTypeCollection ? contentTypeCollection[subjectId] : null;
+      if (contentTypeCollection) {
+        props[nameSingular] = routeParamSubjectKey !== 'id'
+          ? find(contentTypeCollection, obj => obj[routeParamSubjectKey] === subjectId)
+          : contentTypeCollection[subjectId];
       }
 
-      return {
-        $$pepperoni: state.$$pepperoni,
-        [nameSingular]: back
-      };
+      return props;
     }
 
     class PepperoniComponentWrapper extends Component {
@@ -87,13 +90,18 @@ export default function connectWordPress ({
     PepperoniComponentWrapper.__pepperoni = true;
 
     PepperoniComponentWrapper.fetchData = (renderProps, store) => {
+      invariant(
+        typeof store === 'object',
+        'Expecting store to be an object, got "%s". ' +
+        'Make sure to pass the result of store#getState.',
+        typeof store
+      );
+
       const contentTypeOptions = getContentTypeOptions(store.$$pepperoni.config.contentTypes);
-      return [
-        [fetchResource, {
-          contentType: contentTypeOptions.name.canonical,
-          subject: renderProps[routeParamsPropName][routeParamSubjectKey]
-        }]
-      ];
+      const contentType = contentTypeOptions.name.canonical;
+      const subject = renderProps[routeParamsPropName][routeParamSubjectKey];
+
+      return [[fetchResource, { contentType, subject }]];
     };
 
     return reduxConnect(mapStateToProps)(PepperoniComponentWrapper);
