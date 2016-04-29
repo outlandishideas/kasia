@@ -53,14 +53,19 @@ export default function connectWordPress ({
 
       componentWillMount () {
         const { contentTypes } = this.props.$$pepperoni.config;
+        const entities = this.props.$$pepperoni.entities;
+
+        const params = this.props[routeParamsPropName];
+        const subjectId = params[routeParamSubjectKey];
+
         const contentTypeOpts = getContentTypeOptions(contentTypes);
-        const nameSingular = contentTypeOpts.name[Plurality.SINGULAR];
+        const namePlural = contentTypeOpts.name[Plurality.PLURAL];
+        const canonicalName = contentTypeOpts.name.canonical;
 
-        if (this.props[nameSingular] == null) {
-          const params = this.props[routeParamsPropName];
-          const subjectId = params[routeParamSubjectKey];
-          const canonicalName = contentTypeOpts.name.canonical;
-
+        if (
+          !entities[namePlural] ||
+          entities[namePlural] && !entities[namePlural][subjectId]
+        ) {
           this.props.dispatch(
             createRequest(canonicalName, subjectId, { params })
           );
