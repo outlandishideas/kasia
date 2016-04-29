@@ -31,12 +31,12 @@ describe('fetchContent', () => {
 
   it('makes request for single content by numeric id', () => {
     fetchContent(contentTypeOptions[ContentTypes.POST], 1337, config);
-    expect(fetchCall()).toEqual('http://test/posts/1337');
+    expect(fetchCall()).toEqual('http://test/posts/1337?_embed');
   });
 
   it('makes request for single content by slug', () => {
     fetchContent(contentTypeOptions[ContentTypes.POST], 'post-slug', config);
-    expect(fetchCall()).toEqual('http://test/posts?slug=post-slug');
+    expect(fetchCall()).toEqual('http://test/posts?_embed&slug=post-slug');
   });
 
   it('throws when requesting content type by slug that is not queryable by slug', () => {
@@ -56,7 +56,7 @@ describe('fetchContent', () => {
 
     fetchContent(contentTypeOptions[ContentTypes.POST], 1337, config, options);
 
-    expect(fetchCall()).toEqual('http://test/posts/1337?page=5&context=embed&search=me%2Cmyself%26i');
+    expect(fetchCall()).toEqual('http://test/posts/1337?page=5&context=embed&search=me%2Cmyself%26i&_embed');
   });
 
   it('builds endpoint for content type that requires multiple route parameters', () => {
@@ -67,12 +67,12 @@ describe('fetchContent', () => {
 
     fetchContent(contentTypeOptions[ContentTypes.POST_REVISION], 1337, config, options);
 
-    expect(fetchCall()).toEqual('http://test/posts/13/revisions/37')
+    expect(fetchCall()).toEqual('http://test/posts/13/revisions/37?_embed')
   });
 
   it('makes request for multiple subjects by constructing multiple filter[post__in] query parameters', () => {
     fetchContent(contentTypeOptions[ContentTypes.POST], [1, 2], config);
-    expect(fetchCall()).toEqual('http://test/posts?filter[post__in][]=1&filter[post__in][]=2');
+    expect(fetchCall()).toEqual('http://test/posts?_embed&filter[post__in][]=1&filter[post__in][]=2');
   });
 
   it('throws when multiple subject identifiers are not numeric', () => {

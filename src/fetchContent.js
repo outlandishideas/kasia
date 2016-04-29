@@ -20,6 +20,7 @@ export default function fetchContent (contentTypeOptions, subject, config, optio
   options = merge({}, defaultOptions, options);
 
   options.params = options.params || {};
+  options.query = merge({}, options.query, { _embed: true });
 
   const requestType = Array.isArray(subject)
     ? Plurality.PLURAL
@@ -71,7 +72,8 @@ export default function fetchContent (contentTypeOptions, subject, config, optio
   endpoint += Object.keys(options.query)
     .reduce((str, optionKey) => {
       didAddQueryParams = true;
-      const keyVal = optionKey + '=' + urlencode(options.query[optionKey]);
+      const hasValue = typeof options.query[optionKey] !== 'boolean';
+      const keyVal = optionKey + (hasValue ? '=' + urlencode(options.query[optionKey]) : '');
       return str + (str.length ? `&${keyVal}` : `?${keyVal}`);
     }, '');
 
