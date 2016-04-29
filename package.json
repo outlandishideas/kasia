@@ -2,12 +2,13 @@
   "name": "pepperoni",
   "version": "0.0.1",
   "description": "A React Redux Toolset for the WordPress API",
-  "main": "src/index.js",
+  "main": "lib/index.js",
+  "jsnext:main": "src/index.js",
   "directories": {
     "example": "examples"
   },
   "scripts": {
-    "build": "babel --presets es2015, stage-0 --plugins transform-decorators-legacy -d lib/ src/",
+    "compile": "rimraf lib && babel -d lib/ src/",
     "lint": "eslint src/",
     "test": "jest",
     "test:watch": "jest --watch",
@@ -17,9 +18,8 @@
     "type": "git",
     "url": "git@gitlab.outlandish.com:repress/repress.git"
   },
-  "author": "",
+  "author": "Outlandish <hello@outlandish.com>",
   "license": "ISC",
-  "dependencies": {},
   "devDependencies": {
     "babel-cli": "6.6.5",
     "babel-core": "6.7.2",
@@ -48,48 +48,14 @@
     "react-redux": "^4.4.5",
     "redux": "^3.4.0",
     "redux-saga": "^0.9.5",
+    "rimraf": "^2.5.2",
     "urlencode": "^1.1.0",
     "webpack": "^1.13.0"
   },
-  "babel": {
-    "presets": [
-      "es2015",
-      "react",
-      "stage-0"
-    ],
-    "plugins": [
-      "transform-decorators-legacy"
-    ]
-  },
-  "eslintConfig": {
-    "extends": "airbnb-base",
-    "globals": {
-      "fetch": false
-    },
-    "parserOptions": {
-      "ecmaFeatures": {
-        "jsx": true
-      }
-    },
-    "rules": {
-      "comma-dangle": [
-        2,
-        "never"
-      ],
-      "no-underscore-dangle": [
-        2,
-        {
-          "allow": [
-            "__repress"
-          ]
-        }
-      ]
-    },
-    "env": {
-      "jest": true
-    }
-  },
   "jest": {
+    "testPathDirs": [
+      "./src"
+    ],
     "unmockedModulePathPatterns": [
       "<rootDir>/node_modules/react",
       "<rootDir>/node_modules/react-dom",
