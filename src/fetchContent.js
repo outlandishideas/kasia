@@ -90,5 +90,8 @@ export default function fetchContent (contentTypeOptions, subject, config, optio
     }
   });
 
-  return fetch(endpoint);
+  return fetch(endpoint)
+    .then(response => response.json())
+    .then(data => ({ data }))
+    .catch(error => ({ error }));
 }

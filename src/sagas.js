@@ -24,12 +24,13 @@ export function* fetchResource (action) {
 
   yield put(startRequest(contentType));
 
-  const response = yield call(fetchContent, contentTypeOptions, subject, config, action.options);
+  const { error, data } = yield call(fetchContent, contentTypeOptions, subject, config, action.options);
 
-  return response
-    .then(response => response.json())
-    .then(json => put(completeRequest(contentType, subject, json)))
-    .catch(error => put(failRequest(contentType, error)));
+  if (error) {
+    return put(failRequest(contentType, error));
+  }
+
+  return put(completeRequest(contentType, subject, data));
 }
 
 export default function* fetchSaga () {
