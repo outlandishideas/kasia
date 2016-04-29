@@ -9,7 +9,8 @@
     "lint": "eslint src/",
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage"
+    "test:coverage": "jest --coverage",
+    "postinstall": "npm run compile"
   },
   "repository": {
     "type": "git",
@@ -30,6 +31,21 @@
     "url": "https://github.com/outlandishideas/pepperoni/issues"
   },
   "homepage": "https://github.com/outlandishideas/pepperoni#readme",
+  "dependencies": {
+    "humps": "^1.0.0",
+    "invariant": "^2.2.1",
+    "lodash.clonedeep": "^4.1.0",
+    "lodash.merge": "^4.3.5",
+    "urlencode": "^1.1.0",
+    "normalizr": "^2.0.1"
+  },
+  "peerDependencies": {
+    "react": "^15.0.1",
+    "react-dom": "^15.0.1",
+    "react-redux": "^4.4.5",
+    "redux": "^3.4.0",
+    "redux-saga": "^0.9.5"
+  },
   "devDependencies": {
     "babel-cli": "6.6.5",
     "babel-core": "6.7.2",
@@ -45,20 +61,9 @@
     "eslint": "^2.8.0",
     "eslint-config-airbnb-base": "^1.0.1",
     "eslint-plugin-import": "^1.5.0",
-    "humps": "^1.0.0",
-    "invariant": "^2.2.1",
     "jest": "^0.1.40",
     "jest-cli": "^11.0.2",
-    "lodash.clonedeep": "^4.1.0",
-    "lodash.merge": "^4.3.5",
-    "normalizr": "^2.0.1",
-    "react": "^15.0.1",
-    "react-dom": "^15.0.1",
-    "react-redux": "^4.4.5",
-    "redux": "^3.4.0",
-    "redux-saga": "^0.9.5",
-    "rimraf": "^2.5.2",
-    "urlencode": "^1.1.0"
+    "rimraf": "^2.5.2"
   },
   "jest": {
     "testDirectoryName": [
