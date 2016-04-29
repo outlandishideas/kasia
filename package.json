@@ -7,11 +7,11 @@
     "example": "examples"
   },
   "scripts": {
+    "build": "babel --presets es2015, stage-0 --plugins transform-decorators-legacy -d lib/ src/",
+    "lint": "eslint src/",
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage",
-    "lint": "eslint src/",
-    "compile": "babel --presets es2015,stage-0 --plugins transform-decorators-legacy -d lib/ src/"
+    "test:coverage": "jest --coverage"
   },
   "repository": {
     "type": "git",
