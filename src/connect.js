@@ -58,10 +58,6 @@ export default function connectWordPress ({
     }
 
     class PepperoniComponentWrapper extends Component {
-      constructor (props, context) {
-        super(props, context);
-      }
-
       componentWillMount () {
         const { contentTypes } = this.props.$$pepperoni.config;
         const entities = this.props.$$pepperoni.entities;
@@ -90,12 +86,15 @@ export default function connectWordPress ({
 
     PepperoniComponentWrapper.__pepperoni = true;
 
-    PepperoniComponentWrapper.fetchData = (renderProps) => [
-      [fetchResource, {
-        contentType,
-        subject: renderProps[routeParamsPropName][routeParamSubjectKey]
-      }]
-    ];
+    PepperoniComponentWrapper.fetchData = (renderProps, store) => {
+      const contentTypeOptions = getContentTypeOptions(store.$$pepperoni.config.contentTypes);
+      return [
+        [fetchResource, {
+          contentType: contentTypeOptions.name.canonical,
+          subject: renderProps[routeParamsPropName][routeParamSubjectKey]
+        }]
+      ];
+    };
 
     return reduxConnect(mapStateToProps)(PepperoniComponentWrapper);
   };
