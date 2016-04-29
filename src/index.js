@@ -5,11 +5,16 @@ import fetchSaga from './sagas';
 import EntityKeyPropNames from './constants/EntityKeyPropNames'
 import { makeCustomContentTypeOptions } from './contentTypes';
 
+export { EntityKeyPropNames };
 export { default as ContentTypes } from './constants/ContentTypes';
 export { default as connectWordPress } from './connect';
 
 export { fetchCategory, fetchComment, fetchCustomContentType, fetchMedia, fetchPage, fetchPost, fetchPostRevision,
   fetchPostStatus, fetchPostStatus, fetchPostType, fetchTag, fetchTaxonomy, fetchUser } from './actionCreators';
+
+export const pepperoniSagas = [
+  fetchSaga
+];
 
 /**
  * Configure Pepperoni.
@@ -18,7 +23,7 @@ export { fetchCategory, fetchComment, fetchCustomContentType, fetchMedia, fetchP
  * @param {Array} [entityKeyPropName] The property on content items that is used to key entities in the store.
  * @returns {Object} Pepperoni reducer
  */
-export default function pepperoni ({
+export default function configurePepperoni ({
   wpApiUrl,
   customContentTypes = [],
   // TODO let consumer provide a function that takes content object and returns the key for the entity
@@ -43,7 +48,3 @@ export default function pepperoni ({
     contentTypes: makeCustomContentTypeOptions(customContentTypes)
   });
 }
-
-export const pepperoniSagas = [
-  fetchSaga
-];
