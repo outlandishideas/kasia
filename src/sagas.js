@@ -27,10 +27,10 @@ export function* fetchResource (action) {
   const { error, data } = yield call(fetchContent, contentTypeOptions, subject, config, action.options);
 
   if (error) {
-    return put(failRequest(contentType, error));
+    yield put(failRequest(contentType, error));
   }
 
-  return put(completeRequest(contentType, subject, data));
+  yield put(completeRequest(contentType, subject, data));
 }
 
 export default function* fetchSaga () {
