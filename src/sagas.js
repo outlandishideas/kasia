@@ -30,7 +30,7 @@ export function* fetchResource (action) {
     yield put(failRequest(contentType, error));
   }
 
-  yield put(completeRequest(contentType, subject, data));
+  yield put(completeRequest(contentType, data));
 }
 
 export default function* fetchSaga () {
