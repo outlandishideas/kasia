@@ -19,21 +19,7 @@
   },
   "author": "",
   "license": "ISC",
-  "dependencies": {
-    "humps": "^1.0.0",
-    "invariant": "^2.2.1",
-    "isomorphic-fetch": "^2.2.1",
-    "lodash.merge": "^4.3.5",
-    "normalizr": "^2.0.1",
-    "urlencode": "^1.1.0"
-  },
-  "peerDependencies": {
-    "react": "^15.0.1",
-    "react-dom": "^15.0.1",
-    "react-redux": "^4.4.5",
-    "redux": "^3.4.0",
-    "redux-saga": "^0.9.5"
-  },
+  "dependencies": {},
   "devDependencies": {
     "babel-cli": "6.6.5",
     "babel-core": "6.7.2",
@@ -49,9 +35,20 @@
     "eslint": "^2.8.0",
     "eslint-config-airbnb-base": "^1.0.1",
     "eslint-plugin-import": "^1.5.0",
+    "humps": "^1.0.0",
+    "invariant": "^2.2.1",
+    "isomorphic-fetch": "^2.2.1",
     "jest": "^0.1.40",
     "jest-cli": "^11.0.2",
     "lodash.clonedeep": "^4.1.0",
+    "lodash.merge": "^4.3.5",
+    "normalizr": "^2.0.1",
+    "react": "^15.0.1",
+    "react-dom": "^15.0.1",
+    "react-redux": "^4.4.5",
+    "redux": "^3.4.0",
+    "redux-saga": "^0.9.5",
+    "urlencode": "^1.1.0",
     "webpack": "^1.13.0"
   },
   "babel": {
