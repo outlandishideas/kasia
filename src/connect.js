@@ -34,9 +34,11 @@ export default function connectWordPress ({
 
     function mapStateToProps (state, ownProps) {
       const { contentTypes } = state.$$pepperoni.config;
+
       const contentTypeOpts = getContentTypeOptions(contentTypes);
       const nameSingular = contentTypeOpts.name[Plurality.SINGULAR];
       const namePlural = contentTypeOpts.name[Plurality.PLURAL];
+
       const subjectId = ownProps[routeParamsPropName][routeParamSubjectKey];
       const contentTypeCollection = state.$$pepperoni.entities[namePlural];
 
@@ -79,14 +81,10 @@ export default function connectWordPress ({
 
     PepperoniComponentWrapper.__pepperoni = true;
 
-    /**
-     * Fetch the content data for the `contentType` that the component represents.
-     * @param {String} subject The subject identifier (id or slug)
-     */
-    PepperoniComponentWrapper.fetchData = subject => [
+    PepperoniComponentWrapper.fetchData = (renderProps) => [
       [fetchResource, {
         contentType,
-        subject
+        subject: renderProps[routeParamsPropName][routeParamSubjectKey]
       }]
     ];
 

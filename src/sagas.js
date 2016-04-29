@@ -19,7 +19,7 @@ export function* fetchResource (action) {
     contentTypeOptions,
     'The content type "%s" is not recognised. ' +
     'Register custom content types at initialisation.',
-    action.subject
+    contentType
   );
 
   yield put(startRequest(contentType));
