@@ -38,18 +38,16 @@ export default function connectWordPress ({
     };
 
     function mapStateToProps (state, ownProps) {
-      const { contentTypes } = state.$$pepperoni.config;
+      const { contentTypes } = state.wordpress.config;
 
       const contentTypeOpts = getContentTypeOptions(contentTypes);
       const nameSingular = contentTypeOpts.name[Plurality.SINGULAR];
       const namePlural = contentTypeOpts.name[Plurality.PLURAL];
 
       const subjectId = ownProps[routeParamsPropName][routeParamSubjectKey];
-      const contentTypeCollection = state.$$pepperoni.entities[namePlural];
+      const contentTypeCollection = state.wordpress.entities[namePlural];
 
-      const props = {
-        $$pepperoni: state.$$pepperoni
-      };
+      const props = { wordpress: state.wordpress };
 
       if (contentTypeCollection) {
         props[nameSingular] = routeParamSubjectKey !== 'id'
@@ -62,8 +60,8 @@ export default function connectWordPress ({
 
     class PepperoniComponentWrapper extends Component {
       componentWillMount () {
-        const { contentTypes } = this.props.$$pepperoni.config;
-        const entities = this.props.$$pepperoni.entities;
+        const { contentTypes } = this.props.wordpress.config;
+        const { entities } = this.props.wordpress;
 
         const params = this.props[routeParamsPropName];
         const subjectId = params[routeParamSubjectKey];
@@ -72,13 +70,12 @@ export default function connectWordPress ({
         const namePlural = contentTypeOpts.name[Plurality.PLURAL];
         const canonicalName = contentTypeOpts.name.canonical;
 
-        if (
-          !entities[namePlural] ||
-          entities[namePlural] && !entities[namePlural][subjectId]
-        ) {
-          this.props.dispatch(
-            createRequest(canonicalName, subjectId, { params })
-          );
+        const noCollection = !entities[namePlural];
+        const noEntity = entities[namePlural] && !entities[namePlural][subjectId];
+
+        if (noCollection || noEntity) {
+          const action = createRequest(canonicalName, subjectId, { params });
+          this.props.dispatch(action);
         }
       }
 
@@ -90,14 +87,8 @@ export default function connectWordPress ({
     PepperoniComponentWrapper.__pepperoni = true;
 
     PepperoniComponentWrapper.fetchData = (renderProps, store) => {
-      invariant(
-        typeof store === 'object',
-        'Expecting store to be an object, got "%s". ' +
-        'Make sure to pass the result of store#getState.',
-        typeof store
-      );
-
-      const contentTypeOptions = getContentTypeOptions(store.$$pepperoni.config.contentTypes);
+      const { contentTypes } = store.wordpress.config;
+      const contentTypeOptions = getContentTypeOptions(contentTypes);
       const contentType = contentTypeOptions.name.canonical;
       const subject = renderProps[routeParamsPropName][routeParamSubjectKey];
 

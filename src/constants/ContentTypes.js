@@ -1,5 +1,5 @@
 export default {
-  CATEGORY: 'CATEGORY',
+    CATEGORY: 'CATEGORY',
   COMMENT: 'COMMENT',
   MEDIA: 'MEDIA',
   PAGE: 'PAGE',

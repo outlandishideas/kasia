@@ -19,8 +19,10 @@ if you are starting from scratch.
 - React >0.14 ??????
 - Redux
 - Redux Saga
-- WordPress
-- WordPress [WP-API](http://v2.wp-api.org/) plugin
+- WordPress w/ [WP-API](http://v2.wp-api.org/) plugin
+- [`isomorphic-fetch`](https://github.com/matthew-andrews/isomorphic-fetch)*
+<p></p>
+_\* isomorphic applications only_
 
 ## Install
 
@@ -37,7 +39,7 @@ import pepperoni from 'pepperoni';
 
 ```js
 // non-ES6
-const pepperoni = require('pepperoni');
+var pepperoni = require('pepperoni');
 ```
 
 Pepperoni has other exports, listed in the [API](#API) documentation.
@@ -136,6 +138,19 @@ The works by simple convention. Anything with `Post` in it is assumed to be a wa
 anything with `Page` is assumed to be wanting that, anything with `Taxonomy` is assumed to be a taxonomy and so on.
 The information from React Router passed as props (for example `slug` or `id`) is assumed to correspond to those
 meanings in WordPress REST API generally. You can also override this if neccessary as we will see.
+
+## Ready-made Components
+
+Pepperoni comes with all built-in content types available as ready-made React components.
+
+It also provides a generic `Pepperoni.Component` component that can be configured to receive data for
+custom content types.
+
+This API is useful for components that do not depend on configuration received via a router.
+
+```js
+const Component,
+```
 
 ## The Shape of Data
 

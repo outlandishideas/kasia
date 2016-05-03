@@ -1,5 +1,7 @@
 jest.disableAutomock();
 
+import merge from 'lodash.merge';
+
 import configureStore from './util/configureStore';
 import Plurality from '../src/constants/Plurality';
 
@@ -20,11 +22,12 @@ const builtInContentTypes = [
 let store;
 
 function createStore (options) {
+  options = merge(options, { host: '' });
   store = configureStore(options).store;
 }
 
 function getConfig () {
-  return store.getState().$$pepperoni.config;
+  return store.getState().wordpress.config;
 }
 
 function makeContentTypeObj (single, plural, slug) {
@@ -43,16 +46,10 @@ function makeContentTypeObj (single, plural, slug) {
 
 describe('contentTypes', () => {
   describe('unhappy path', () => {
-    it('throws an invariant exception when name is not a string', () => {
-      expect(() => {
-        createStore({ customContentTypes: [111] });
-      }).toThrowError(/Expecting custom content type name to be a string/);
-    });
-
     builtInContentTypes.forEach(builtInType => {
       it(`throws an invariant exception when name is a built in type ${builtInType}`, () => {
         expect(() => {
-          createStore({ customContentTypes: [builtInType] });
+          createStore({ contentTypes: [builtInType] });
         }).toThrowError(/taken/);
       });
     });
@@ -60,7 +57,7 @@ describe('contentTypes', () => {
 
   describe('happy path', () => {
     it('adds contentType to list', () => {
-      createStore({ customContentTypes: ['article'] });
+      createStore({ contentTypes: ['article'] });
 
       const config = getConfig();
 
@@ -70,7 +67,7 @@ describe('contentTypes', () => {
     });
 
     it('adds contentType to list with camelCased type', () => {
-      createStore({ customContentTypes: ['blogPost'] });
+      createStore({ contentTypes: ['blogPost'] });
 
       const config = getConfig();
 
@@ -81,7 +78,7 @@ describe('contentTypes', () => {
 
     it('maintains more than one contentType on list', () => {
       createStore({
-        customContentTypes: [
+        contentTypes: [
           'article',
           'book'
         ]
@@ -100,7 +97,7 @@ describe('contentTypes', () => {
 
     it('adds contentType to list with custom pluralisation', () => {
       createStore({
-        customContentTypes: [{
+        contentTypes: [{
           name: 'custom',
           namePlural: 'plural'
         }]
@@ -115,7 +112,7 @@ describe('contentTypes', () => {
 
     it('adds contentType to list with custom endpoint', () => {
       createStore({
-        customContentTypes: [{
+        contentTypes: [{
           name: 'owl',
           requestSlug: 'parliament'
         }]

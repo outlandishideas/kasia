@@ -64,6 +64,8 @@
     "eslint-plugin-import": "^1.5.0",
     "jest": "^0.1.40",
     "jest-cli": "^11.0.2",
+    "lodash.keyby": "^4.3.0",
+    "lodash.mapkeys": "^4.3.0",
     "rimraf": "^2.5.2"
   },
   "jest": {

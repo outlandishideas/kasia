@@ -1,6 +1,6 @@
 jest.disableAutomock();
 
-import React  from 'react';
+import React from 'react';
 import { mount } from 'enzyme';
 
 import postJson from './fixtures/wp-api-responses/post'
@@ -16,7 +16,8 @@ import CustomContentType from './components/CustomContentType';
 import BadContentTypeComponent from './components/BadContentType';
 
 const { store, interceptReducer } = configureStore({
-  customContentTypes: ['CustomContentType']
+  host: 'test',
+  contentTypes: ['CustomContentType']
 });
 
 const testProps = {
