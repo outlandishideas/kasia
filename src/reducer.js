@@ -40,8 +40,6 @@ export default function makeReducer (config, plugins) {
         return state;
       }
 
-      console.log(reducer)
-
       if (action.type in reducer) {
         return reducer[action.type](state, action);
       }
