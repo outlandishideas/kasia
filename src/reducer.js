@@ -1,4 +1,3 @@
-import invariant from 'invariant';
 import merge from 'lodash.merge';
 
 import Plurality from './constants/Plurality';
