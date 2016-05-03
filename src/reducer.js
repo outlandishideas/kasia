@@ -13,10 +13,15 @@ export const baseState = {
 export default function makeReducer (config, plugins) {
   const { contentTypes, entityKeyPropName } = config;
 
-  const pluginReducers = plugins
-    .map(plugin => plugin.reducer || {});
+  const initialState = merge({},
+    baseState,
+    { config }
+  );
 
-  const handlers = merge({}, pluginReducers, {
+  const pluginReducers = plugins
+    .reduce((obj, plugin) => merge(obj, plugin.reducer), {});
+
+  const reducer = merge({}, pluginReducers, {
     [REQUEST.COMPLETE]: (state, action) => {
       const normalisedData = normalise(action.contentType, action.data, entityKeyPropName);
       return merge({}, state, { entities: normalisedData.entities });
@@ -28,11 +33,6 @@ export default function makeReducer (config, plugins) {
     }
   });
 
-  const initialState = merge({},
-    baseState,
-    { config }
-  );
-
   return {
     wordpress: function pepperoniReducer (state = initialState, action) {
       const [actionNamespace] = action.type.split('/');
@@ -41,8 +41,10 @@ export default function makeReducer (config, plugins) {
         return state;
       }
 
-      if (handlers[action.type]) {
-        return handlers[action.type](state, action);
+      console.log(reducer)
+
+      if (action.type in reducer) {
+        return reducer[action.type](state, action);
       }
 
       return state;

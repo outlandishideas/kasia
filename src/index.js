@@ -24,7 +24,7 @@ export const __defaultConfig = {
   wpApiUrl: 'wp-json/wp/v2',
   entityKeyPropName: 'id',
   contentTypes: builtInContentTypeOptions,
-  plugins: []
+  plugins: {}
 };
 
 /**
@@ -45,17 +45,27 @@ export default function configurePepperoni (opts) {
     typeof host
   );
 
-  const config = merge({}, __defaultConfig, { host, entityKeyPropName, plugins });
+  // Call each plugin function with the user's own plugin
+  // config and also the initial configuration for Pepperoni
+  const loadedPlugins = plugins
+    .map(plugin => plugin[0](plugin[1] || {}, opts));
+
+  const pluginConfigs = loadedPlugins
+    .reduce((obj, plugin) => {
+      obj[plugin.name] = plugin.config;
+      return obj;
+    }, {});
+
+  const config = merge({},
+    __defaultConfig,
+    { host, entityKeyPropName },
+    { plugins: pluginConfigs }
+  );
 
   config.contentTypes = merge({},
     config.contentTypes,
     makeCustomContentTypeOptions(contentTypes)
   );
-
-  // Call each plugin function with the user's own plugin
-  // config and also the initial configuration for Pepperoni
-  const loadedPlugins = plugins
-    .map(plugin => plugin[0](plugin[1] || {}, config));
 
   if (loadedPlugins.length) {
     const pluginSagas = loadedPlugins

@@ -18,11 +18,11 @@ import { builtInContentTypeOptions } from '../src/contentTypes';
 global.fetch = jest.fn();
 global.fetch.mockReturnValue(Promise.resolve());
 
-
 const fetchCall = () => fetch.mock.calls[0][0];
 
 const config = {
-  wpApiUrl: 'http://test'
+  host: 'http://test',
+  wpApiUrl: '/wp'
 };
 
 describe('fetchContent', () => {
@@ -30,12 +30,12 @@ describe('fetchContent', () => {
 
   it('makes request for single content by numeric id', () => {
     fetchContent(builtInContentTypeOptions[ContentTypes.POST], 1337, config);
-    expect(fetchCall()).toEqual('http://test/posts/1337?_embed');
+    expect(fetchCall()).toEqual('http://test/wp/posts/1337?_embed');
   });
 
   it('makes request for single content by slug', () => {
     fetchContent(builtInContentTypeOptions[ContentTypes.POST], 'post-slug', config);
-    expect(fetchCall()).toEqual('http://test/posts?_embed&slug=post-slug');
+    expect(fetchCall()).toEqual('http://test/wp/posts?_embed&slug=post-slug');
   });
 
   it('throws when requesting content type by slug that is not queryable by slug', () => {
@@ -55,7 +55,7 @@ describe('fetchContent', () => {
 
     fetchContent(builtInContentTypeOptions[ContentTypes.POST], 1337, config, options);
 
-    expect(fetchCall()).toEqual('http://test/posts/1337?_embed&page=5&context=embed&search=me%2Cmyself%26i');
+    expect(fetchCall()).toEqual('http://test/wp/posts/1337?_embed&page=5&context=embed&search=me%2Cmyself%26i');
   });
 
   it('builds endpoint for content type that requires multiple route parameters', () => {
@@ -66,12 +66,12 @@ describe('fetchContent', () => {
 
     fetchContent(builtInContentTypeOptions[ContentTypes.POST_REVISION], 1337, config, options);
 
-    expect(fetchCall()).toEqual('http://test/posts/13/revisions/37?_embed')
+    expect(fetchCall()).toEqual('http://test/wp/posts/13/revisions/37?_embed')
   });
 
   it('makes request for multiple subjects by constructing multiple filter[post__in] query parameters', () => {
     fetchContent(builtInContentTypeOptions[ContentTypes.POST], [1, 2], config);
-    expect(fetchCall()).toEqual('http://test/posts?_embed&filter[post__in][]=1&filter[post__in][]=2');
+    expect(fetchCall()).toEqual('http://test/wp/posts?_embed&filter[post__in][]=1&filter[post__in][]=2');
   });
 
   // TODO test post revisions route as has different route parameters requirement than the other routes

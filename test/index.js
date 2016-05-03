@@ -80,8 +80,8 @@ describe('Pepperoni', () => {
       host: 'some-url.com',
       wpApiUrl: 'wp-json/wp/v2',
       entityKeyPropName: 'id',
-      plugins: [],
-      contentTypes: merge({}, builtInContentTypeOptions, contentTypeOptions)
+      contentTypes: merge({}, builtInContentTypeOptions, contentTypeOptions),
+      plugins: {}
     };
 
     Pepperoni(input);

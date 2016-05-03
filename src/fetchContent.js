@@ -29,7 +29,7 @@ export default function fetchContent (contentTypeOptions, subject, config, optio
   const isSlugRequest = requestType === Plurality.SINGULAR
     && typeof subject === 'string';
 
-  let endpoint = config.wpApiUrl;
+  let endpoint = config.host + config.wpApiUrl;
 
   if (isSlugRequest) {
     const name = contentTypeOptions.name.canonical;
