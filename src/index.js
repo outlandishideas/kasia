@@ -7,8 +7,6 @@ import { builtInContentTypeOptions, makeCustomContentTypeOptions } from './conte
 
 export { default as ContentTypes } from './constants/ContentTypes';
 
-export let pepperoniSagas = [fetchSaga];
-
 export const __defaultConfig = {
   host: null,
   wpApiUrl: 'wp-json/wp/v2',
@@ -16,6 +14,12 @@ export const __defaultConfig = {
   contentTypes: builtInContentTypeOptions,
   plugins: {}
 };
+
+let sagas = [fetchSaga];
+
+export function pepperoniSagas () {
+  return sagas;
+}
 
 /**
  * Configure Pepperoni.
@@ -61,7 +65,7 @@ export default function configurePepperoni (opts) {
     const pluginSagas = loadedPlugins
       .map(plugin => plugin.sagas || []);
 
-    pepperoniSagas = pepperoniSagas
+    sagas = sagas
       .concat(...pluginSagas);
   }
 
