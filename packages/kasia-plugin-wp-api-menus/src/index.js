@@ -17,6 +17,13 @@ const routes = {
   [ActionTypes.REQUEST_LOCATION]: '/menu-locations/:id'
 }
 
+const actionRequestTypes = [
+  ActionTypes.REQUEST_MENU,
+  ActionTypes.REQUEST_MENUS,
+  ActionTypes.REQUEST_LOCATION,
+  ActionTypes.REQUEST_LOCATIONS
+];
+
 function * doFetch (endpoint) {
   yield fetch(endpoint)
     .then(response => response.json())
@@ -62,7 +69,7 @@ export default function (pluginConfig, pepperoniConfig) {
 
   const sagas = [function * () {
     yield * takeEvery(
-      action => action.type === ActionTypes.RECEIVE_DATA,
+      action => actionRequestTypes.indexOf(action.type) !== -1,
       fetchResource, pepperoniConfig, pluginConfig
     )
   }]
