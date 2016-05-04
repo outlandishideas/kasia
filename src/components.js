@@ -49,13 +49,15 @@ class PepperoniComponent extends Component {
     const contentTypeOpts = this.getContentTypeOptions();
     const namePlural = contentTypeOpts.name[Plurality.PLURAL];
     const contentTypeCollection = entities[namePlural];
-    
+
     let entity;
 
     if (contentTypeCollection) {
-      entity = config.entityKeyPropName !== 'id'
-        ? find(contentTypeCollection, obj => obj[config.entityKeyPropName] === subjectId)
-        : contentTypeCollection[subjectId];
+      if (config.entityKeyPropName === 'id' && typeof params.id !== 'undefined') {
+        entity = contentTypeCollection[subjectId];
+      } else if (config.entityKeyPropName === 'slug') {
+        entity = find(contentTypeCollection, obj => obj.slug === subjectId);
+      }
     }
 
     if (!entity) {
