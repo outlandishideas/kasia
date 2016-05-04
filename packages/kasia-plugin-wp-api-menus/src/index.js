@@ -26,6 +26,19 @@ function * doFetch (endpoint) {
     .catch(error => ({ data: { error } }))
 }
 
+export function * fetchResource (action, pepperoniConfig, pluginConfig) {
+  const { id } = action
+
+  const preparedRoute = routes[action.type]
+    .replace(':id', id || '')
+
+  const endpoint = [pepperoniConfig.host, pluginConfig.route, preparedRoute].join('/');
+
+  const { data } = yield call(doFetch, endpoint)
+
+  yield put({ type: ActionTypes.RECEIVE_DATA, dataType: action.type, data, id })
+}
+
 export default function (pluginConfig, pepperoniConfig) {
   const config = merge({},
     defaultConfig,
@@ -46,23 +59,10 @@ export default function (pluginConfig, pepperoniConfig) {
       merge({}, state, { menuLocations: action.data })
   }
 
-  const fetchResource = function * (action) {
-    const { id } = action
-
-    const preparedRoute = routes[action.type]
-      .replace(':id', id || '')
-
-    const endpoint = [pepperoniConfig.host, pluginConfig.route, preparedRoute].join('/');
-
-    const { data } = yield call(doFetch, endpoint)
-
-    yield put({ type: ActionTypes.RECEIVE_DATA, dataType: action.type, data, id })
-  }
-
   const sagas = [function * () {
     yield * takeEvery(
       action => actionTypeNames.indexOf(action.type) !== -1,
-      fetchResource
+      fetchResource, pepperoniConfig, pluginConfig
     )
   }]
 
