@@ -44,19 +44,22 @@ class PepperoniComponent extends Component {
       'Expecting either a slug or id property (not both).'
     );
 
+    const subjectId = id || slug;
+
     const contentTypeOpts = this.getContentTypeOptions();
     const namePlural = contentTypeOpts.name[Plurality.PLURAL];
-    const nameSingular = contentTypeOpts.name[Plurality.SINGULAR];
-    const canonicalName = contentTypeOpts.name.canonical;
-
-    const subjectId = id || slug;
     const contentTypeCollection = entities[namePlural];
+    
+    let entity;
 
-    const entity = contentTypeCollection && config.entityKeyPropName !== 'id'
+    if (contentTypeCollection) {
+      entity = config.entityKeyPropName !== 'id'
         ? find(contentTypeCollection, obj => obj[config.entityKeyPropName] === subjectId)
         : contentTypeCollection[subjectId];
+    }
 
     if (!entity) {
+      const canonicalName = contentTypeOpts.name.canonical;
       const action = createRequest(canonicalName, subjectId, { params });
       this.props.dispatch(action);
       return null;
@@ -64,6 +67,7 @@ class PepperoniComponent extends Component {
 
     // Pass the content data to all children via their props
     if (this.props.children) {
+      const nameSingular = contentTypeOpts.name[Plurality.SINGULAR];
       const children = React.Children
         .map(this.props.children, (child) => {
           return React.cloneElement(child, { [nameSingular]: entity })
