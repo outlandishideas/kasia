@@ -2,20 +2,10 @@ import { takeEvery } from 'redux-saga'
 import { call, put } from 'redux-saga/effects'
 import merge from 'lodash.merge'
 
-// ---
-// Configuration
-// ---
+import ActionTypes from './ActionTypes';
 
 const defaultConfig = {
   route: '/wp-json/menus'
-}
-
-const ActionTypes = {
-  REQUEST_MENUS: 'pepperoni/REQUEST_MENUS',
-  REQUEST_MENU: 'pepperoni/REQUEST_MENU',
-  REQUEST_LOCATIONS: 'pepperoni/REQUEST_LOCATIONS',
-  REQUEST_LOCATION: 'pepperoni/REQUEST_LOCATION',
-  RECEIVE_DATA: 'pepperoni/RECEIVE_DATA'
 }
 
 const actionTypeNames = Object.keys(ActionTypes)
@@ -27,26 +17,6 @@ const routes = {
   [ActionTypes.REQUEST_LOCATION]: '/menu-locations/:id'
 }
 
-// ---
-// Action creators
-// ---
-
-export const fetchMenus = () =>
-  ({ type: ActionTypes.REQUEST_MENUS })
-
-export const fetchMenu = (id) =>
-  ({ type: ActionTypes.REQUEST_MENU, id })
-
-export const fetchThemeLocations = () =>
-  ({ type: ActionTypes.REQUEST_MENU })
-
-export const fetchThemeLocation = (id) =>
-  ({ type: ActionTypes.REQUEST_MENU, id })
-
-// ---
-// Plugin
-// ---
-
 export default function (pluginConfig, pepperoniConfig) {
   const config = merge({},
     defaultConfig,
@@ -56,13 +26,13 @@ export default function (pluginConfig, pepperoniConfig) {
   const reducer = {
     [ActionTypes.REQUEST_MENU]: (state, action) =>
         merge({}, state, { menus: { [action.id]: action.data }}),
-    
+
     [ActionTypes.REQUEST_MENUS]: (state, action) =>
       merge({}, state, { menus: action.data }),
-    
+
     [ActionTypes.REQUEST_LOCATION]: (state, action) =>
       merge({}, state, { menuLocations: { [action.id]: action.data }}),
-    
+
     [ActionTypes.REQUEST_LOCATIONS]: (state, action) =>
       merge({}, state, { menuLocations: action.data })
   }
