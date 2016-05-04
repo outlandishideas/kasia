@@ -31,7 +31,7 @@ function * doFetch (endpoint) {
     .catch(error => ({ data: { error } }))
 }
 
-export function * fetchResource (action, pepperoniConfig, pluginConfig) {
+export function * fetchResource (pepperoniConfig, pluginConfig, action) {
   const { id } = action
 
   const preparedRoute = routes[action.type.replace(ActionTypeNamespace, '')]
