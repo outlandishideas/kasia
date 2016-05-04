@@ -34,7 +34,7 @@ function * doFetch (endpoint) {
 export function * fetchResource (pepperoniConfig, pluginConfig, action) {
   const { id } = action
 
-  const preparedRoute = routes[action.type.replace(ActionTypeNamespace, '')]
+  const preparedRoute = routes[action.type]
     .replace(':id', id || '')
 
   const endpoint = [pepperoniConfig.host, pluginConfig.route, preparedRoute].join('/');
