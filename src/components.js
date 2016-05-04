@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import invariant from 'invariant';
+import find from 'lodash.find';
 
 import Plurality from './constants/Plurality';
 import ContentTypes from './constants/ContentTypes';
@@ -35,7 +36,7 @@ class PepperoniComponent extends Component {
   }
 
   render () {
-    const { entities } = this.props.wordpress;
+    const { config, entities } = this.props.wordpress;
     const { params, slug, id } = this.props;
 
     invariant(
@@ -49,7 +50,11 @@ class PepperoniComponent extends Component {
     const canonicalName = contentTypeOpts.name.canonical;
 
     const subjectId = id || slug;
-    const entity = entities[namePlural] && entities[namePlural][subjectId];
+    const contentTypeCollection = state.wordpress.entities[namePlural];
+
+    const entity = contentTypeCollection && config.entityKeyPropName !== 'id'
+        ? find(contentTypeCollection, obj => obj[config.entityKeyPropName] === subjectId)
+        : contentTypeCollection[subjectId];
 
     if (!entity) {
       const action = createRequest(canonicalName, subjectId, { params });
