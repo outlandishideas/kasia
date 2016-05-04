@@ -16,6 +16,11 @@ function mapStateToProps (state) {
 // ---
 
 class PepperoniComponent extends Component {
+  constructor (props, context) {
+    super(props, context);
+    this.state = {};
+  }
+
   getContentTypeOptions () {
     const { contentTypes } = this.props.wordpress.config;
 
@@ -52,7 +57,6 @@ class PepperoniComponent extends Component {
     const entity = entities[namePlural] && entities[namePlural][subjectId];
 
     if (entity) {
-      this.state = this.state || {};
       this.state[nameSingular] = entity;
     } else {
       const action = createRequest(canonicalName, subjectId, { params });
