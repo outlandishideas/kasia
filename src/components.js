@@ -68,7 +68,7 @@ class PepperoniComponent extends Component {
     if (this.state[nameSingular] && this.props.children) {
       const children = React.Children
         .map(this.props.children, (child) => {
-          return React.cloneElement(child, { [nameSingular]: this[nameSingular] })
+          return React.cloneElement(child, { [nameSingular]: this.state[nameSingular] })
         });
 
       return <div>{children}</div>;
