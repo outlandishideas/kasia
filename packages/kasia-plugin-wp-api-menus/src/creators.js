@@ -7,7 +7,7 @@ export const fetchMenu = (id) =>
   ({ type: ActionTypes.REQUEST_MENU, id })
 
 export const fetchThemeLocations = () =>
-  ({ type: ActionTypes.REQUEST_MENU })
+  ({ type: ActionTypes.REQUEST_LOCATIONS })
 
 export const fetchThemeLocation = (id) =>
-  ({ type: ActionTypes.REQUEST_MENU, id })
+  ({ type: ActionTypes.REQUEST_LOCATION, id })
