@@ -54,7 +54,7 @@ export default function (pluginConfig, pepperoniConfig) {
 
     const endpoint = pepperoniConfig.host + pluginConfig.route + preparedRoute
 
-    const { data } = call(doFetch, endpoint)
+    const { data } = yield call(doFetch, endpoint)
 
     yield put({ type: ActionTypes.RECEIVE_DATA, dataType: action.type, data, id })
   }
