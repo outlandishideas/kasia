@@ -70,7 +70,7 @@ export default function (pluginConfig, pepperoniConfig) {
   const sagas = [function * () {
     yield * takeEvery(
       action => actionRequestTypes.indexOf(action.type) !== -1,
-      fetchResource, pepperoniConfig, pluginConfig
+      fetchResource, pepperoniConfig, config
     )
   }]
 
