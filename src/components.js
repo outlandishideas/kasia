@@ -16,11 +16,6 @@ function mapStateToProps (state) {
 // ---
 
 class PepperoniComponent extends Component {
-  constructor (props, context) {
-    super(props, context);
-    this.state = {};
-  }
-
   getContentTypeOptions () {
     const { contentTypes } = this.props.wordpress.config;
 
@@ -39,7 +34,7 @@ class PepperoniComponent extends Component {
     return contentTypeOpts;
   }
 
-  componentWillMount () {
+  render () {
     const { entities } = this.props.wordpress;
     const { params, slug, id } = this.props;
 
@@ -56,23 +51,17 @@ class PepperoniComponent extends Component {
     const subjectId = id || slug;
     const entity = entities[namePlural] && entities[namePlural][subjectId];
 
-    if (entity) {
-      this.state[nameSingular] = entity;
-    } else {
+    if (!entity) {
       const action = createRequest(canonicalName, subjectId, { params });
       this.props.dispatch(action);
+      return null;
     }
-  }
-
-  render () {
-    const contentTypeOpts = this.getContentTypeOptions();
-    const nameSingular = contentTypeOpts.name[Plurality.SINGULAR];
 
     // Pass the content data to all children via their props
-    if (this.state[nameSingular] && this.props.children) {
+    if (this.props.children) {
       const children = React.Children
         .map(this.props.children, (child) => {
-          return React.cloneElement(child, { [nameSingular]: this.state[nameSingular] })
+          return React.cloneElement(child, { [nameSingular]: entity })
         });
 
       return <div>{children}</div>;
