@@ -24,8 +24,8 @@ const actionRequestTypes = [
   ActionTypes.REQUEST_LOCATIONS
 ];
 
-function * doFetch (endpoint) {
-  yield fetch(endpoint)
+function doFetch (endpoint) {
+  return fetch(endpoint)
     .then(response => response.json())
     .then(data => ({ data }))
     .catch(error => ({ data: { error } }))
