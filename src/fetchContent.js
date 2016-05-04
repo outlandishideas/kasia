@@ -29,8 +29,6 @@ export default function fetchContent (contentTypeOptions, subject, config, optio
   const isSlugRequest = requestType === Plurality.SINGULAR
     && typeof subject === 'string';
 
-  console.log(config)
-
   let endpoint = [config.host, config.wpApiUrl].join('/');
 
   if (isSlugRequest) {

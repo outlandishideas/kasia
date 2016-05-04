@@ -22,7 +22,7 @@ const fetchCall = () => fetch.mock.calls[0][0];
 
 const config = {
   host: 'http://test',
-  wpApiUrl: '/wp'
+  wpApiUrl: 'wp'
 };
 
 describe('fetchContent', () => {
