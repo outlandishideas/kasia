@@ -59,15 +59,7 @@ export default function connectWordPress ({
     }
 
     class PepperoniComponentWrapper extends Component {
-      componentWillMount () {
-        this.ensureData();
-      }
-
-      componentWillUpdate  () {
-        this.ensureData();
-      }
-
-      ensureData () {
+      render () {
         const { contentTypes } = this.props.wordpress.config;
 
         const params = this.props[routeParamsPropName];
@@ -80,10 +72,9 @@ export default function connectWordPress ({
         if (!this.props[nameSingular]) {
           const action = createRequest(canonicalName, subjectId, { params });
           this.props.dispatch(action);
+          return null;
         }
-      }
 
-      render () {
         return React.createElement(target, this.props);
       }
     }
