@@ -5,8 +5,8 @@ import ContentTypes from './constants/ContentTypes';
 import Plurality from './constants/Plurality';
 import { Slugs } from './constants/WpApiEndpoints';
 
-export function makeBuiltInContentTypeOptions () {
-  return Object.keys(ContentTypes).reduce((obj, contentType) => {
+export const builtInContentTypeOptions = Object.keys(ContentTypes)
+  .reduce((obj, contentType) => {
     obj[contentType] = {
       slug: Slugs[contentType],
       name: {
@@ -17,15 +17,15 @@ export function makeBuiltInContentTypeOptions () {
     };
     return obj;
   }, {});
-}
 
 export function makeCustomContentTypeOptions (customContentTypes) {
-  return customContentTypes.reduce((obj, contentType) => {
-    const options = typeof contentType === 'string' ? { name: contentType } : contentType;
-    const contentTypeOptions = makeCustomContentType(options);
-    obj[contentTypeOptions.name.canonical] = contentTypeOptions;
-    return obj;
-  }, {});
+  return customContentTypes
+    .reduce((obj, contentType) => {
+      const options = typeof contentType === 'object' ?  contentType : { name: String(contentType) };
+      const contentTypeOptions = makeCustomContentType(options);
+      obj[contentTypeOptions.name.canonical] = contentTypeOptions;
+      return obj;
+    }, {});
 }
 
 export function deriveContentTypeOptions (str, contentTypes) {
@@ -69,7 +69,7 @@ function makeCustomContentType (options = {}) {
   const isConflictingName = []
       .concat(builtInContentNames, camelisedBuiltInContentNames)
       .indexOf(options.name.toLowerCase()) !== -1;
-
+  
   invariant(
     !isConflictingName,
     'The content type name "%s" is taken. Choose another non-conflicting name.',

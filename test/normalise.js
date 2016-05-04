@@ -5,7 +5,6 @@ import cloneDeep from 'lodash.clonedeep';
 
 import WpApiResponses from './fixtures/wp-api-responses'
 import ContentTypes from '../src/constants/ContentTypes'
-import EntityKeyPropNames from '../src/constants/EntityKeyPropNames';
 import normalise from '../src/normalise';
 
 function makeNormaliserTestData (contentType) {
@@ -46,7 +45,7 @@ const tests = {
     testKeyBySlug: true,
     testKeyById: false
   }
-  // TODO remaining content types + a custom content type
+  // TODO test remaining content types + a custom content type
 };
 
 Object.keys(tests).forEach(contentType => {
@@ -56,13 +55,13 @@ Object.keys(tests).forEach(contentType => {
 
     if (testKeyById) {
       it(`should normalise a single ${contentType} by ID`, () => {
-        const flattened = normalise(contentType, first, EntityKeyPropNames.ID, true);
+        const flattened = normalise(contentType, first, 'id', true);
         expect(flattened.result).toEqual(first.id);
         expect(Object.keys(flattened.entities)).toEqual(expectedEntities);
       });
 
       it(`should normalise multiple ${contentType} by ID`, () => {
-        const flattened = normalise(contentType, multiple, EntityKeyPropNames.ID, true);
+        const flattened = normalise(contentType, multiple, 'id', true);
         expect(flattened.result).toEqual([first.id, second.id]);
 
       });
@@ -70,13 +69,13 @@ Object.keys(tests).forEach(contentType => {
 
     if (testKeyBySlug) {
       it(`should normalise a single ${contentType} by SLUG`, () => {
-        const flattened = normalise(contentType, first, EntityKeyPropNames.SLUG, true);
+        const flattened = normalise(contentType, first, 'slug', true);
         expect(flattened.result).toEqual(first.slug);
         expect(Object.keys(flattened.entities)).toEqual(expectedEntities);
       });
 
       it(`should normalise multiple ${contentType} by SLUG`, () => {
-        const flattened = normalise(contentType, multiple, EntityKeyPropNames.SLUG, true);
+        const flattened = normalise(contentType, multiple, 'slug', true);
         expect(flattened.result).toEqual([first.slug, second.slug]);
       });
     }

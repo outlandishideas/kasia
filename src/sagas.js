@@ -4,9 +4,9 @@ import invariant from 'invariant';
 
 import fetchContent from './fetchContent';
 import { REQUEST } from './constants/ActionTypes';
-import { startRequest, completeRequest, failRequest } from './actionCreators';
+import { startRequest, completeRequest, failRequest } from './creators';
 
-export const configSelector = state => state.$$pepperoni.config;
+export const configSelector = state => state.wordpress.config;
 
 export function* fetchResource (action) {
   const { contentType, subject } = action;
@@ -24,7 +24,7 @@ export function* fetchResource (action) {
 
   yield put(startRequest(contentType));
 
-  const { error, data } = yield call(fetchContent, contentTypeOptions, subject, config, action.options);
+  const {error, data} = yield call(fetchContent, contentTypeOptions, subject, config, action.options);
 
   if (error) {
     yield put(failRequest(contentType, error));

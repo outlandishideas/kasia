@@ -2,43 +2,49 @@ import merge from 'lodash.merge';
 
 import Plurality from './constants/Plurality';
 import normalise from './normalise';
-import { makeBuiltInContentTypeOptions } from './contentTypes';
 import { REQUEST, INVALIDATE } from './constants/ActionTypes';
 
-export const defaultState = {
-  config: {
-    contentTypes: makeBuiltInContentTypeOptions()
-  },
-  entities: {}
+export const baseState = {
+  entities: {},
+  config: {}
 };
 
-export default function makeReducer (config) {
-  defaultState.config = merge(defaultState.config, config);
+export default function makeReducer (config, plugins) {
+  const { contentTypes, entityKeyPropName } = config;
+
+  const initialState = merge({},
+    baseState,
+    { config }
+  );
+
+  const pluginReducers = plugins
+    .reduce((obj, plugin) => merge(obj, plugin.reducer), {});
+
+  const reducer = merge({}, pluginReducers, {
+    [REQUEST.COMPLETE]: (state, action) => {
+      const normalisedData = normalise(action.contentType, action.data, entityKeyPropName);
+      return merge({}, state, { entities: normalisedData.entities });
+    },
+    [INVALIDATE]: (state, action) => {
+      const namePlural = contentTypes[action.contentType].name[Plurality.PLURAL];
+      delete state.entities[namePlural][action.id];
+      return merge({}, state);
+    }
+  });
 
   return {
-    $$pepperoni: function pepperoniReducer (state = defaultState, action) {
+    wordpress: function pepperoniReducer (state = initialState, action) {
       const [actionNamespace] = action.type.split('/');
 
       if (actionNamespace !== 'pepperoni') {
         return state;
       }
 
-      const { type, contentType } = action;
-      const { entityKeyPropName, contentTypes } = state.config;
-
-      switch (type) {
-        case REQUEST.COMPLETE:
-          const normalisedData = normalise(contentType, action.data, entityKeyPropName);
-          return merge({}, state, { entities: normalisedData.entities });
-
-        case INVALIDATE:
-          const namePlural = contentTypes[contentType].name[Plurality.PLURAL];
-          delete state.entities[namePlural][action.id];
-          return merge({}, state);
-
-        default:
-          return state;
+      if (action.type in reducer) {
+        return reducer[action.type](state, action);
       }
+
+      return state;
     }
   };
 };

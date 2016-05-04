@@ -3,11 +3,11 @@ jest.disableAutomock();
 import merge from 'lodash.merge';
 import { combineReducers, createStore } from 'redux';
 
-import pepperoni  from '../../src/index';
+import Pepperoni  from '../../src/index';
 
 export default function configureStore (options) {
   const interceptReducer = jest.fn();
-  const pepperoniReducer = pepperoni(merge({ wpApiUrl: 'test' }, options));
+  const pepperoniReducer = Pepperoni(options);
 
   interceptReducer.mockReturnValue({});
 
