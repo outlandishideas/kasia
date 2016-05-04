@@ -4,17 +4,17 @@ import { takeEvery } from 'redux-saga'
 import { call, put } from 'redux-saga/effects'
 import merge from 'lodash.merge'
 
-import ActionTypes, { ActionTypeNamespace } from './ActionTypes'
+import ActionTypes  from './ActionTypes'
 
 const defaultConfig = {
-  route: '/wp-json/menus'
+  route: 'wp-json'
 }
 
 const routes = {
-  [ActionTypes.REQUEST_MENUS]: '/menus',
-  [ActionTypes.REQUEST_MENU]: '/menus/:id',
-  [ActionTypes.REQUEST_LOCATIONS]: '/menu-locations',
-  [ActionTypes.REQUEST_LOCATION]: '/menu-locations/:id'
+  [ActionTypes.REQUEST_MENUS]: 'menus',
+  [ActionTypes.REQUEST_MENU]: 'menus/:id',
+  [ActionTypes.REQUEST_LOCATIONS]: 'menu-locations',
+  [ActionTypes.REQUEST_LOCATION]: 'menu-locations/:id'
 }
 
 const actionRequestTypes = [
