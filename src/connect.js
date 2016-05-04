@@ -60,6 +60,14 @@ export default function connectWordPress ({
 
     class PepperoniComponentWrapper extends Component {
       componentWillMount () {
+        this.ensureData();
+      }
+
+      componentWillUpdate  () {
+        this.ensureData();
+      }
+      
+      ensureData () {
         const { contentTypes } = this.props.wordpress.config;
         const { entities } = this.props.wordpress;
 

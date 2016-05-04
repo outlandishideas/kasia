@@ -24,7 +24,7 @@ export function* fetchResource (action) {
 
   yield put(startRequest(contentType));
 
-  const {error, data} = yield call(fetchContent, contentTypeOptions, subject, config, action.options);
+  const { error, data } = yield call(fetchContent, contentTypeOptions, subject, config, action.options);
 
   if (error) {
     yield put(failRequest(contentType, error));
