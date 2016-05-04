@@ -87,7 +87,48 @@ export default function configureStore (initialState) {
 }
 ```
 
-## Connect a Component
+## Built-in Components
+
+Pepperoni comes with ready-made React components for all the built-in content types available through the WP-API.
+
+All children of a built-in component are passed the content data implicitly.
+
+For custom content types, use the `PepperoniComponent` and pass in the content type via the `contentType` prop.
+
+```js
+// Available built-in components
+import PepperoniComponent, {
+  Category, Comment, Media, Page, Post, PostRevision,
+  PostType, PostStatus, Tag, Taxonomy, User
+} from 'pepperoni/components';
+```
+
+Example using the `Page` component:
+
+```js
+import { Page } from 'pepperoni/components';
+
+const Title = ({ page }) => {
+  return <h1>{page.title}</h1>;
+};
+
+const Content = ({ page }) => {
+  return <p>{page.content}</p>;
+};
+
+export default class MyPage {
+  render () {
+    return (
+      <Page slug="page-slug">
+        <Title />
+        <Content />
+      </Page>
+    );
+  }
+}
+```
+
+## Connected Components
 
 After configuration you can connect a component in order that it receives content
 data via `props` by decorating that component with `connectWordPress`:
