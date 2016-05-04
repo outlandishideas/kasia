@@ -10,7 +10,10 @@ const defaultConfig = {
   route: '/wp-json/menus'
 }
 
-const actionTypeNames = Object.keys(ActionTypes)
+const actionTypes = Object.keys(ActionTypes).reduce((arr, key) => {
+  arr.push(ActionTypes[key]);
+  return arr;
+}, []);
 
 const routes = {
   [ActionTypes.REQUEST_MENUS]: '/menus',
@@ -61,7 +64,7 @@ export default function (pluginConfig, pepperoniConfig) {
 
   const sagas = [function * () {
     yield * takeEvery(
-      action => actionTypeNames.indexOf(action.type) !== -1,
+      action => actionTypes.indexOf(action.type) !== -1,
       fetchResource, pepperoniConfig, pluginConfig
     )
   }]
