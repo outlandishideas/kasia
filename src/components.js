@@ -56,7 +56,7 @@ class PepperoniComponent extends Component {
       if (typeof id !== 'undefined' && config.entityKeyPropName === 'id') {
         entity = contentTypeCollection[subjectId];
       } else {
-        entity = find(contentTypeCollection, obj => obj[config.entityKeyPropName] === subjectId);
+        entity = find(contentTypeCollection, obj => obj.slug === subjectId);
       }
     }
 
