@@ -1,7 +1,7 @@
 export default {
-  REQUEST_MENUS: 'pepperoni/REQUEST_MENUS',
-  REQUEST_MENU: 'pepperoni/REQUEST_MENU',
-  REQUEST_LOCATIONS: 'pepperoni/REQUEST_LOCATIONS',
-  REQUEST_LOCATION: 'pepperoni/REQUEST_LOCATION',
-  RECEIVE_DATA: 'pepperoni/RECEIVE_DATA'
+  REQUEST_MENUS: 'pepperoni/menus/REQUEST_MENUS',
+  REQUEST_MENU: 'pepperoni/menus/REQUEST_MENU',
+  REQUEST_LOCATIONS: 'pepperoni/menus/REQUEST_LOCATIONS',
+  REQUEST_LOCATION: 'pepperoni/menus/REQUEST_LOCATION',
+  RECEIVE_DATA: 'pepperoni/menus/RECEIVE_DATA'
 }

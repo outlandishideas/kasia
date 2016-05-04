@@ -1,3 +1,5 @@
+import ActionTypes from './ActionTypes'
+
 export const fetchMenus = () =>
   ({ type: ActionTypes.REQUEST_MENUS })
 
