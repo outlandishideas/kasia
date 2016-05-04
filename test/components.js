@@ -8,7 +8,7 @@ import configureStore from './util/configureStore';
 
 import { completeRequest } from '../src/creators';
 import { ContentTypes } from '../src/index';
-import PepperoniComponent, { Page } from '../src/Component';
+import PepperoniComponent, { Page } from '../src/components';
 
 const { store } = configureStore({
   host: 'test',
