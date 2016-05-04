@@ -52,7 +52,7 @@ export default function (pluginConfig, pepperoniConfig) {
     const preparedRoute = routes[action.type]
       .replace(':id', id || '')
 
-    const endpoint = pepperoniConfig.host + pluginConfig.route + preparedRoute
+    const endpoint = [pepperoniConfig.host, pluginConfig.route, preparedRoute].join('/');
 
     const { data } = yield call(doFetch, endpoint)
 
