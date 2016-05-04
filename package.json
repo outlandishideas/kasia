@@ -36,6 +36,7 @@
     "invariant": "^2.2.1",
     "lodash.clonedeep": "^4.1.0",
     "lodash.find": "^4.3.0",
+    "lodash.mapkeys": "^4.3.0",
     "lodash.merge": "^4.3.5",
     "normalizr": "^2.0.1",
     "urlencode": "^1.1.0"
