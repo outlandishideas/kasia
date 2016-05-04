@@ -4,7 +4,7 @@ import { takeEvery } from 'redux-saga'
 import { call, put } from 'redux-saga/effects'
 import merge from 'lodash.merge'
 
-import ActionTypes from './ActionTypes'
+import ActionTypes, { ActionTypeNamespace } from './ActionTypes'
 
 const defaultConfig = {
   route: '/wp-json/menus'
@@ -17,13 +17,6 @@ const routes = {
   [ActionTypes.REQUEST_LOCATION]: '/menu-locations/:id'
 }
 
-const actionRequestTypes = [
-  ActionTypes.REQUEST_MENU,
-  ActionTypes.REQUEST_MENUS,
-  ActionTypes.REQUEST_LOCATION,
-  ActionTypes.REQUEST_LOCATIONS
-];
-
 function * doFetch (endpoint) {
   yield fetch(endpoint)
     .then(response => response.json())
@@ -34,7 +27,7 @@ function * doFetch (endpoint) {
 export function * fetchResource (action, pepperoniConfig, pluginConfig) {
   const { id } = action
 
-  const preparedRoute = routes[action.type]
+  const preparedRoute = routes[action.type.replace(ActionTypeNamespace, '')]
     .replace(':id', id || '')
 
   const endpoint = [pepperoniConfig.host, pluginConfig.route, preparedRoute].join('/');
@@ -69,7 +62,7 @@ export default function (pluginConfig, pepperoniConfig) {
 
   const sagas = [function * () {
     yield * takeEvery(
-      action => actionRequestTypes.indexOf(action.type) !== -1,
+      action => action.type.replace(ActionTypeNamespace, '') === ActionTypes.RECEIVE_DATA,
       fetchResource, pepperoniConfig, pluginConfig
     )
   }]

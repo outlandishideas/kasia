@@ -5,3 +5,5 @@ export default {
   REQUEST_LOCATION: 'pepperoni/menus/REQUEST_LOCATION',
   RECEIVE_DATA: 'pepperoni/menus/RECEIVE_DATA'
 }
+
+export const ActionTypeNamespace = 'pepperoni/menus/';
