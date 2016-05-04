@@ -7,7 +7,7 @@ import merge from 'lodash.merge'
 import ActionTypes  from './ActionTypes'
 
 const defaultConfig = {
-  route: 'wp-json'
+  route: 'wp-json/wp-api-menus/v2'
 }
 
 const routes = {
