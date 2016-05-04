@@ -52,7 +52,8 @@ class PepperoniComponent extends Component {
     const entity = entities[namePlural] && entities[namePlural][subjectId];
 
     if (entity) {
-      this[nameSingular] = entity;
+      this.state = this.state || {};
+      this.state[nameSingular] = entity;
     } else {
       const action = createRequest(canonicalName, subjectId, { params });
       this.props.dispatch(action);
@@ -64,7 +65,7 @@ class PepperoniComponent extends Component {
     const nameSingular = contentTypeOpts.name[Plurality.SINGULAR];
 
     // Pass the content data to all children via their props
-    if (this[nameSingular] && this.props.children) {
+    if (this.state[nameSingular] && this.props.children) {
       const children = React.Children
         .map(this.props.children, (child) => {
           return React.cloneElement(child, { [nameSingular]: this[nameSingular] })
