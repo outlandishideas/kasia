@@ -44,17 +44,20 @@ export default function (pluginConfig, pepperoniConfig) {
   )
 
   const reducer = {
-    [ActionTypes.REQUEST_MENU]: (state, action) =>
-      merge({}, state, { menus: { [action.id]: action.data } }),
-
-    [ActionTypes.REQUEST_MENUS]: (state, action) =>
-      merge({}, state, { menus: action.data }),
-
-    [ActionTypes.REQUEST_LOCATION]: (state, action) =>
-      merge({}, state, { menuLocations: { [action.id]: action.data } }),
-
-    [ActionTypes.REQUEST_LOCATIONS]: (state, action) =>
-      merge({}, state, { menuLocations: action.data })
+    [ActionTypes.RECEIVE_DATA]: (state, action) => {
+      switch (action.dataType) {
+        case ActionTypes.REQUEST_MENU:
+          return merge({}, state, { menus: { [action.id]: action.data } })
+        case ActionTypes.REQUEST_MENUS:
+          return merge({}, state, { menus: action.data })
+        case ActionTypes.REQUEST_LOCATION:
+          return merge({}, state, { menuLocations: { [action.id]: action.data } })
+        case ActionTypes.REQUEST_LOCATIONS:
+          return merge({}, state, { menuLocations: action.data })
+        default:
+          return state
+      }
+    }
   }
 
   const sagas = [function * () {
