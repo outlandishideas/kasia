@@ -4,7 +4,7 @@ import invariant from 'invariant';
 
 import fetchContent from './fetchContent';
 import { REQUEST } from './constants/ActionTypes';
-import { startRequest, completeRequest, failRequest } from './actionCreators';
+import { startRequest, completeRequest, failRequest } from './creators';
 
 export const configSelector = state => state.wordpress.config;
 

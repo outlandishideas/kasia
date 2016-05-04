@@ -5,7 +5,7 @@ jest.unmock('invariant');
 
 jest.unmock('../src/constants/ActionTypes');
 jest.unmock('../src/constants/ContentTypes');
-jest.unmock('../src/actionCreators');
+jest.unmock('../src/creators');
 jest.unmock('../src/sagas');
 jest.unmock('../src/fetchContent');
 jest.unmock('../src/contentTypes');
@@ -16,7 +16,7 @@ import ContentTypes from '../src/constants/ContentTypes';
 import fetchContent from '../src/fetchContent';
 import { builtInContentTypeOptions } from '../src/contentTypes';
 import { configSelector, fetchResource } from '../src/sagas';
-import { createRequest, startRequest } from '../src/actionCreators';
+import { createRequest, startRequest } from '../src/creators';
 
 const contentType = ContentTypes.POST;
 const createRequestOptions = { params: { id: 1337 }};

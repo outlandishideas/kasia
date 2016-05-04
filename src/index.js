@@ -5,17 +5,7 @@ import makeReducer from './reducer';
 import fetchSaga from './sagas';
 import { builtInContentTypeOptions, makeCustomContentTypeOptions } from './contentTypes';
 
-export { default as Component } from './Component';
 export { default as ContentTypes } from './constants/ContentTypes';
-export { default as connectWordPress } from './connect';
-
-export {
-  default as PepperoniComponent,
-  Category, Comment, Media, Page, Post, PostRevision, PostStatus, PostType, Tag, Taxonomy, User
-} from './Component';
-
-export { fetchCategory, fetchComment, fetchCustomContentType, fetchMedia, fetchPage, fetchPost, fetchPostRevision,
-  fetchPostStatus, fetchPostStatus, fetchPostType, fetchTag, fetchTaxonomy, fetchUser } from './actionCreators';
 
 export let pepperoniSagas = [fetchSaga];
 

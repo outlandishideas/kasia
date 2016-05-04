@@ -1,6 +1,6 @@
 # Pepperoni
 
-> A React Redux toolset for the WordPress API.
+> A React Redux toolset for the WordPress API
 
 ## Features
 
@@ -109,7 +109,7 @@ class MyPost extends Component {
 }
 
 // Connect the component to data from WP-API
-connectWordPress()(MyPost);
+export default connectWordPress()(MyPost);
 ```
 
 ## Use a Connected Component

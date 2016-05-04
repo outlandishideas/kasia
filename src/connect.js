@@ -4,7 +4,7 @@ import invariant from 'invariant';
 import find from 'lodash.find';
 
 import Plurality from './constants/Plurality';
-import { createRequest } from './actionCreators';
+import { createRequest } from './creators';
 import { fetchResource } from './sagas';
 import { deriveContentTypeOptions } from './contentTypes';
 

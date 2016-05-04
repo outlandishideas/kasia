@@ -8,7 +8,7 @@ import postJson from './fixtures/wp-api-responses/post'
 import configureStore from './util/configureStore';
 import ContentTypes from '../src/constants/ContentTypes';
 import { REQUEST } from '../src/constants/ActionTypes';
-import { completeRequest } from '../src/actionCreators';
+import { completeRequest } from '../src/creators';
 
 import BuiltInContentType from './components/BuiltInContentType';
 import DerivedContentType from './components/DerivedContentType';

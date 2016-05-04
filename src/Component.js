@@ -5,7 +5,7 @@ import invariant from 'invariant';
 import Plurality from './constants/Plurality';
 import ContentTypes from './constants/ContentTypes';
 import { deriveContentTypeOptions } from './contentTypes';
-import { createRequest } from './actionCreators';
+import { createRequest } from './creators';
 
 function mapStateToProps (state) {
   return { wordpress: state.wordpress };
@@ -63,12 +63,13 @@ class PepperoniComponent extends Component {
     const contentTypeOpts = this.getContentTypeOptions();
     const nameSingular = contentTypeOpts.name[Plurality.SINGULAR];
 
+    // Pass the content data to all children via their props
     if (this[nameSingular] && this.props.children) {
       const children = React.Children
         .map(this.props.children, (child) => {
           return React.cloneElement(child, { [nameSingular]: this[nameSingular] })
         });
-      
+
       return <div>{children}</div>;
     }
 

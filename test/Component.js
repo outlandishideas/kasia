@@ -6,8 +6,9 @@ import { mount, render } from 'enzyme';
 import pageJson from './fixtures/wp-api-responses/post'
 import configureStore from './util/configureStore';
 
-import { completeRequest } from '../src/actionCreators';
-import { ContentTypes, PepperoniComponent, Page } from '../src/index';
+import { completeRequest } from '../src/creators';
+import { ContentTypes } from '../src/index';
+import PepperoniComponent, { Page } from '../src/Component';
 
 const { store } = configureStore({
   host: 'test',
