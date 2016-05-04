@@ -53,7 +53,7 @@ class PepperoniComponent extends Component {
     let entity;
 
     if (contentTypeCollection) {
-      if (typeof params.id !== 'undefined' && config.entityKeyPropName === 'id') {
+      if (typeof id !== 'undefined' && config.entityKeyPropName === 'id') {
         entity = contentTypeCollection[subjectId];
       } else {
         entity = find(contentTypeCollection, obj => obj[config.entityKeyPropName] === subjectId);
