@@ -66,22 +66,18 @@ export default function connectWordPress ({
       componentWillUpdate  () {
         this.ensureData();
       }
-      
+
       ensureData () {
         const { contentTypes } = this.props.wordpress.config;
-        const { entities } = this.props.wordpress;
 
         const params = this.props[routeParamsPropName];
         const subjectId = params[routeParamSubjectKey];
 
         const contentTypeOpts = getContentTypeOptions(contentTypes);
-        const namePlural = contentTypeOpts.name[Plurality.PLURAL];
+        const nameSingular = contentTypeOpts.name[Plurality.SINGULAR];
         const canonicalName = contentTypeOpts.name.canonical;
 
-        const noCollection = !entities[namePlural];
-        const noEntity = entities[namePlural] && !entities[namePlural][subjectId];
-
-        if (noCollection || noEntity) {
+        if (!this.props[nameSingular]) {
           const action = createRequest(canonicalName, subjectId, { params });
           this.props.dispatch(action);
         }
