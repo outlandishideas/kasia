@@ -50,7 +50,7 @@ class PepperoniComponent extends Component {
     const canonicalName = contentTypeOpts.name.canonical;
 
     const subjectId = id || slug;
-    const contentTypeCollection = state.wordpress.entities[namePlural];
+    const contentTypeCollection = entities[namePlural];
 
     const entity = contentTypeCollection && config.entityKeyPropName !== 'id'
         ? find(contentTypeCollection, obj => obj[config.entityKeyPropName] === subjectId)
