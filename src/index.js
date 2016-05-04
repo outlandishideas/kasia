@@ -17,10 +17,6 @@ export const __defaultConfig = {
 
 let sagas = [fetchSaga];
 
-export function pepperoniSagas () {
-  return sagas;
-}
-
 /**
  * Configure Pepperoni.
  * @returns {Object} Pepperoni reducer
@@ -65,9 +61,11 @@ export default function configurePepperoni (opts) {
     const pluginSagas = loadedPlugins
       .map(plugin => plugin.sagas || []);
 
-    sagas = sagas
-      .concat(...pluginSagas);
+    sagas = [fetchSaga].concat(...pluginSagas);
   }
 
-  return makeReducer(config, loadedPlugins);
+  return {
+    pepperoniReducer: makeReducer(config, loadedPlugins),
+    pepperoniSagas: sagas
+  };
 }

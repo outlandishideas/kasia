@@ -75,7 +75,9 @@ import createSagaMiddleware from 'redux-saga';
 import rootReducer from '../reducers';
 
 export default function configureStore (initialState) {
-  const sagaMiddleware = createSagaMiddleware(...pepperoniSagas);
+  const sagaMiddleware = createSagaMiddleware(
+    ...pepperoniSagas()
+  );
 
   const store = createStore(
     rootReducer,
