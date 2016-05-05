@@ -10,16 +10,18 @@ import { deriveContentTypeOptions } from './contentTypes';
 
 /**
  * Connect a component to data from the WP-API.
- * @param {String} [contentType] The content type for which the WP-API request will be made.
- * @param {String} [routeParamsPropName] From which object on props will the WP-API route parameters be derived?
- * @param {Boolean} [routeParamSubjectKey] The key on `params` that will be used as the identifier of desired content.
  * @returns {Function}
  */
-export default function connectWordPress ({
-  contentType,
-  routeParamsPropName = 'params',
-  routeParamSubjectKey = 'id'
-} = {}) {
+export default function connectWordPress (contentType, identifier) {
+  const deriveContentType = typeof contentType !== 'string';
+  const deriveIdentifier = deriveContentType && typeof identifier === 'undefined';
+
+  invariant(
+    ['string', 'function'].indexOf(typeof contentType) !== -1,
+    'Expecting first argument to be a String or Function, got "%s".',
+    typeof contentType
+  );
+
   return target => {
     const targetName = target.displayName
       ? target.displayName
@@ -32,26 +34,28 @@ export default function connectWordPress ({
     );
 
     const getContentTypeOptions = contentTypes => {
-      return typeof contentType === 'undefined'
+      return deriveContentType
         ? deriveContentTypeOptions(targetName, contentTypes)
         : contentTypes[contentType];
     };
 
     function mapStateToProps (state, ownProps) {
-      const { contentTypes } = state.wordpress.config;
+      const { contentTypes, entityKeyPropName } = state.wordpress.config;
 
       const contentTypeOpts = getContentTypeOptions(contentTypes);
       const nameSingular = contentTypeOpts.name[Plurality.SINGULAR];
       const namePlural = contentTypeOpts.name[Plurality.PLURAL];
 
-      const subjectId = ownProps[routeParamsPropName][routeParamSubjectKey];
-      const contentTypeCollection = state.wordpress.entities[namePlural];
+      const subjectId = deriveIdentifier
+        ? deriveIdentifier(ownProps)
+        : identifier;
 
+      const contentTypeCollection = state.wordpress.entities[namePlural];
       const props = { wordpress: state.wordpress };
 
       if (contentTypeCollection) {
-        props[nameSingular] = routeParamSubjectKey !== 'id'
-          ? find(contentTypeCollection, obj => obj[routeParamSubjectKey] === subjectId)
+        props[nameSingular] = entityKeyPropName !== 'id'
+          ? find(contentTypeCollection, obj => obj[entityKeyPropName] === subjectId)
           : contentTypeCollection[subjectId];
       }
 
@@ -62,15 +66,16 @@ export default function connectWordPress ({
       render () {
         const { contentTypes } = this.props.wordpress.config;
 
-        const params = this.props[routeParamsPropName];
-        const subjectId = params[routeParamSubjectKey];
+        const subjectId = deriveIdentifier
+          ? deriveIdentifier(this.props)
+          : identifier;
 
         const contentTypeOpts = getContentTypeOptions(contentTypes);
         const nameSingular = contentTypeOpts.name[Plurality.SINGULAR];
         const canonicalName = contentTypeOpts.name.canonical;
 
         if (!this.props[nameSingular]) {
-          const action = createRequest(canonicalName, subjectId, { params });
+          const action = createRequest(canonicalName, subjectId);
           this.props.dispatch(action);
           return null;
         }

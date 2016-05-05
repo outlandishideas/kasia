@@ -70,8 +70,9 @@ class PepperoniComponent extends Component {
     // Pass the content data to all children via their props
     if (this.props.children) {
       const nameSingular = contentTypeOpts.name[Plurality.SINGULAR];
+
       const children = React.Children
-        .map(this.props.children, (child) => {
+        .map(this.props.children, child => {
           return React.cloneElement(child, { [nameSingular]: entity })
         });
 
