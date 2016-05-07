@@ -1,4 +1,5 @@
-/* global describe:false, it:false, expect:false, jest:false, beforeEach:false */
+/* eslint-env jasmine */
+/* global jest:false */
 
 jest.disableAutomock()
 

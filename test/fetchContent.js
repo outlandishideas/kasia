@@ -1,4 +1,5 @@
-/* global describe:false, it:false, expect:false, jest:false, afterEach:false, fetch:false */
+/* eslint-env jasmine */
+/* global jest:false, fetch:false */
 
 jest.unmock('invariant')
 jest.unmock('lodash.merge')

@@ -1,4 +1,5 @@
-/* global describe:false, it:false, expect:false, jest:false */
+/* eslint-env jasmine */
+/* global jest:false */
 
 jest.unmock('redux-saga')
 jest.unmock('redux-saga/effects')
