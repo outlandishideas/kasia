@@ -34,7 +34,7 @@ const reducerCalls = interceptReducer.mock.calls
 let actionIndex = -1
 
 function nextActionOfType (actionType) {
-  for (; actionIndex < reducerCalls.length; actionIndex++) {
+  for (let len = reducerCalls.length; actionIndex < len; actionIndex++) {
     // Second argument to a reducer is the action (first is the current state)
     const call = reducerCalls[actionIndex]
     const action = call && call[1]

@@ -19,7 +19,7 @@ export function deriveContentTypeOptions (str, contentTypes) {
 
   let found
 
-  for (let i = 0; i < contentTypeNames.length; i++) {
+  for (let i = 0, len = contentTypeNames.length; i < len; i++) {
     const name = contentTypeNames[i]
     const options = contentTypes[name]
 

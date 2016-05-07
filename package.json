@@ -6,7 +6,7 @@
   "jsnext:main": "src/index.js",
   "scripts": {
     "compile": "rimraf lib && babel -d lib/ src/",
-    "lint": "standard",
+    "lint": "snazzy",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
@@ -63,6 +63,7 @@
     "jest": "^0.1.40",
     "jest-cli": "^11.0.2",
     "rimraf": "^2.5.2",
+    "snazzy": "^4.0.0",
     "standard": "^7.0.1"
   },
   "jest": {
