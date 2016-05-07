@@ -1,12 +1,12 @@
-jest.disableAutomock();
+jest.disableAutomock()
 
-import React, { Component } from 'react';
+import React, { Component } from 'react'
 
-import connectWordPress from '../../src/connect';
+import connectWordPress from '../../src/connect'
 
 @connectWordPress({ contentType: 'CustomContentType' })
 export default class CustomContentType extends Component {
   render () {
-    return <div></div>;
+    return <div></div>
   }
 }

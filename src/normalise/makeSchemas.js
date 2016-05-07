@@ -1,32 +1,32 @@
-import { Schema, arrayOf } from 'normalizr';
+import { Schema, arrayOf } from 'normalizr'
 
-import ContentTypes from '../constants/ContentTypes';
+import ContentTypes from '../constants/ContentTypes'
 
-let schemas = null;
+let schemas = null
 
 export default function makeSchemas (idAttributeKey, invalidateCache) {
   if (schemas && !invalidateCache) {
-    return schemas;
+    return schemas
   }
 
   const options = {
     idAttribute: idAttributeKey.toLowerCase()
-  };
+  }
 
   // Content types with `id` properties
-  const categorySchema = new Schema('categories', options);
-  const mediaSchema = new Schema('media', options);
-  const pageSchema = new Schema('pages', options);
-  const postSchema = new Schema('posts', options);
-  const revisionSchema = new Schema('revisions', options);
-  const tagSchema = new Schema('tags', options);
-  const userSchema = new Schema('users', options);
+  const categorySchema = new Schema('categories', options)
+  const mediaSchema = new Schema('media', options)
+  const pageSchema = new Schema('pages', options)
+  const postSchema = new Schema('posts', options)
+  const revisionSchema = new Schema('revisions', options)
+  const tagSchema = new Schema('tags', options)
+  const userSchema = new Schema('users', options)
 
   // Content types without `id` properties
-  const commentSchema = new Schema('comments', { idAttribute: 'slug' });
-  const postTypeSchema = new Schema('postTypes', { idAttribute: 'slug' });
-  const postStatusSchema = new Schema('postStatuses', { idAttribute: 'slug' });
-  const taxonomySchema = new Schema('taxonomies', { idAttribute: 'slug' });
+  const commentSchema = new Schema('comments', { idAttribute: 'slug' })
+  const postTypeSchema = new Schema('postTypes', { idAttribute: 'slug' })
+  const postStatusSchema = new Schema('postStatuses', { idAttribute: 'slug' })
+  const taxonomySchema = new Schema('taxonomies', { idAttribute: 'slug' })
 
   mediaSchema.define({
     author: userSchema,
@@ -34,7 +34,7 @@ export default function makeSchemas (idAttributeKey, invalidateCache) {
     embedded: {
       author: arrayOf(userSchema)
     }
-  });
+  })
 
   pageSchema.define({
     author: userSchema,
@@ -43,7 +43,7 @@ export default function makeSchemas (idAttributeKey, invalidateCache) {
       author: arrayOf(userSchema),
       'wp:featuredmedia': arrayOf(mediaSchema)
     }
-  });
+  })
 
   postSchema.define({
     author: userSchema,
@@ -54,9 +54,9 @@ export default function makeSchemas (idAttributeKey, invalidateCache) {
       author: arrayOf(userSchema),
       'wp:featuredmedia': arrayOf(mediaSchema)
     }
-  });
+  })
 
-  return schemas = {
+  schemas = {
     [ContentTypes.CATEGORY]: categorySchema,
     [ContentTypes.COMMENT]: commentSchema,
     [ContentTypes.MEDIA]: mediaSchema,
@@ -68,5 +68,7 @@ export default function makeSchemas (idAttributeKey, invalidateCache) {
     [ContentTypes.TAG]: tagSchema,
     [ContentTypes.TAXONOMY]: taxonomySchema,
     [ContentTypes.USER]: userSchema
-  };
+  }
+
+  return schemas
 }

@@ -1,46 +1,48 @@
-jest.disableAutomock();
+/* global describe:false, it:false, expect:false, jest:false, beforeEach:false */
 
-jest.mock('invariant');
+jest.disableAutomock()
 
-jest.mock('../src/reducer');
+jest.mock('invariant')
 
-import merge from 'lodash.merge';
-import invariant from 'invariant';
+jest.mock('../src/reducer')
 
-import Pepperoni from '../src/index';
-import Plurality from '../src/constants/Plurality';
-import makeReducer from '../src/reducer';
-import { builtInContentTypeOptions } from '../src/contentTypes';
+import merge from 'lodash.merge'
+import invariant from 'invariant'
+
+import Pepperoni from '../src/index'
+import Plurality from '../src/constants/Plurality'
+import makeReducer from '../src/reducer'
+import { builtInContentTypeOptions } from '../src/contentTypes'
 
 describe('Pepperoni', () => {
   beforeEach(() => {
-    invariant.mockClear();
-    makeReducer.mockClear();
-  });
+    invariant.mockClear()
+    makeReducer.mockClear()
+  })
 
   it('exports a function', () => {
-    expect(typeof Pepperoni).toEqual('function');
-  });
+    expect(typeof Pepperoni).toEqual('function')
+  })
 
   it('throws an invariant violation when `host` is not a string', () => {
-    Pepperoni({ host: 11111 });
+    Pepperoni({ host: 11111 })
 
     expect(invariant).toBeCalledWith(
       false,
       'Expecting host to be a string, got "%s".',
       'number'
-    );
-  });
+    )
+  })
 
   it('throws an invariant violation when `host` is undefined', () => {
-    Pepperoni({ host: undefined });
+    Pepperoni({ host: undefined })
 
     expect(invariant).toBeCalledWith(
       false,
       'Expecting host to be a string, got "%s".',
       'undefined'
-    );
-  });
+    )
+  })
 
   it('calls makeReducer with the correct object shape', () => {
     const input = {
@@ -49,13 +51,13 @@ describe('Pepperoni', () => {
         'FirstCustomPostType',
         'SecondCustomPostType'
       ]
-    };
+    }
 
     const contentTypeOptions = {
       FirstCustomPostType: {
         slug: {
-          [Plurality.SINGULAR]: `/first-custom-post-types/:id`,
-          [Plurality.PLURAL]: `/first-custom-post-types`
+          [Plurality.SINGULAR]: '/first-custom-post-types/:id',
+          [Plurality.PLURAL]: '/first-custom-post-types'
         },
         name: {
           canonical: 'FirstCustomPostType',
@@ -65,8 +67,8 @@ describe('Pepperoni', () => {
       },
       SecondCustomPostType: {
         slug: {
-          [Plurality.SINGULAR]: `/second-custom-post-types/:id`,
-          [Plurality.PLURAL]: `/second-custom-post-types`
+          [Plurality.SINGULAR]: '/second-custom-post-types/:id',
+          [Plurality.PLURAL]: '/second-custom-post-types'
         },
         name: {
           canonical: 'SecondCustomPostType',
@@ -74,7 +76,7 @@ describe('Pepperoni', () => {
           [Plurality.PLURAL]: 'secondCustomPostTypes'
         }
       }
-    };
+    }
 
     const expected = {
       host: 'some-url.com',
@@ -82,10 +84,10 @@ describe('Pepperoni', () => {
       entityKeyPropName: 'id',
       contentTypes: merge({}, builtInContentTypeOptions, contentTypeOptions),
       plugins: {}
-    };
+    }
 
-    Pepperoni(input);
+    Pepperoni(input)
 
-    expect(makeReducer).toBeCalledWith(expected, []);
-  });
-});
+    expect(makeReducer).toBeCalledWith(expected, [])
+  })
+})

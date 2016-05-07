@@ -1,27 +1,29 @@
-jest.disableAutomock();
+/* global jest:false */
 
-import merge from 'lodash.merge';
-import { combineReducers, createStore } from 'redux';
+jest.disableAutomock()
 
-import Pepperoni  from '../../src/index';
+import merge from 'lodash.merge'
+import { combineReducers, createStore } from 'redux'
+
+import Pepperoni from '../../src/index'
 
 export default function configureStore (options) {
-  const interceptReducer = jest.fn();
-  const pepperoniReducer = Pepperoni(options);
+  const interceptReducer = jest.fn()
+  const pepperoniReducer = Pepperoni(options)
 
-  interceptReducer.mockReturnValue({});
+  interceptReducer.mockReturnValue({})
 
   const rootReducer = combineReducers({
     intercept: interceptReducer,
     ...pepperoniReducer
-  });
+  })
 
-  const store = createStore(rootReducer);
-  const initialState = merge({}, store);
+  const store = createStore(rootReducer)
+  const initialState = merge({}, store)
 
   return {
     interceptReducer,
     store,
     initialState
-  };
+  }
 }
