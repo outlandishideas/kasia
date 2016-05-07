@@ -12,7 +12,7 @@ function wowSuchFunction () {}
 
 const isMinified = wowSuchFunction.name !== 'wowSuchFunction'
 
-function invariant_targetMinifiedWithoutDisplayName (target) {
+function invariantTargetMinifiedWithoutDisplayName (target) {
   invariant(
     !isMinified || (isMinified && !target.displayName),
     'Pepperoni cannot derive the content type from a minified component. ' +
@@ -66,7 +66,7 @@ export default function connectWordPress (contentType, identifier) {
     if (contentType && typeof identifier === 'undefined') {
       let contentTypeOptions
 
-      invariant_targetMinifiedWithoutDisplayName(target)
+      invariantTargetMinifiedWithoutDisplayName(target)
 
       getContentTypeOptions = (contentTypes) => !contentTypeOptions
           ? contentTypeOptions = deriveContentTypeOptions(targetName, contentTypes)

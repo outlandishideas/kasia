@@ -6,14 +6,14 @@ export default {
   'hierarchical': true,
   '_links': {
     'collection': [{
-      'href': 'http:\/\/demo.wp-api.org\/wp-json\/wp\/v2\/taxonomies'
+      'href': 'http://demo.wp-api.org/wp-json/wp/v2/taxonomies'
     }],
     'wp:items': [{
-      'href': 'http:\/\/demo.wp-api.org\/wp-json\/wp\/v2\/categories'
+      'href': 'http://demo.wp-api.org/wp-json/wp/v2/categories'
     }],
     'curies': [{
       'name': 'wp',
-      'href': 'https:\/\/api.w.org\/{rel}',
+      'href': 'https://api.w.org/{rel}',
       'templated': true
     }]
   }

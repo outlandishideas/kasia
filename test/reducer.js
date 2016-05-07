@@ -7,10 +7,9 @@ import { combineReducers, createStore } from 'redux'
 import postJson from './fixtures/wp-api-responses/post'
 import ContentTypes from '../src/constants/ContentTypes'
 import normalise from '../src/normalise'
-import Pepperoni from '../src/index'
+import Pepperoni, { __defaultConfig } from '../src/index'
 import { completeRequest } from '../src/creators'
 import { baseState } from '../src/reducer'
-import { __defaultConfig } from '../src/index'
 
 const pepperoniReducer = Pepperoni({ host: 'test' })
 const rootReducer = combineReducers(pepperoniReducer)

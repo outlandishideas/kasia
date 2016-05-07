@@ -6,7 +6,7 @@
   "jsnext:main": "src/index.js",
   "scripts": {
     "compile": "rimraf lib && babel -d lib/ src/",
-    "lint": "standard src/**/*.js",
+    "lint": "standard",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
@@ -80,6 +80,11 @@
       "/fixtures/",
       "/components/",
       "/util/"
+    ]
+  },
+  "standard": {
+    "ignore": [
+      "/lib"
     ]
   }
 }

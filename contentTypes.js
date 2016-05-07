@@ -1,1 +1,1 @@
-module.exports = require('./lib/constants/ContentTypes');
+module.exports = require('./lib/constants/ContentTypes')

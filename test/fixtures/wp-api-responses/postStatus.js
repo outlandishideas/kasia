@@ -5,7 +5,7 @@ export default {
   'slug': 'publish',
   '_links': {
     'archives': [{
-      'href': 'http:\/\/demo.wp-api.org\/wp-json\/wp\/v2\/posts'
+      'href': 'http://demo.wp-api.org/wp-json/wp/v2/posts'
     }]
   }
 }
