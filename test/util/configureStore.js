@@ -8,8 +8,9 @@ import { combineReducers, createStore } from 'redux'
 import Pepperoni from '../../src/index'
 
 export default function configureStore (options) {
+  const { pepperoniReducer, pepperoniSagas } = Pepperoni(options)
+
   const interceptReducer = jest.fn()
-  const pepperoniReducer = Pepperoni(options)
 
   interceptReducer.mockReturnValue({})
 
@@ -22,8 +23,9 @@ export default function configureStore (options) {
   const initialState = merge({}, store)
 
   return {
-    interceptReducer,
     store,
-    initialState
+    initialState,
+    interceptReducer,
+    pepperoniSagas
   }
 }

@@ -20,6 +20,25 @@ function invariantTargetMinifiedWithoutDisplayName (target) {
   )
 }
 
+function invariantCannotDeriveContentType (targetName, contentTypeOptions) {
+  invariant(
+    contentTypeOptions,
+    'Could not derive content type from name "%s". ' +
+    'Pass built-ins using `pepperoni/contentTypes`. For example, ContentTypes.POST. ' +
+    'Custom content types should be registered at initialisation and passed in using registered name.',
+    targetName
+  )
+}
+
+function invariantContentTypeNotRecognised (contentTypeOptions, contentType) {
+  invariant(
+    contentTypeOptions,
+    'The content type "%s" is not recognised. ' +
+    'Register custom content types during initialisation.',
+    contentType
+  )
+}
+
 /**
  * Connect a component to data from the WP-API.
  *
@@ -40,9 +59,8 @@ function invariantTargetMinifiedWithoutDisplayName (target) {
  * connectWordPress(Page, (props) => props.params.slug)(Component)
  * ```
  *
- * @params {String|Function|Number} contentType The content type of the data to fetch from WP-API.
- * @params {String|Function|Number} identifier The subject identifier of the content.
- *
+ * @params {String|Function|Number} contentType The content type of the data to fetch from WP-API
+ * @params {String|Function|Number} [identifier] The subject identifier of the content
  * @returns {Function}
  */
 export default function connectWordPress (contentType, identifier) {
@@ -57,20 +75,28 @@ export default function connectWordPress (contentType, identifier) {
       targetName
     )
 
-    let getContentTypeOptions = (contentTypes) => contentTypes[contentType]
+    let getContentTypeOptions = (contentTypes) => {
+      const contentTypeOptions = find(contentTypes, { name: { canonical: contentType } })
+      invariantContentTypeNotRecognised(contentTypeOptions, contentType)
+      return contentTypeOptions
+    }
 
     let getIdentifier = (props) => typeof identifier === 'function'
       ? identifier(props)
       : identifier
 
-    if (contentType && typeof identifier === 'undefined') {
+    if (typeof contentType !== 'string' && typeof identifier === 'undefined') {
       let contentTypeOptions
 
       invariantTargetMinifiedWithoutDisplayName(target)
 
-      getContentTypeOptions = (contentTypes) => !contentTypeOptions
-          ? contentTypeOptions = deriveContentTypeOptions(targetName, contentTypes)
-          : contentTypeOptions
+      getContentTypeOptions = (contentTypes) => {
+        if (!contentTypeOptions) {
+          contentTypeOptions = deriveContentTypeOptions(targetName, contentTypes)
+          invariantCannotDeriveContentType(targetName, contentTypeOptions)
+        }
+        return contentTypeOptions
+      }
 
       getIdentifier = (props) => typeof contentType === 'function'
         ? contentType(props)
@@ -82,17 +108,22 @@ export default function connectWordPress (contentType, identifier) {
 
       const subject = getIdentifier(ownProps)
       const contentTypeOpts = getContentTypeOptions(contentTypes)
+
       const nameSingular = contentTypeOpts.name[Plurality.SINGULAR]
       const namePlural = contentTypeOpts.name[Plurality.PLURAL]
       const contentTypeCollection = state.wordpress.entities[namePlural]
 
+      let entity = null
+
+      if (contentTypeCollection) {
+        entity = entityKeyPropName !== 'id'
+          ? find(contentTypeCollection, (obj) => obj[entityKeyPropName] === subject)
+          : contentTypeCollection[subject]
+      }
+
       return {
         wordpress: state.wordpress,
-        [nameSingular]: contentTypeCollection
-          ? entityKeyPropName !== 'id'
-            ? find(contentTypeCollection, (obj) => obj[entityKeyPropName] === subject)
-            : contentTypeCollection[subject]
-          : null
+        [nameSingular]: entity
       }
     }
 
@@ -102,6 +133,7 @@ export default function connectWordPress (contentType, identifier) {
 
         const subject = getIdentifier(this.props)
         const contentTypeOpts = getContentTypeOptions(contentTypes)
+
         const nameSingular = contentTypeOpts.name[Plurality.SINGULAR]
         const canonicalName = contentTypeOpts.name.canonical
 

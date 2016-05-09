@@ -12,7 +12,7 @@ import Pepperoni, { __defaultConfig } from '../src/index'
 import { completeRequest } from '../src/creators'
 import { baseState } from '../src/reducer'
 
-const pepperoniReducer = Pepperoni({ host: 'test' })
+const { pepperoniReducer } = Pepperoni({ host: 'test' })
 const rootReducer = combineReducers(pepperoniReducer)
 const store = createStore(rootReducer)
 

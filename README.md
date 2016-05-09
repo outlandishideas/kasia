@@ -89,48 +89,7 @@ export default function configureStore (initialState) {
 }
 ```
 
-## Built-in Components
-
-Pepperoni comes with ready-made React components for all the built-in content types available through the WP-API.
-
-All children of a built-in component are passed the content data implicitly.
-
-For custom content types, use the `PepperoniComponent` and pass in the content type via the `contentType` prop.
-
-```js
-// Available built-in components
-import PepperoniComponent, {
-  Category, Comment, Media, Page, Post, PostRevision,
-  PostType, PostStatus, Tag, Taxonomy, User
-} from 'pepperoni/components';
-```
-
-Example using the `Page` component:
-
-```js
-import { Page } from 'pepperoni/components';
-
-const Title = ({ page }) => {
-  return <h1>{page.title}</h1>;
-};
-
-const Content = ({ page }) => {
-  return <p>{page.content}</p>;
-};
-
-export default class MyPage {
-  render () {
-    return (
-      <Page slug="page-slug">
-        <Title />
-        <Content />
-      </Page>
-    );
-  }
-}
-```
-
-## Connected Components
+## Connect a Component
 
 After configuration you can connect a component in order that it receives content
 data via `props` by decorating that component with `connectWordPress`:
@@ -157,21 +116,29 @@ export default connectWordPress()(MyPost);
 
 ## Use a Connected Component
 
-Assuming this post is connected up to [react-router](https://github.com/reactjs/react-router) in the following manner:
+Example:
 
 ```js
-import React from 'react';
-import { Route, IndexRoute } from 'react-router';
+import React, { Component } from 'react'
+import { Route, IndexRoute } from 'react-router'
+import connectWordPress from 'pepperoni/connect'
 
-import App from './containers/App';
-import Post from './pages/Post';
+@connectedWordPress()
+class Post extends Component {
+  render () {
+    const { post } = this.props
+
+    if (!post) {
+      return <span>Loading</span>
+    }
+
+    return <h1>{post.title}</h1>
+  }
+}
 
 export default (
- <Route component={App} path="/">
-   <IndexRoute component={Home} />
-   <Route component={Post} path="/:slug" />
- </Route>
-);
+ <Route component={Post} path="/:slug" />
+)
 ```
 
 It will just work. Eventually `MyPost` will receive the post information as `this.props.post`.
@@ -199,27 +166,20 @@ const Component,
 
 __Pepperoni restructures data returned from the WP-API__.
 
-
 > Why?
 
 The JSON returned from WP-API contains such things as objects with a single property (e.g. objects with `rendered`),
-property names prefixed with underscores (e.g. `_links`) and most importantly it does not by default embed content
+property names prefixed with underscores (e.g. `_links`), and most importantly it does not by default embed content
 types within one another without the use of the `_embed` query parameter.
 
 > What changes should I be aware of?
 
 - __The `_embed` query parameter is enabled by default in Pepperoni.__
 
-- All properties are camel-cased.
+- All property names are camel-cased.
 
     ```js
     "featured_media" => "featuredMedia"
-    ```
-
-- All keys of the `links` object are prefixed with `link:`. This is to avoid `normalizr` picking up link objects as entities.
-
-    ```js
-    link['author]' => link['link:author']
     ```
 
 - Objects that have a single property `'rendered'` are flattened.
@@ -236,7 +196,7 @@ types within one another without the use of the `_embed` query parameter.
     { content: '<h1>Hello, World!</h1>' }
     ```
 
-- Wherever a nested content type appears under `embedded` that content type is flattened into the parent. It is also
+- Wherever a nested content type appears under `_embedded` that content type is flattened into the parent. It is also
 lifted into the store as a separate entity and so can be accessed independently of the parent content.
 
     So in the following instance, both the post and user (authors are users) become available in their respective

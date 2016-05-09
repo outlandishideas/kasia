@@ -6,7 +6,7 @@ import React, { Component } from 'react'
 
 import connectWordPress from '../../src/connect'
 
-@connectWordPress()
+@connectWordPress((props) => props.params.id)
 export default class DerivedPost extends Component {
   render () {
     return <div></div>

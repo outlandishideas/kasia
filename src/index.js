@@ -5,8 +5,6 @@ import makeReducer from './reducer'
 import fetchSaga from './sagas'
 import { builtInContentTypeOptions, makeCustomContentTypeOptions } from './contentTypes'
 
-export { default as ContentTypes } from './constants/ContentTypes'
-
 export const __defaultConfig = {
   host: null,
   wpApiUrl: 'wp-json/wp/v2',

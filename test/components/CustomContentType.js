@@ -6,7 +6,7 @@ import React, { Component } from 'react'
 
 import connectWordPress from '../../src/connect'
 
-@connectWordPress({ contentType: 'CustomContentType' })
+@connectWordPress('CustomContentType', (props) => props.params.id)
 export default class CustomContentType extends Component {
   render () {
     return <div></div>

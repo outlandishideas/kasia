@@ -7,12 +7,7 @@ import React, { Component } from 'react'
 import ContentTypes from '../../src/constants/ContentTypes'
 import connectWordPress from '../../src/connect'
 
-const testConnectOptions = {
-  contentType: ContentTypes.POST,
-  fetchDataOptions: {}
-}
-
-@connectWordPress(testConnectOptions)
+@connectWordPress(ContentTypes.POST, (props) => props.params.id)
 export default class BuiltInContentType extends Component {
   render () {
     return <div></div>

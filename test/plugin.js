@@ -5,7 +5,6 @@ jest.disableAutomock()
 
 import merge from 'lodash.merge'
 
-import { pepperoniSagas } from '../src/index'
 import configureStore from './util/configureStore'
 
 let didHitPluginReducer = false
@@ -32,7 +31,7 @@ const plugin = (pluginConfig) => {
   }
 }
 
-const { store } = configureStore({
+const { store, pepperoniSagas } = configureStore({
   host: 'test',
   plugins: [
     [plugin, { userPluginOption: true }]
