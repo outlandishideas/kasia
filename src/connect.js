@@ -154,6 +154,11 @@ export default function connectWordPress (contentType, identifier) {
 
         return React.createElement(target, this.props)
       }
+
+      componentWillUpdate () {
+        hasDispatchedRequestAction = false
+        hasWarnedNoEntity = false
+      }
     }
 
     PepperoniComponentWrapper.__pepperoni = true
