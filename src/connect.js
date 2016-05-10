@@ -104,11 +104,12 @@ export default function connectWordPress (contentType, identifier) {
     }
 
     function mapStateToProps (state, ownProps) {
-      const { contentTypes, entityKeyPropName } = state.wordpress.config
+      const { contentTypes } = state.wordpress.config
 
       const subject = getIdentifier(ownProps)
       const contentTypeOpts = getContentTypeOptions(contentTypes)
 
+      const isSlugSubject = typeof subject === 'string'
       const nameSingular = contentTypeOpts.name[Plurality.SINGULAR]
       const namePlural = contentTypeOpts.name[Plurality.PLURAL]
       const contentTypeCollection = state.wordpress.entities[namePlural]
@@ -116,8 +117,8 @@ export default function connectWordPress (contentType, identifier) {
       let entity = null
 
       if (contentTypeCollection) {
-        entity = entityKeyPropName !== 'id'
-          ? find(contentTypeCollection, (obj) => obj[entityKeyPropName] === subject)
+        entity = isSlugSubject
+          ? find(contentTypeCollection, (obj) => obj.slug === subject)
           : contentTypeCollection[subject]
       }
 
