@@ -155,6 +155,11 @@ export default function connectWordPress (contentType, identifier) {
         return React.createElement(target, this.props)
       }
 
+      shouldComponentUpdate (nextProps) {
+        return !hasDispatchedRequestAction &&
+          getIdentifier(nextProps) === getIdentifier(this.props);
+      }
+
       componentWillUpdate () {
         hasDispatchedRequestAction = false
         hasWarnedNoEntity = false
