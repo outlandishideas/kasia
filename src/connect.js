@@ -64,6 +64,9 @@ function invariantContentTypeNotRecognised (contentTypeOptions, contentType) {
  * @returns {Function}
  */
 export default function connectWordPress (contentType, identifier) {
+  let hasDispatchedRequestAction = false;
+  let hasWarnedNoEntity = false;
+
   return (target) => {
     const targetName = target.displayName
       ? target.displayName
@@ -109,7 +112,7 @@ export default function connectWordPress (contentType, identifier) {
       const subject = getIdentifier(ownProps)
       const contentTypeOpts = getContentTypeOptions(contentTypes)
 
-      const isSlugSubject = typeof subject === 'string'
+      const isSlugSubject = isNaN(Number(subject))
       const nameSingular = contentTypeOpts.name[Plurality.SINGULAR]
       const namePlural = contentTypeOpts.name[Plurality.PLURAL]
       const contentTypeCollection = state.wordpress.entities[namePlural]
@@ -119,7 +122,7 @@ export default function connectWordPress (contentType, identifier) {
       if (contentTypeCollection) {
         entity = isSlugSubject
           ? find(contentTypeCollection, (obj) => obj.slug === subject)
-          : contentTypeCollection[subject]
+          : contentTypeCollection[String(subject)]
       }
 
       return {
@@ -138,10 +141,15 @@ export default function connectWordPress (contentType, identifier) {
         const nameSingular = contentTypeOpts.name[Plurality.SINGULAR]
         const canonicalName = contentTypeOpts.name.canonical
 
-        if (!this.props[nameSingular]) {
-          this.props.dispatch(
-            createRequest(canonicalName, subject)
-          )
+        if (!this.props[nameSingular] && !hasDispatchedRequestAction) {
+          hasDispatchedRequestAction = true
+          this.props.dispatch(createRequest(canonicalName, subject))
+        } else if (!this.props[nameSingular] && hasDispatchedRequestAction) {
+          if (!hasWarnedNoEntity) {
+            hasWarnedNoEntity = true
+            console.warn(`Pepperoni: subject was not found with identifier \`${subject}\``)
+            // TODO do something other than console.warn here
+          }
         }
 
         return React.createElement(target, this.props)
