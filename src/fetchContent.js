@@ -14,6 +14,27 @@ const defaultOptions = {
   }
 }
 
+// TODO check if there are other response statuses and handle them
+function handleData (isSlugRequest, response) {
+  const idContentNotFound = !isSlugRequest &&
+    response && response.data && response.data.status === 404
+
+  const slugContentNotFound = isSlugRequest &&
+    response && !response.length
+
+  const contentNotFound = idContentNotFound || slugContentNotFound
+
+  if (!response || contentNotFound) {
+    return Promise.reject(new Error('No content found'))
+  }
+
+  const data = isSlugRequest
+    ? response[0]
+    : response
+
+  return { data }
+}
+
 /**
  * Make a request to the WP-API for content data.
  * @param {Object} contentTypeOptions Options for the content that is being requested.
@@ -81,6 +102,6 @@ export default function fetchContent (contentTypeOptions, subject, config, optio
 
   return fetch(endpoint)
     .then((response) => response.json())
-    .then((data) => ({ data: isSlugRequest ? data[0] : data }))
-    .catch((error) => ({ error }))
+    .then(handleData.bind(null, isSlugRequest))
+    .catch((error) => ({ data: { error } }))
 }

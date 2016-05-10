@@ -77,5 +77,7 @@ describe('fetchContent', () => {
     expect(fetchCall()).toEqual('http://test/wp/posts?_embed&filter[post__in][]=1&filter[post__in][]=2')
   })
 
+  // TODO test content 404
+
   // TODO test post revisions route as has different route parameters requirement than the other routes
 })
