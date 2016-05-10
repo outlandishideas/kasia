@@ -155,20 +155,24 @@ export default function connectWordPress (contentType, identifier) {
         return React.createElement(target, this.props)
       }
 
-      shouldComponentUpdate (nextProps) {
-        const { contentTypes } = this.props.wordpress.config
+      // shouldComponentUpdate (nextProps) {
+      //   const { contentTypes } = this.props.wordpress.config
+      //
+      //   const contentTypeOpts = getContentTypeOptions(contentTypes)
+      //   const nameSingular = contentTypeOpts.name[Plurality.SINGULAR]
+      //   const sameIdentifier = getIdentifier(nextProps) === getIdentifier(this.props);
+      //   const hasDispatchedAndReceivedEntity = hasDispatchedRequestAction && !!this.props[nameSingular];
+      //
+      //   return hasDispatchedAndReceivedEntity || (!hasDispatchedRequestAction && sameIdentifier);
+      // }
 
-        const contentTypeOpts = getContentTypeOptions(contentTypes)
-        const nameSingular = contentTypeOpts.name[Plurality.SINGULAR]
+      componentWillUpdate (nextProps) {
         const sameIdentifier = getIdentifier(nextProps) === getIdentifier(this.props);
-        const hasDispatchedAndReceivedEntity = hasDispatchedRequestAction && !!this.props[nameSingular];
 
-        return hasDispatchedAndReceivedEntity || (!hasDispatchedRequestAction && sameIdentifier);
-      }
-
-      componentWillUpdate () {
-        hasDispatchedRequestAction = false
-        hasWarnedNoEntity = false
+        if (!sameIdentifier) {
+          hasDispatchedRequestAction = false
+          hasWarnedNoEntity = false
+        }
       }
     }
 
