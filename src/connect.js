@@ -156,8 +156,14 @@ export default function connectWordPress (contentType, identifier) {
       }
 
       shouldComponentUpdate (nextProps) {
-        return !hasDispatchedRequestAction &&
-          getIdentifier(nextProps) === getIdentifier(this.props);
+        const { contentTypes } = this.props.wordpress.config
+
+        const contentTypeOpts = getContentTypeOptions(contentTypes)
+        const nameSingular = contentTypeOpts.name[Plurality.SINGULAR]
+        const sameIdentifier = getIdentifier(nextProps) === getIdentifier(this.props);
+        const hasDispatchedAndReceivedEntity = hasDispatchedRequestAction && !!this.props[nameSingular];
+
+        return hasDispatchedAndReceivedEntity || (!hasDispatchedRequestAction && sameIdentifier);
       }
 
       componentWillUpdate () {
