@@ -1,5 +1,5 @@
-export default {
-    CATEGORY: 'CATEGORY',
+const ContentTypes = {
+  CATEGORY: 'CATEGORY',
   COMMENT: 'COMMENT',
   MEDIA: 'MEDIA',
   PAGE: 'PAGE',
@@ -10,4 +10,6 @@ export default {
   TAG: 'TAG',
   TAXONOMY: 'TAXONOMY',
   USER: 'USER'
-};
+}
+
+export default ContentTypes

@@ -1,11 +1,11 @@
-import Plurality from './Plurality';
-import ContentTypes from './ContentTypes';
+import Plurality from './Plurality'
+import ContentTypes from './ContentTypes'
 
 export const EndpointRouteParams = [
   'id',
   'postId',
   'slug'
-];
+]
 
 export const QueryableBySlug = [
   ContentTypes.CATEGORY,
@@ -14,7 +14,7 @@ export const QueryableBySlug = [
   ContentTypes.POST,
   ContentTypes.TAG,
   ContentTypes.USER
-];
+]
 
 export const Slugs = {
   [ContentTypes.CATEGORY]: {
@@ -61,4 +61,4 @@ export const Slugs = {
     [Plurality.SINGULAR]: '/users/:id',
     [Plurality.PLURAL]: '/users'
   }
-};
+}

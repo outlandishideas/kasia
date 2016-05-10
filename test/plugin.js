@@ -1,24 +1,26 @@
-jest.disableAutomock();
+/* eslint-env jasmine */
+/* global jest:false */
 
-import merge from 'lodash.merge';
+jest.disableAutomock()
 
-import { pepperoniSagas } from '../src/index';
-import configureStore from './util/configureStore';
+import merge from 'lodash.merge'
 
-let didHitPluginReducer = false;
+import configureStore from './util/configureStore'
 
-const testPluginName = 'testPluginName';
-const config = { foo: 'bar' };
-const testActionType = 'pepperoni/TEST_ACTION';
+let didHitPluginReducer = false
 
-const pluginSaga = jest.fn();
+const testPluginName = 'testPluginName'
+const config = { foo: 'bar' }
+const testActionType = 'pepperoni/TEST_ACTION'
+
+const pluginSaga = jest.fn()
 
 const pluginReducer = {
   [testActionType]: (action, state) => {
-    didHitPluginReducer = true;
-    return state;
+    didHitPluginReducer = true
+    return state
   }
-};
+}
 
 const plugin = (pluginConfig) => {
   return {
@@ -26,30 +28,30 @@ const plugin = (pluginConfig) => {
     reducer: pluginReducer,
     sagas: [pluginSaga],
     config: merge({}, config, pluginConfig)
-  };
-};
+  }
+}
 
-const { store } = configureStore({
+const { store, pepperoniSagas } = configureStore({
   host: 'test',
   plugins: [
     [plugin, { userPluginOption: true }]
   ]
-});
+})
 
 describe('Pepperoni plugin', () => {
   it('should add plugin config to the default state', () => {
-    const state = store.getState();
-    expect(typeof state.wordpress.config.plugins[testPluginName]).toEqual('object');
-    expect(state.wordpress.config.plugins[testPluginName].foo).toEqual('bar');
-    expect(state.wordpress.config.plugins[testPluginName].userPluginOption).toEqual(true);
-  });
+    const state = store.getState()
+    expect(typeof state.wordpress.config.plugins[testPluginName]).toEqual('object')
+    expect(state.wordpress.config.plugins[testPluginName].foo).toEqual('bar')
+    expect(state.wordpress.config.plugins[testPluginName].userPluginOption).toEqual(true)
+  })
 
   it('should call plugin reducer action handler when action type is matched', () => {
-    store.dispatch({ type: testActionType });
-    expect(didHitPluginReducer).toEqual(true);
-  });
-  
+    store.dispatch({ type: testActionType })
+    expect(didHitPluginReducer).toEqual(true)
+  })
+
   it('should add the plugin saga to internal sagas array', () => {
-    expect(pepperoniSagas.indexOf(pluginSaga)).toEqual(1);
-  });
-});
+    expect(pepperoniSagas.indexOf(pluginSaga)).toEqual(1)
+  })
+})

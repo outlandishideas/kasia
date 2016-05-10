@@ -1,18 +1,15 @@
-jest.disableAutomock();
+/* global jest:false */
 
-import React, { Component } from 'react';
+jest.disableAutomock()
 
-import ContentTypes from '../../src/constants/ContentTypes';
-import connectWordPress from '../../src/connect';
+import React, { Component } from 'react'
 
-const testConnectOptions = {
-  contentType: ContentTypes.POST,
-  fetchDataOptions: {}
-};
+import ContentTypes from '../../src/constants/ContentTypes'
+import connectWordPress from '../../src/connect'
 
-@connectWordPress(testConnectOptions)
+@connectWordPress(ContentTypes.POST, (props) => props.params.id)
 export default class BuiltInContentType extends Component {
   render () {
-    return <div></div>;
+    return <div></div>
   }
 }

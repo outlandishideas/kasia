@@ -1,9 +1,9 @@
-import humps from 'humps';
-import invariant from 'invariant';
+import humps from 'humps'
+import invariant from 'invariant'
 
-import ContentTypes from './constants/ContentTypes';
-import Plurality from './constants/Plurality';
-import { Slugs } from './constants/WpApiEndpoints';
+import ContentTypes from './constants/ContentTypes'
+import Plurality from './constants/Plurality'
+import { Slugs } from './constants/WpApiEndpoints'
 
 export const builtInContentTypeOptions = Object.keys(ContentTypes)
   .reduce((obj, contentType) => {
@@ -11,74 +11,71 @@ export const builtInContentTypeOptions = Object.keys(ContentTypes)
       slug: Slugs[contentType],
       name: {
         canonical: contentType,
-        [Plurality.SINGULAR]: humps.camelize(contentType.toLowerCase()),
+        [Plurality.SINGULAR]: mapToCamelCaseSingular(contentType),
         [Plurality.PLURAL]: mapToCamelCasePlural(contentType)
       }
-    };
-    return obj;
-  }, {});
+    }
+    return obj
+  }, {})
 
 export function makeCustomContentTypeOptions (customContentTypes) {
   return customContentTypes
     .reduce((obj, contentType) => {
-      const options = typeof contentType === 'object' ?  contentType : { name: String(contentType) };
-      const contentTypeOptions = makeCustomContentType(options);
-      obj[contentTypeOptions.name.canonical] = contentTypeOptions;
-      return obj;
-    }, {});
+      const contentTypeOptions = makeCustomContentType(contentType)
+      obj[contentTypeOptions.name.canonical] = contentTypeOptions
+      return obj
+    }, {})
 }
 
 export function deriveContentTypeOptions (str, contentTypes) {
-  const contentTypeNames = Object.keys(contentTypes);
-  const lowercased = str.toLowerCase();
+  const contentTypeNames = Object.keys(contentTypes)
+  const lowercased = str.toLowerCase()
 
-  let found;
+  let contentTypeOptions = false
 
-  for (let i = 0; i < contentTypeNames.length; i++) {
-    const name = contentTypeNames[i];
-    const options = contentTypes[name];
-
-    if (lowercased.indexOf(options.name.canonical.toLowerCase()) !== -1) {
-      found = contentTypes[name];
-      break;
+  contentTypeNames.forEach(function it (name) {
+    if (!contentTypeOptions) {
+      const nameCanonical = contentTypes[name].name.canonical.toLowerCase()
+      if (lowercased.indexOf(nameCanonical) !== -1) {
+        contentTypeOptions = contentTypes[name]
+      }
     }
-  }
+  })
 
-  invariant(
-    found,
-    'Could not derive content type from name "%s". ' +
-    'Pass built-ins using Pepperoni.ContentTypes. For example, ContentTypes.POST. ' +
-    'Custom content types should be registered at initialisation and passed in using registered name.',
-    str
-  );
-
-  return found;
+  return contentTypeOptions
 }
 
-function makeCustomContentType (options = {}) {
+function makeCustomContentType (options) {
   invariant(
-    typeof options.name === 'string',
+    typeof options === 'string' || typeof options.name === 'string',
     'Expecting custom content type name to be a string, got "%s".',
-    typeof options.name
-  );
+    typeof (options.name ? options.name : options)
+  )
 
-  // TODO move this check somewhere that has access to config to prevent custom content types being overridden too
-  const builtInContentNames = Object.keys(ContentTypes).map(s => s.toLowerCase());
-  const camelisedBuiltInContentNames = builtInContentNames.map(s => s.replace('_', ''));
+  options = typeof options === 'string'
+    ? { name: String(options) }
+    : options
+
+  options.nameSingle = options.nameSingle || options.name
+  options.namePlural = options.namePlural || options.name + 's'
+  options.requestSlug = options.requestSlug || humps.decamelize(options.namePlural, { separator: '-' })
+
+  const builtInContentNames = Object.keys(ContentTypes)
+    .map((s) => s.toLowerCase())
+
+  const camelisedBuiltInContentNames = builtInContentNames
+    .map((s) => s.replace('_', ''))
 
   const isConflictingName = []
       .concat(builtInContentNames, camelisedBuiltInContentNames)
-      .indexOf(options.name.toLowerCase()) !== -1;
-  
+      .indexOf(options.name.toLowerCase()) !== -1
+
   invariant(
     !isConflictingName,
-    'The content type name "%s" is taken. Choose another non-conflicting name.',
+    'The content type name "%s" is taken. ' +
+    'Choose another non-conflicting name.',
     options.name
-  );
-
-  options.nameSingle = options.nameSingle || options.name;
-  options.namePlural = options.namePlural || options.name + 's';
-  options.requestSlug = options.requestSlug || humps.decamelize(options.namePlural, { separator: '-' });
+  )
 
   return {
     slug: {
@@ -88,12 +85,28 @@ function makeCustomContentType (options = {}) {
     name: {
       // Canonical name is used when querying content types
       canonical: options.name,
-      // Single name is used for placing an item on a component's state, e.g. `state.postType`
+      // Singular is used for placing an item on a component's props, e.g. `this.props.postType`
       [Plurality.SINGULAR]: humps.camelize(options.nameSingle),
-      // Plural name is used for entity collection name in the store, e.g. `entities.postTypes`
+      // Plural is used for entity collection name in the store, e.g. `store.wordpress.entities.postTypes`
       [Plurality.PLURAL]: humps.camelize(options.namePlural)
     }
-  };
+  }
+}
+
+function mapToCamelCaseSingular (contentType) {
+  return {
+    [ContentTypes.CATEGORY]: 'category',
+    [ContentTypes.COMMENT]: 'comment',
+    [ContentTypes.MEDIA]: 'media',
+    [ContentTypes.PAGE]: 'page',
+    [ContentTypes.POST]: 'post',
+    [ContentTypes.POST_REVISION]: 'postRevision',
+    [ContentTypes.POST_TYPE]: 'postType',
+    [ContentTypes.POST_STATUS]: 'postStatus',
+    [ContentTypes.TAG]: 'tag',
+    [ContentTypes.TAXONOMY]: 'taxonomy',
+    [ContentTypes.USER]: 'user'
+  }[contentType]
 }
 
 function mapToCamelCasePlural (contentType) {
@@ -109,5 +122,5 @@ function mapToCamelCasePlural (contentType) {
     [ContentTypes.TAG]: 'tags',
     [ContentTypes.TAXONOMY]: 'taxonomies',
     [ContentTypes.USER]: 'users'
-  }[contentType];
+  }[contentType]
 }

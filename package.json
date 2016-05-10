@@ -6,7 +6,7 @@
   "jsnext:main": "src/index.js",
   "scripts": {
     "compile": "rimraf lib && babel -d lib/ src/",
-    "lint": "eslint src/",
+    "lint": "snazzy",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
@@ -51,6 +51,7 @@
   "devDependencies": {
     "babel-cli": "6.6.5",
     "babel-core": "6.7.2",
+    "babel-eslint": "^6.0.4",
     "babel-jest": "^11.0.2",
     "babel-plugin-add-module-exports": "^0.1.4",
     "babel-plugin-transform-decorators-legacy": "^1.3.4",
@@ -59,12 +60,11 @@
     "babel-preset-react": "^6.5.0",
     "babel-preset-stage-0": "^6.5.0",
     "enzyme": "^2.2.0",
-    "eslint": "^2.8.0",
-    "eslint-config-airbnb-base": "^1.0.1",
-    "eslint-plugin-import": "^1.5.0",
     "jest": "^0.1.40",
     "jest-cli": "^11.0.2",
-    "rimraf": "^2.5.2"
+    "rimraf": "^2.5.2",
+    "snazzy": "^4.0.0",
+    "standard": "^7.0.1"
   },
   "jest": {
     "testDirectoryName": [
@@ -82,6 +82,12 @@
       "/fixtures/",
       "/components/",
       "/util/"
+    ]
+  },
+  "standard": {
+    "parser": "babel-eslint",
+    "ignore": [
+      "/lib"
     ]
   }
 }
