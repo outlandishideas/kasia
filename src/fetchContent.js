@@ -30,9 +30,9 @@ function handleData (isSlugRequest, response) {
 
   const data = isSlugRequest
     ? response[0]
-    : response;
+    : response
 
-  return { data };
+  return { data }
 }
 
 /**
