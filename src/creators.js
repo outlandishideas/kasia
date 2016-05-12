@@ -11,8 +11,8 @@ export const createRequest = (contentType, subject, options = {}) =>
 export const startRequest = (contentType) =>
   ({ type: REQUEST.START, contentType })
 
-export const failRequest = (contentType, error) =>
-  ({ type: REQUEST.FAIL, contentType, error })
+export const failRequest = (contentType, subject, error) =>
+  ({ type: REQUEST.FAIL, contentType, subject, error })
 
 export const completeRequest = (contentType, data) =>
   ({ type: REQUEST.COMPLETE, contentType, data })

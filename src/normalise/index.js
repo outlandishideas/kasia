@@ -4,7 +4,7 @@ import humps from 'humps'
 import makeSchemas from './makeSchemas'
 import flatten from './flatten'
 
-export default function normalise (contentType, content, idAttribute, invalidateSchemaCache = false) {
+export function normalise (contentType, content, idAttribute, invalidateSchemaCache = false) {
   const flattened = flatten(humps.camelizeKeys(content))
 
   const finalIdAttribute = typeof idAttribute === 'function'
@@ -19,4 +19,13 @@ export default function normalise (contentType, content, idAttribute, invalidate
     : contentTypeSchema
 
   return normalize(flattened, schema)
+}
+
+export function normaliseFailed(contentType, idAttribute, subject, error, invalidateSchemaCache = false) {
+  const content = {
+    id: subject,
+    slug: subject,
+    error: error && error.message ? error.message : error
+  };
+  return normalise(contentType, content, idAttribute, invalidateSchemaCache);
 }

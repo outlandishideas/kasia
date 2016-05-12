@@ -125,6 +125,23 @@ export default function connectWordPress (contentType, identifier) {
           : contentTypeCollection[String(subject)]
       }
 
+      if (!entity) {
+        // look in the failed entities instead
+        const failedContentTypeCollection = state.wordpress.failedEntities[namePlural]
+        if (failedContentTypeCollection && failedContentTypeCollection[subject]) {
+          
+          // return an entity object with no identifying properties
+          entity = {...failedContentTypeCollection[subject]};
+          delete entity.id;
+          delete entity.slug;
+
+          if (!hasWarnedNoEntity) {
+            hasWarnedNoEntity = true
+            console.warn(`Pepperoni: subject was not found with identifier \`${subject}\``)
+          }
+        }
+      }
+
       return {
         wordpress: state.wordpress,
         [nameSingular]: entity
@@ -144,12 +161,6 @@ export default function connectWordPress (contentType, identifier) {
         if (!this.props[nameSingular] && !hasDispatchedRequestAction) {
           hasDispatchedRequestAction = true
           this.props.dispatch(createRequest(canonicalName, subject))
-        } else if (!this.props[nameSingular] && hasDispatchedRequestAction) {
-          if (!hasWarnedNoEntity) {
-            hasWarnedNoEntity = true
-            console.warn(`Pepperoni: subject was not found with identifier \`${subject}\``)
-            // TODO do something other than console.warn here
-          }
         }
 
         return React.createElement(target, this.props)

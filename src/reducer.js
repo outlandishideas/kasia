@@ -1,11 +1,12 @@
 import merge from 'lodash.merge'
 
 import Plurality from './constants/Plurality'
-import normalise from './normalise'
+import { normalise, normaliseFailed } from './normalise'
 import { REQUEST, INVALIDATE } from './constants/ActionTypes'
 
 export const baseState = {
   entities: {},
+  failedEntities: {},
   config: {}
 }
 
@@ -24,6 +25,10 @@ export default function makeReducer (config, plugins) {
     [REQUEST.COMPLETE]: (state, action) => {
       const normalisedData = normalise(action.contentType, action.data, entityKeyPropName)
       return merge({}, state, { entities: normalisedData.entities })
+    },
+    [REQUEST.FAIL]: (state, action) => {
+      const normalisedData = normaliseFailed(action.contentType, entityKeyPropName, action.subject, action.error)
+      return merge({}, state, { failedEntities: normalisedData.entities })
     },
     [INVALIDATE]: (state, action) => {
       const namePlural = contentTypes[action.contentType].name[Plurality.PLURAL]

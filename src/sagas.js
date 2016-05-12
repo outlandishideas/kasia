@@ -24,13 +24,16 @@ export function * fetchResource (action) {
 
   yield put(startRequest(contentType))
 
-  const { error, data } = yield call(fetchContent, contentTypeOptions, subject, config, action.options)
-
-  if (error) {
-    yield put(failRequest(contentType, error))
+  let { error, data } = yield call(fetchContent, contentTypeOptions, subject, config, action.options)
+  if (!error && data) {
+    error = data.error;
   }
 
-  yield put(completeRequest(contentType, data))
+  if (error) {
+    yield put(failRequest(contentType, subject, error))
+  } else {
+    yield put(completeRequest(contentType, data))
+  }
 }
 
 export default function * fetchSaga () {

@@ -8,7 +8,7 @@ import cloneDeep from 'lodash.clonedeep'
 
 import WpApiResponses from './fixtures/wp-api-responses'
 import ContentTypes from '../src/constants/ContentTypes'
-import normalise from '../src/normalise'
+import { normalise } from '../src/normalise'
 
 function makeNormaliserTestData (contentType) {
   const first = WpApiResponses[contentType]
