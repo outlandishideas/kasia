@@ -34,132 +34,82 @@ Import the main configuration function:
 
 ```js
 // ES6
-import pepperoni from 'pepperoni';
+import pepperoni from 'pepperoni'
 ```
 
 ```js
 // non-ES6
-var pepperoni = require('pepperoni');
+var pepperoni = require('pepperoni')
 ```
 
 Pepperoni has other exports, listed in the [API](#API) documentation.
 
 ## Configure
 
-Create and then include the Pepperoni reducer when composing
-your application's root reducer with `redux#combineReducers`:
+Two small steps for man, one huge leap for a pizza topping.
+
+1. Create and spread the Pepperoni reducer when composing your the root reducer.
+
+2. Spread the Pepperoni sagas when composing the saga middleware.
 
 ```js
-import { combineReducers } from 'redux';
-import pepperoni from 'pepperoni';
+import { combineReducers, createStore, applyMiddleware } from 'redux'
+import createSagaMiddleware from 'redux-saga'
+import Pepperoni from 'pepperoni'
 
-const pepperoniReducer = pepperoni({
+const { pepperoniReducer, pepperoniSagas } = Pepperoni({
   wpApiUrl: 'https://example.com/wp-api/v2/'
-});
+})
 
 const rootReducer = combineReducers({
   ...pepperoniReducer
-});
+})
 
-export default rootReducer;
-```
-
-Use the root reducer when creating your redux store, passing
-in Pepperoni's own sagas to `redux-saga#createSagaMiddleware`.
-
-```js
-import { createStore, applyMiddleware } from 'redux';
-import { pepperoniSagas } from 'pepperoni';
-import createSagaMiddleware from 'redux-saga';
-
-import rootReducer from '../reducers';
+const sagaMiddleware = createSagaMiddleware(
+  ...pepperoniSagas
+)
 
 export default function configureStore (initialState) {
-  const sagaMiddleware = createSagaMiddleware(
-    ...pepperoniSagas()
-  );
-
-  const store = createStore(
+  return createStore(
     rootReducer,
     initialState,
     applyMiddleware(sagaMiddleware)
-  );
-
-  return store;
+  )
 }
 ```
 
 ## Connect a Component
 
 After configuration you can connect a component in order that it receives content
-data via `props` by decorating that component with `connectWordPress`:
+data via `props` by decorating that component with `connectWordPress`.
 
-```js
-import React, { Component } from 'react';
-import { connectWordPress } from 'pepperoni';
-
-class MyPost extends Component {
-  render () {
-    const { post } = this.props;
-
-    if (!post) {
-      return <div>Loading...</div>;
-    }
-
-    return <div dangerouslySetInnerHTML={this.props.post.title}></div>;
-  }
-}
-
-// Connect the component to data from WP-API
-export default connectWordPress()(MyPost);
-```
-
-## Use a Connected Component
-
-Example:
+For example, using a connected component as a `react-router` router handler we can provide a function
+to pick a subject identifier from the `params` property:
 
 ```js
 import React, { Component } from 'react'
-import { Route, IndexRoute } from 'react-router'
+import { Route } from 'react-router'
 import connectWordPress from 'pepperoni/connect'
 
-@connectedWordPress()
-class Post extends Component {
+@connectWordPress((props) => props.params.slug)
+export default class Post extends Component {
   render () {
     const { post } = this.props
 
     if (!post) {
-      return <span>Loading</span>
+      return <span>Loading...</span>
     }
 
     return <h1>{post.title}</h1>
   }
 }
 
+// Somewhere else in a module far far away...
+// [imports, boilerplate, ...]
+
 export default (
- <Route component={Post} path="/:slug" />
+  <Route component={Post} path="/:slug" />
 )
-```
-
-It will just work. Eventually `MyPost` will receive the post information as `this.props.post`.
-If something goes wrong it will receive `this.props.error` which it should handle if required.
-
-The works by simple convention. Anything with `Post` in it is assumed to be a wanted the post post type in WordPress,
-anything with `Page` is assumed to be wanting that, anything with `Taxonomy` is assumed to be a taxonomy and so on.
-The information from React Router passed as props (for example `slug` or `id`) is assumed to correspond to those
-meanings in WordPress REST API generally. You can also override this if neccessary as we will see.
-
-## Ready-made Components
-
-Pepperoni comes with all built-in content types available as ready-made React components.
-
-It also provides a generic `Pepperoni.Component` component that can be configured to receive data for
-custom content types.
-
-This API is useful for components that do not depend on configuration received via a router.
-
-```js
-const Component,
 ```
 
 ## The Shape of Data
@@ -169,12 +119,26 @@ __Pepperoni restructures data returned from the WP-API__.
 > Why?
 
 The JSON returned from WP-API contains such things as objects with a single property (e.g. objects with `rendered`),
-property names prefixed with underscores (e.g. `_links`), and most importantly it does not by default embed content
+property names prefixed with an underscore (e.g. `_links`), and most importantly it does not by default embed content
 types within one another without the use of the `_embed` query parameter.
 
 > What changes should I be aware of?
 
 - __The `_embed` query parameter is enabled by default in Pepperoni.__
+
+    The primary reason for this is to reduce the number of requests made to the WP-API as it is very common
+    to not only want content data, but also any metadata such as authors.
+
+    This can be disabled during configuration or for an individual component by
+    declaring `{ useEmbedQuery: false }` in the options object.
+
+    ```js
+    // Disable `_embed` query parameter during configuration
+    const { pepperoniReducer, pepperoniSagas } = Pepperoni({ useEmbedQuery: false })
+
+    // Disable `_embed` query parameter at the component-level
+    connectWordPress(/*args*/, { useEmbedQuery: false })(Component)
+    ```
 
 - All property names are camel-cased.
 
@@ -191,7 +155,7 @@ types within one another without the use of the `_embed` query parameter.
       }
     }
 
-    =>
+    //=>
 
     { content: '<h1>Hello, World!</h1>' }
     ```
@@ -202,7 +166,6 @@ lifted into the store as a separate entity and so can be accessed independently 
     So in the following instance, both the post and user (authors are users) become available in their respective
     collections within the store.
 
-
    ```js
     {
       id: 10,
@@ -212,11 +175,18 @@ lifted into the store as a separate entity and so can be accessed independently 
       }
     }
 
-    =>
+    //=>
 
     {
-      id: 10,
-      author: { id: 50, name: "Special Agent Pepperoni" }
+      posts: {
+        '10': {
+          id: 10,
+          author: { id: 50, name: "Special Agent Pepperoni" }
+        }
+      },
+      authors: {
+        '50': { id: 50, name: "Special Agent Pepperoni" }
+      }
     }
   ```
 
@@ -226,23 +196,32 @@ lifted into the store as a separate entity and so can be accessed independently 
 
 Configure Pepperoni.
 
-Returns the Pepperoni reducer as an object.
+Returns an object containing the Pepperoni reducer and sagas.
 
 ```js
-const pepperoniReducer = pepperoni({
-  wpApiUrl: 'http://website.com/wp/v2'
-});
+const { pepperoniReducer, pepperoniSagas } = Pepperoni({
+  host: 'http://website.com'
+})
 ```
 
 The required `options` object accepts properties:
 
-- `wpApiUrl` (required)
+- `host` (required)
+
+    The host of the WP-API.
+
+    ```js
+    // Example host
+    { host: 'http://website.com' }
+    ```
+
+- `wpApiUrl` (optional) (default: `'wp-json/wp/v2'`)
 
     The location of the WP-API.
 
     ```js
     // Example WP-API URL
-    { wpApiUrl: 'http://website.com/wp/v2' }
+    { wpApiUrl: 'wp-json/wp/v2' }
     ```
 
 - `customContentTypes` (optional) (default: `[]`)
@@ -257,76 +236,64 @@ The required `options` object accepts properties:
     A custom content type can be an `Object` or a `String`.
 
     When a string is given, the `requestSlug` and `namePlural` are generated automatically.
-    For example, for a custom content type `'CustomUser'`:
+    The string should be camel-cased. For example, for a custom content type `'CustomUser'`:
 
         requestSlug === 'custom-users' // string used in WP-API requests
         nameSingle === 'customUser' // string used to namespace single item on component `props`
         namePlural === 'customUsers' // string used to namespace entities in the store
 
-    The above properties are can be overridden by providing a custom content type as an `Object`.
+    These properties can be overridden by providing a custom content type as an `Object`.
 
-- `entityKeyPropName` (optional) (default: `EntityKeyPropNames.ID`)
+- `keyEntitiesBy` (optional) (default: `'id'`)
 
-    The property on content returned from the WP-API that is used to key that content in the store.
+    The property on content from the WP-API that is used to key that content in the store.
 
-    Available values live in `pepperoni.EntityKeyPropNames` and are `ID` and `SLUG`.
-
-    For example, given a post `{ title: 'My Post', id: '123' }` and `entityKeyPropName === EntityKeyPropNames.ID`
-    the post will be available in the store under `posts['123']`.
+    e.g Given `keyEntitiesBy === 'slug'` and a post `{ title: 'My Post', slug: 'my-post' }`
+    the post will be available in the store under `wordpress.entities.posts['my-post']`.
 
 ### `connectWordPress([options]) : Component`
 
 Connect a component to data from the WP-API.
 
 ```js
-@connectWordPress(/*<options>*/)
-class Post extends Component {}
+@connectWordPress(/*contentType, identifier, options*/)
+export default class Post extends Component {}
 
 // or, without support for decorators...
 
 class Post extends Component {}
-connectWordPress(/*<options>*/)(Post)
+export default connectWordPress(/*contentType, identifier, options*/)(Post)
 ```
 
-The optional `options` object accepts properties:
+Arguments:
 
 - `contentType` (optional) (default: derived from Component name)
 
     The name of the content type for which the connected component will receive data.
 
-    When a `contentType` is not given (default) Pepperoni will derive the content type from the component name. e.g.
-    A component named `MyCustomPost` will automatically use the registered custom content type `'CustomPost'`.
+    When a `contentType` is not given Pepperoni will derive the content type from the component name. e.g.
+    A component named `'MyPost'` will automatically use the built-in content type `'Post'`, or a component named
+    `'Article'` will use the custom content type `'Article'`, so long as it has been declared at initialisation.
 
-    When passing explicitly, built-in content types are available at `pepperoni.ContentTypes` and custom content
+    When passing explicitly, built-in content types are available from `pepperoni/contentTypes` and custom content
     types should be passed in using the `name` they were registered with.
 
     ```js
-    // Example explicit built-in content type:
-    { contentType: ContentTypes.POST }
+    import { Post } from 'pepperoni/contentTypes'
+
+    // Example explicit built-in content type
+    // Requests a post with derived ID
+    connectWordPress(Post, (props) => props.params.postId)(Component)
+
+    // Example derived content type
+    // Makes request for a page with the 'homepage' slug
+    connectWordPress('homepage')(HomePage)
 
     // Example explicit custom content type
-    { contentType: 'CustomContentType' }
+    // Makes request for an article with ID of `43`
+    connectWordPress('Articles', 34)(Component)
     ```
 
-- `routeParamsPropName` (optional) (default: `'params'`)
-
-    The property on a component's `props` where route parameters for a request to the WP-API will be derived.
-    The default is `'props'`, so folks using `react-router` are not required to configure this option.
-
-    ```js
-    // Example overriding route parameters property name
-    { routeParamsPropName: 'routeParams' }
-    ```
-
-- `routeParamSubjectKey` (optional) (default: `'id'`)
-
-    The property on `props[routeParamsPropName]` where the subject identifier for the request to the
-    WP-API will be derived.
-
-    ```js
-    // Example overriding route parameters property name
-    { routeParamSubjectKey: 'postId' }
-    ```
 
 -----
 
@@ -336,7 +303,7 @@ Pepperoni delivers the data to you straight out of WordPress by default. We have
 pepperoniReducers = createPepperoniReducers({
   api: 'https://example.com/wp-api/v2/',
   restructureData: true
-});
+})
 ```
 
 Sometimes you might not want to make these assumptions. `connectToWordPress` accepts a number of possible arguments to explicitly tell Pepperoni what data is wanted from WordPress REST API.
@@ -351,7 +318,7 @@ connectToWordPress({
   extraActionInfo: {
   	something: 'blah'
   } // Extra action into to be merged when dispatcher is called to make fetch from WordPress (or a function to add extra action info)
-})(MyPost);
+})(MyPost)
 ```
 
 ### Getting Data Directly
@@ -363,31 +330,31 @@ You can do this by dispatching the action handlers that under the hood are respo
 For example, if we wanted to fetch a post for our own component.
 
 ```js
-import React, { Component } from 'react';
+import React, { Component } from 'react'
 
-import { connectToWordPressDirectly } from 'pepperoni';
-import { fetchPost } from 'pepperoni/action';
+import { connectToWordPressDirectly } from 'pepperoni'
+import { fetchPost } from 'pepperoni/action'
 
 class MyComponent extends Component {
   componentDidMount() {
-    const { dispatch, id } = this.props;
+    const { dispatch, id } = this.props
 
-    dispatch(fetchPost(id));
+    dispatch(fetchPost(id))
 
-    this.handleClick = this.handleClick.bind(this);
+    this.handleClick = this.handleClick.bind(this)
   }
 
   handleOnClick() {
-    const { dispatch, id } = this.props;
+    const { dispatch, id } = this.props
 
-    dispatch(fetchPost(10));
+    dispatch(fetchPost(10))
   }
 
   render() {
-    const { post } = this.props;
+    const { post } = this.props
 
     if (!post) {
-      return (<div>Loading</div>);
+      return (<div>Loading</div>)
     }
 
     return (
@@ -395,7 +362,7 @@ class MyComponent extends Component {
         {post.title.rendered}
         <button onClick={this.handleClick}>Click to make this another post</button>
       </div>
-    );
+    )
   }
 }
 
@@ -403,7 +370,7 @@ function mapStateToProps(state, ownProps) {
   // [...]
  }
 
-connectToWordPressDirectly(mapStateToProps)(MyPost);
+connectToWordPressDirectly(mapStateToProps)(MyPost)
 ```
 
 `connectToWordPressDirectly` is a sugar over `react-redux`'s `connect` method. If you are already performing a `connect` with Redux there is no need to do anything more.
@@ -411,30 +378,30 @@ connectToWordPressDirectly(mapStateToProps)(MyPost);
 For simple mapping of state to props we provide an example implementation of `mapStateToProps`. This can just be turned on in the simple case with the following and props will be returned simply as the `this.props[type]`:
 
 ```js
-import React, { Component } from 'react';
+import React, { Component } from 'react'
 
-import { connectToWordPressDirectly } from 'pepperoni';
-import { fetchPost } from 'pepperoni/action';
+import { connectToWordPressDirectly } from 'pepperoni'
+import { fetchPost } from 'pepperoni/action'
 
 class MyComponent extends Component {
   componentDidMount() {
-    const { dispatch, id } = this.props;
+    const { dispatch, id } = this.props
 
-    dispatch(fetchPost(id));
+    dispatch(fetchPost(id))
   }
 
   render() {
-    const { post } = this.props;
+    const { post } = this.props
 
     if (!post) {
-      return (<div>Loading</div>);
+      return (<div>Loading</div>)
     }
 
-    return (<div>post.title.rendered</div>);
+    return (<div>post.title.rendered</div>)
   }
 }
 
-connectToWordPressDirectly({ automap: true })(MyPost);
+connectToWordPressDirectly({ automap: true })(MyPost)
 ```
 
 ## Components
