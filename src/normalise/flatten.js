@@ -53,8 +53,8 @@ export default function flatten (obj) {
     return obj.map(flatten)
   }
 
-  return effects
-    .reduce((flattened, effect) => {
-      return effect(obj, flattened)
-    }, merge({}, obj))
+  return effects.reduce(
+    (flattened, effect) => effect(obj, flattened), 
+    merge({}, obj)
+  )
 }

@@ -41,20 +41,24 @@ export default function configurePepperoni (opts) {
   // Create hash of plugin name to plugin config
   const pluginConfigs = zipObject(
     map(loadedPlugins, 'name'),
-    map(loadedPlugins, 'config'))
+    map(loadedPlugins, 'config')
+  )
 
   // Merge user options into default configuration
   const config = merge({},
     __defaultConfig,
     { host, entityKeyPropName },
-    { plugins: pluginConfigs })
+    { plugins: pluginConfigs }
+  )
 
   // Create hash of content type name to options
   config.contentTypes = merge({},
     mapKeys(ContentTypes, makeContentTypeOptions),
     zipObject(
       contentTypes.map((ct) => ct.name || ct),
-      contentTypes.map(makeContentTypeOptions)))
+      contentTypes.map(makeContentTypeOptions)
+    )
+  )
 
   if (loadedPlugins.length) {
     const pluginSagas = loadedPlugins.map((plugin) => plugin.sagas || [])
