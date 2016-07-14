@@ -82,6 +82,7 @@ function makeCustomContentType (options) {
   )
 
   return {
+    isCustomContentType: true,
     slug: {
       [Plurality.SINGULAR]: `/${options.requestSlug}/:id`,
       [Plurality.PLURAL]: `/${options.requestSlug}`

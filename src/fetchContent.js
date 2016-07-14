@@ -53,7 +53,7 @@ export default function fetchContent (contentTypeOptions, subject, config, optio
 
   let endpoint = [config.host, config.wpApiUrl].join('/')
 
-  if (isSlugRequest) {
+  if (isSlugRequest && !contentTypeOptions.isCustomContentType) {
     const name = contentTypeOptions.name.canonical
 
     invariant(
