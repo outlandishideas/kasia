@@ -15,7 +15,8 @@ export function makeReducer (config, plugins) {
 
   const initialState = merge({},
     baseState,
-    { config })
+    { config }
+  )
 
   const pluginReducers = plugins
     .reduce((obj, plugin) => merge(obj, plugin.reducer), {})
@@ -27,6 +28,7 @@ export function makeReducer (config, plugins) {
       return merge({}, state, { entities: normalisedData.entities })
     },
     [REQUEST.FAIL]: (state, action) => {
+      const contentTypeOptions = contentTypes[action.contentType]
       const normalisedData = normaliseFailed(contentTypeOptions, entityKeyPropName, action.subject, action.error)
       return merge({}, state, { failedEntities: normalisedData.entities })
     },

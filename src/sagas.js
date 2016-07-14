@@ -18,19 +18,21 @@ export function * fetchResource (action) {
 
   yield put(startRequest(contentType))
 
-  let { error, data } = yield call(fetchContent,
+  let { error, data } = yield call(
+    fetchContent,
     contentTypeOptions,
     subject,
     config,
-    action.options)
+    action.options
+  )
 
   if (!error && data) {
     error = data.error
   }
 
-  return error
-    ? yield put(failRequest(contentType, subject, error))
-    : yield put(completeRequest(contentType, data))
+  yield error
+    ? put(failRequest(contentType, subject, error))
+    : put(completeRequest(contentType, data))
 }
 
 export function * fetchSaga () {
