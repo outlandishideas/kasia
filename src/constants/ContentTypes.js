@@ -12,6 +12,16 @@ const ContentTypes = {
   USER: 'USER'
 }
 
+export const QueryableBySlug = [
+  ContentTypes.CATEGORY,
+  ContentTypes.MEDIA,
+  ContentTypes.PAGE,
+  ContentTypes.POST,
+  ContentTypes.TAG,
+  ContentTypes.USER
+]
+
+// Export each individually for convenience
 export const Category = ContentTypes.CATEGORY;
 export const Comment = ContentTypes.COMMENT;
 export const Media = ContentTypes.MEDIA;

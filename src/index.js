@@ -1,15 +1,19 @@
 import merge from 'lodash.merge'
-import invariant from 'invariant'
+import map from 'lodash.map'
+import zipObject from 'lodash.zipObject'
+import mapKeys from 'lodash.mapKeys'
 
-import makeReducer from './reducer'
-import fetchSaga from './sagas'
-import { builtInContentTypeOptions, makeCustomContentTypeOptions } from './contentTypes'
+import invariants from './invariants'
+import ContentTypes from './constants/ContentTypes'
+import { makeReducer} from './reducer'
+import { fetchSaga } from './sagas'
+import { makeContentTypeOptions } from './contentTypes'
 
 export const __defaultConfig = {
   host: null,
   wpApiUrl: 'wp-json/wp/v2',
   entityKeyPropName: 'id',
-  contentTypes: builtInContentTypeOptions,
+  contentTypes: {},
   plugins: {}
 }
 
@@ -27,38 +31,33 @@ export default function configurePepperoni (opts) {
     plugins = []
   } = opts
 
-  invariant(
-    typeof host === 'string',
-    'Expecting host to be a string, got "%s".',
-    typeof host
-  )
+  invariants.hostNotString(host)
 
   // Call each plugin function with the user's own plugin
   // config and also the initial configuration for Pepperoni
   const loadedPlugins = plugins
     .map((plugin) => plugin[0](plugin[1] || {}, opts))
 
-  const pluginConfigs = loadedPlugins
-    .reduce((obj, plugin) => {
-      obj[plugin.name] = plugin.config
-      return obj
-    }, {})
+  // Create hash of plugin name to plugin config
+  const pluginConfigs = zipObject(
+    map(loadedPlugins, 'name'),
+    map(loadedPlugins, 'config'))
 
+  // Merge user options into default configuration
   const config = merge({},
     __defaultConfig,
     { host, entityKeyPropName },
-    { plugins: pluginConfigs }
-  )
+    { plugins: pluginConfigs })
 
+  // Create hash of content type name to options
   config.contentTypes = merge({},
-    config.contentTypes,
-    makeCustomContentTypeOptions(contentTypes)
-  )
+    mapKeys(ContentTypes, makeContentTypeOptions),
+    zipObject(
+      contentTypes.map((ct) => ct.name || ct),
+      contentTypes.map(makeContentTypeOptions)))
 
   if (loadedPlugins.length) {
-    const pluginSagas = loadedPlugins
-      .map((plugin) => plugin.sagas || [])
-
+    const pluginSagas = loadedPlugins.map((plugin) => plugin.sagas || [])
     sagas = [fetchSaga].concat(...pluginSagas)
   }
 

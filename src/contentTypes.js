@@ -1,101 +1,53 @@
 import humps from 'humps'
-import invariant from 'invariant'
 
+import { Slugs } from './constants/WpApiEndpoints'
 import ContentTypes from './constants/ContentTypes'
 import Plurality from './constants/Plurality'
-import { Slugs } from './constants/WpApiEndpoints'
+import invariants from './invariants'
 
-export const builtInContentTypeOptions = Object.keys(ContentTypes)
-  .reduce((obj, contentType) => {
-    obj[contentType] = {
-      slug: Slugs[contentType],
-      name: {
-        canonical: contentType,
-        [Plurality.SINGULAR]: mapToCamelCaseSingular(contentType),
-        [Plurality.PLURAL]: mapToCamelCasePlural(contentType)
-      }
-    }
-    return obj
-  }, {})
+const pluralise = (str) => str[str.length - 1] === 's' ? str : str + 's'
 
-export function makeCustomContentTypeOptions (customContentTypes) {
-  return customContentTypes
-    .reduce((obj, contentType) => {
-      const contentTypeOptions = makeCustomContentType(contentType)
-      obj[contentTypeOptions.name.canonical] = contentTypeOptions
-      return obj
-    }, {})
-}
-
-export function deriveContentTypeOptions (str, contentTypes) {
-  const contentTypeNames = Object.keys(contentTypes)
-  const lowercased = str.toLowerCase()
-
-  let contentTypeOptions = false
-
-  contentTypeNames.forEach(function it (name) {
-    if (!contentTypeOptions) {
-      const nameCanonical = contentTypes[name].name.canonical.toLowerCase()
-      if (lowercased.indexOf(nameCanonical) !== -1) {
-        contentTypeOptions = contentTypes[name]
-      }
-    }
-  })
-
-  return contentTypeOptions
-}
-
-function makePlural (str) {
-  return str[str.length - 1] === 's' ? str : str + 's'
-}
-
-function makeCustomContentType (options) {
-  invariant(
-    typeof options === 'string' || typeof options.name === 'string',
-    'Expecting custom content type name to be a string, got "%s".',
-    typeof (options.name ? options.name : options)
-  )
+/**
+ * Produce an options object for a (custom) content type.
+ * @param {String|Object} options Name of content type or options object
+ * @returns {Object}
+ */
+export function makeContentTypeOptions (options) {
+  invariants.badCustomContentTypeName(options)
 
   options = typeof options === 'string'
     ? { name: String(options) }
     : options
 
-  options.nameSingle = options.nameSingle || options.name
-  options.namePlural = options.namePlural || makePlural(options.name)
-  options.requestSlug = options.requestSlug || humps.decamelize(options.namePlural, { separator: '-' })
+  const isCustomContentType = !ContentTypes[nameCanonical]
+  const nameCanonical = options.name
+  const nameSingle = options.nameSingle || nameCanonical
+  const namePlural = options.namePlural || pluralise(nameCanonical)
 
-  const builtInContentNames = Object.keys(ContentTypes)
-    .map((s) => s.toLowerCase())
+  let slug = {}
+  let name = {}
 
-  const camelisedBuiltInContentNames = builtInContentNames
-    .map((s) => s.replace('_', ''))
+  if (isCustomContentType) {
+    const requestSlug = options.requestSlug || humps.decamelize(namePlural, { separator: '-' })
 
-  const isConflictingName = []
-      .concat(builtInContentNames, camelisedBuiltInContentNames)
-      .indexOf(options.name.toLowerCase()) !== -1
+    slug[Plurality.SINGULAR] = `/${requestSlug}/:id`
+    slug[Plurality.PLURAL] = `/${requestSlug}`
 
-  invariant(
-    !isConflictingName,
-    'The content type name "%s" is taken. ' +
-    'Choose another non-conflicting name.',
-    options.name
-  )
-
-  return {
-    isCustomContentType: true,
-    slug: {
-      [Plurality.SINGULAR]: `/${options.requestSlug}/:id`,
-      [Plurality.PLURAL]: `/${options.requestSlug}`
-    },
-    name: {
-      // Canonical name is used when querying content types
-      canonical: options.name,
-      // Singular is used for placing an item on a component's props, e.g. `this.props.postType`
-      [Plurality.SINGULAR]: humps.camelize(options.nameSingle),
-      // Plural is used for entity collection name in the store, e.g. `store.wordpress.entities.postTypes`
-      [Plurality.PLURAL]: humps.camelize(options.namePlural)
+    // Canonical name is used when querying content types
+    name.canonical = options.name
+    // Singular is used for placing an item on a component's props, e.g. `this.props.postType`
+    name[Plurality.SINGULAR] = humps.camelize(nameSingle)
+    // Plural is used for entity collection name in the store, e.g. `store.wordpress.entities.postTypes`
+    name[Plurality.PLURAL] = humps.camelize(namePlural)
+  } else {
+    slug = Slugs[nameCanonical]
+    name = {
+      [Plurality.SINGULAR]: mapToCamelCaseSingular(ContentTypes[nameCanonical]),
+      [Plurality.PLURAL]: mapToCamelCasePlural(ContentTypes[nameCanonical])
     }
   }
+
+  return { isCustomContentType, slug, name }
 }
 
 function mapToCamelCaseSingular (contentType) {

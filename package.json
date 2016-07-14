@@ -1,7 +1,7 @@
 {
   "name": "pepperoni",
-  "version": "0.0.6",
-  "description": "A React Redux Toolset for the WordPress API",
+  "version": "0.1.0",
+  "description": "A React Redux toolset for the WordPress API",
   "main": "lib/index.js",
   "jsnext:main": "src/index.js",
   "scripts": {
@@ -10,7 +10,8 @@
     "test": "jest --verbose",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "postinstall": "npm run -s compile"
+    "postinstall": "npm run compile",
+    "prepublish": "npm run lint && npm run test && npm run compile"
   },
   "repository": {
     "type": "git",
@@ -21,9 +22,11 @@
     "react",
     "redux",
     "wordpress",
-    "word press",
+    "word",
+    "press",
     "wp-api",
-    "wordpress api"
+    "wp",
+    "api"
   ],
   "author": "Outlandish <hello@outlandish.com>",
   "license": "ISC",

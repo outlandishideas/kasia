@@ -1,4 +1,4 @@
 export default {
-  SINGULAR: 'SINGULAR',
-  PLURAL: 'PLURAL'
+  SINGULAR: 'singular',
+  PLURAL: 'plural'
 }

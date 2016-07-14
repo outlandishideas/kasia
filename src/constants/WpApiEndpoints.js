@@ -7,15 +7,6 @@ export const EndpointRouteParams = [
   'slug'
 ]
 
-export const QueryableBySlug = [
-  ContentTypes.CATEGORY,
-  ContentTypes.MEDIA,
-  ContentTypes.PAGE,
-  ContentTypes.POST,
-  ContentTypes.TAG,
-  ContentTypes.USER
-]
-
 export const Slugs = {
   [ContentTypes.CATEGORY]: {
     [Plurality.SINGULAR]: '/categories/:id',

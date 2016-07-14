@@ -1,11 +1,11 @@
 /* global fetch:false */
 
-import invariant from 'invariant'
 import urlencode from 'urlencode'
 import merge from 'lodash.merge'
 
 import Plurality from './constants/Plurality'
-import { EndpointRouteParams, QueryableBySlug } from './constants/WpApiEndpoints'
+import invariants from './invariants'
+import { EndpointRouteParams } from './constants/WpApiEndpoints'
 
 const defaultOptions = {
   params: {},
@@ -55,16 +55,7 @@ export default function fetchContent (contentTypeOptions, subject, config, optio
 
   if (isSlugRequest && !contentTypeOptions.isCustomContentType) {
     const name = contentTypeOptions.name.canonical
-
-    invariant(
-      QueryableBySlug.indexOf(name) !== -1,
-      'Got a slug ("%s") as the identifier, but Pepperoni cannot query the content type "%s" by slug. ' +
-      'Content types queryable by slug in Pepperoni are: %s. ' +
-      'For other content types, provide the slug as a query parameter in `options.query`.',
-      subject,
-      name,
-      QueryableBySlug.join(', ')
-    )
+    invariants.notQueryableBySlug(subject, name)
   }
 
   // Modify request type from SINGLE to PLURAL in the case of a request by slug

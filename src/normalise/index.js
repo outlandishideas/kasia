@@ -29,7 +29,7 @@ export function normalise (contentTypeOptions, content, idAttribute, invalidateS
   return normalize(flattened, schema)
 }
 
-export function normaliseFailed(contentTypeOptions, idAttribute, subject, error, invalidateSchemaCache = false) {
+export function normaliseFailed (contentTypeOptions, idAttribute, subject, error, invalidateSchemaCache = false) {
   const content = {
     id: subject,
     slug: subject,

@@ -10,13 +10,12 @@ export const baseState = {
   config: {}
 }
 
-export default function makeReducer (config, plugins) {
+export function makeReducer (config, plugins) {
   const { contentTypes, entityKeyPropName } = config
 
   const initialState = merge({},
     baseState,
-    { config }
-  )
+    { config })
 
   const pluginReducers = plugins
     .reduce((obj, plugin) => merge(obj, plugin.reducer), {})

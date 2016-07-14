@@ -1,43 +1,12 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
-import invariant from 'invariant'
 import find from 'lodash.find'
+import merge from 'lodash.merge'
 
 import Plurality from './constants/Plurality'
+import invariants from './invariants'
 import { createRequest } from './creators'
 import { fetchResource } from './sagas'
-import { deriveContentTypeOptions } from './contentTypes'
-
-function wowSuchFunction () {}
-
-const isMinified = wowSuchFunction.name !== 'wowSuchFunction'
-
-function invariantTargetMinifiedWithoutDisplayName (target) {
-  invariant(
-    !isMinified || (isMinified && !target.displayName),
-    'Pepperoni cannot derive the content type from a minified component. ' +
-    'Add a static property `displayName` to the component.'
-  )
-}
-
-function invariantCannotDeriveContentType (targetName, contentTypeOptions) {
-  invariant(
-    contentTypeOptions,
-    'Could not derive content type from name "%s". ' +
-    'Pass built-ins using `pepperoni/contentTypes`. For example, ContentTypes.POST. ' +
-    'Custom content types should be registered at initialisation and passed in using registered name.',
-    targetName
-  )
-}
-
-function invariantContentTypeNotRecognised (contentTypeOptions, contentType) {
-  invariant(
-    contentTypeOptions,
-    'The content type "%s" is not recognised. ' +
-    'Register custom content types during initialisation.',
-    contentType
-  )
-}
 
 /**
  * Connect a component to data from the WP-API.
@@ -69,47 +38,30 @@ function invariantContentTypeNotRecognised (contentTypeOptions, contentType) {
  * @returns {Function}
  */
 export default function connectWordPress (contentType, identifier) {
-  let hasDispatchedRequestAction = false;
-  let hasWarnedNoEntity = false;
-
   return (target) => {
-    const targetName = target.displayName
-      ? target.displayName
-      : target.name
+    const targetName = target.displayName ? target.displayName : target.name
+    const switchIdentifier = !identifier && typeof contentType !== 'string'
+    const realIdentifier = switchIdentifier ? contentType : identifier
 
-    invariant(
-      !target.__pepperoni,
-      'The component "%s" is already wrapped by Pepperoni.',
-      targetName
-    )
+    invariants.alreadyWrappedByPepperoni(target, targetName)
 
-    let getContentTypeOptions = (contentTypes) => {
-      const contentTypeOptions = find(contentTypes, { name: { canonical: contentType } })
-      invariantContentTypeNotRecognised(contentTypeOptions, contentType)
+    if (switchIdentifier) {
+      invariants.targetMinifiedWithoutDisplayName(target)
+    }
+
+    const getContentTypeOptions = (contentTypes) => {
+      const contentTypeOptions = find(contentTypes, (options) => options.name.canonical.indexOf(contentType) !== -1)
+      invariants.badContentType(contentTypeOptions, contentType)
       return contentTypeOptions
     }
 
-    let getIdentifier = (props) => typeof identifier === 'function'
-      ? identifier(props)
-      : identifier
+    const getIdentifier = (props) => String(
+      typeof realIdentifier === 'function'
+        ? realIdentifier(props)
+        : realIdentifier)
 
-    if (typeof contentType !== 'string' && typeof identifier === 'undefined') {
-      let contentTypeOptions
-
-      invariantTargetMinifiedWithoutDisplayName(target)
-
-      getContentTypeOptions = (contentTypes) => {
-        if (!contentTypeOptions) {
-          contentTypeOptions = deriveContentTypeOptions(targetName, contentTypes)
-          invariantCannotDeriveContentType(targetName, contentTypeOptions)
-        }
-        return contentTypeOptions
-      }
-
-      getIdentifier = (props) => typeof contentType === 'function'
-        ? contentType(props)
-        : contentType
-    }
+    let hasDispatchedRequestAction = false
+    let hasWarnedNoEntity = false
 
     function mapStateToProps (state, ownProps) {
       const { contentTypes } = state.wordpress.config
@@ -117,28 +69,31 @@ export default function connectWordPress (contentType, identifier) {
       const subject = getIdentifier(ownProps)
       const contentTypeOpts = getContentTypeOptions(contentTypes)
 
-      const isSlugSubject = isNaN(Number(subject))
       const nameSingular = contentTypeOpts.name[Plurality.SINGULAR]
       const namePlural = contentTypeOpts.name[Plurality.PLURAL]
       const contentTypeCollection = state.wordpress.entities[namePlural]
+
+      // Anything that is not numeric is treated as a slug
+      const isSlugSubject = !/^\d+$/.test(subject)
 
       let entity = null
 
       if (contentTypeCollection) {
         entity = isSlugSubject
           ? find(contentTypeCollection, (obj) => obj.slug === subject)
-          : contentTypeCollection[String(subject)]
+          : contentTypeCollection[subject]
       }
 
       if (!entity) {
-        // look in the failed entities instead
+        // Look in the failed entities instead
         const failedContentTypeCollection = state.wordpress.failedEntities[namePlural]
-        if (failedContentTypeCollection && failedContentTypeCollection[subject]) {
 
-          // return an entity object with no identifying properties
-          entity = {...failedContentTypeCollection[subject]};
-          delete entity.id;
-          delete entity.slug;
+        if (failedContentTypeCollection && failedContentTypeCollection[subject]) {
+          // Return an entity object with no identifying properties
+          entity = merge({}, failedContentTypeCollection[subject])
+
+          delete entity.id
+          delete entity.slug
 
           if (!hasWarnedNoEntity) {
             hasWarnedNoEntity = true
@@ -172,9 +127,7 @@ export default function connectWordPress (contentType, identifier) {
       }
 
       componentWillUpdate (nextProps) {
-        const sameIdentifier = getIdentifier(nextProps) === getIdentifier(this.props);
-
-        if (!sameIdentifier) {
+        if (getIdentifier(nextProps) !== getIdentifier(this.props)) {
           hasDispatchedRequestAction = false
           hasWarnedNoEntity = false
         }
