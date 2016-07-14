@@ -1,6 +1,6 @@
 {
   "name": "pepperoni",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "A React Redux Toolset for the WordPress API",
   "main": "lib/index.js",
   "jsnext:main": "src/index.js",

@@ -1,6 +1,7 @@
 import { normalize, arrayOf } from 'normalizr'
 import humps from 'humps'
 
+import ContentTypes from '../constants/ContentTypes'
 import makeSchemas from './makeSchemas'
 import flatten from './flatten'
 
@@ -12,7 +13,12 @@ export function normalise (contentType, content, idAttribute, invalidateSchemaCa
     : idAttribute
 
   const schemas = makeSchemas(finalIdAttribute, invalidateSchemaCache)
-  const contentTypeSchema = schemas[contentType]
+  let contentTypeSchema = schemas[contentType]
+
+  if (!contentTypeSchema) {
+    // Custom content types are normalised as a Post
+    contentTypeSchema = schemas[ContentTypes.POST]
+  }
 
   const schema = Array.isArray(content)
     ? arrayOf(contentTypeSchema)
