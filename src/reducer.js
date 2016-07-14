@@ -23,11 +23,12 @@ export default function makeReducer (config, plugins) {
 
   const reducer = merge({}, pluginReducers, {
     [REQUEST.COMPLETE]: (state, action) => {
-      const normalisedData = normalise(action.contentType, action.data, entityKeyPropName)
+      const contentTypeOptions = contentTypes[action.contentType]
+      const normalisedData = normalise(contentTypeOptions, action.data, entityKeyPropName)
       return merge({}, state, { entities: normalisedData.entities })
     },
     [REQUEST.FAIL]: (state, action) => {
-      const normalisedData = normaliseFailed(action.contentType, entityKeyPropName, action.subject, action.error)
+      const normalisedData = normaliseFailed(contentTypeOptions, entityKeyPropName, action.subject, action.error)
       return merge({}, state, { failedEntities: normalisedData.entities })
     },
     [INVALIDATE]: (state, action) => {

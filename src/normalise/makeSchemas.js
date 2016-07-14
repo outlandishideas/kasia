@@ -4,6 +4,23 @@ import ContentTypes from '../constants/ContentTypes'
 
 let schemas = null
 
+let categorySchema, mediaSchema, pageSchema, postSchema, revisionSchema, tagSchema, userSchema,
+  commentSchema, postTypeSchema, postStatusSchema, taxonomySchema;
+
+export function addSchema (name, idAttributeKey) {
+  const contentTypeSchema = new Schema(name, { idAttribute: idAttributeKey.toLowerCase() })
+
+  contentTypeSchema.define({
+    author: userSchema,
+    post: postSchema,
+    embedded: {
+      author: arrayOf(userSchema)
+    }
+  })
+  
+  return contentTypeSchema
+}
+
 export default function makeSchemas (idAttributeKey, invalidateCache) {
   if (schemas && !invalidateCache) {
     return schemas
@@ -14,19 +31,19 @@ export default function makeSchemas (idAttributeKey, invalidateCache) {
   }
 
   // Content types with `id` properties
-  const categorySchema = new Schema('categories', options)
-  const mediaSchema = new Schema('media', options)
-  const pageSchema = new Schema('pages', options)
-  const postSchema = new Schema('posts', options)
-  const revisionSchema = new Schema('revisions', options)
-  const tagSchema = new Schema('tags', options)
-  const userSchema = new Schema('users', options)
+  categorySchema = new Schema('categories', options)
+  mediaSchema = new Schema('media', options)
+  pageSchema = new Schema('pages', options)
+  postSchema = new Schema('posts', options)
+  revisionSchema = new Schema('revisions', options)
+  tagSchema = new Schema('tags', options)
+  userSchema = new Schema('users', options)
 
   // Content types without `id` properties
-  const commentSchema = new Schema('comments', { idAttribute: 'slug' })
-  const postTypeSchema = new Schema('postTypes', { idAttribute: 'slug' })
-  const postStatusSchema = new Schema('postStatuses', { idAttribute: 'slug' })
-  const taxonomySchema = new Schema('taxonomies', { idAttribute: 'slug' })
+  commentSchema = new Schema('comments', { idAttribute: 'slug' })
+  postTypeSchema = new Schema('postTypes', { idAttribute: 'slug' })
+  postStatusSchema = new Schema('postStatuses', { idAttribute: 'slug' })
+  taxonomySchema = new Schema('taxonomies', { idAttribute: 'slug' })
 
   mediaSchema.define({
     author: userSchema,

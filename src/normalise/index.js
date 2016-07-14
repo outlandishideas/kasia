@@ -1,11 +1,11 @@
-import { normalize, arrayOf } from 'normalizr'
+import { normalize, Schema, arrayOf } from 'normalizr'
 import humps from 'humps'
 
-import ContentTypes from '../constants/ContentTypes'
-import makeSchemas from './makeSchemas'
+import Plurality from '../constants/Plurality'
+import makeSchemas, { addSchema } from './makeSchemas'
 import flatten from './flatten'
 
-export function normalise (contentType, content, idAttribute, invalidateSchemaCache = false) {
+export function normalise (contentTypeOptions, content, idAttribute, invalidateSchemaCache = false) {
   const flattened = flatten(humps.camelizeKeys(content))
 
   const finalIdAttribute = typeof idAttribute === 'function'
@@ -13,11 +13,12 @@ export function normalise (contentType, content, idAttribute, invalidateSchemaCa
     : idAttribute
 
   const schemas = makeSchemas(finalIdAttribute, invalidateSchemaCache)
-  let contentTypeSchema = schemas[contentType]
+
+  let contentTypeSchema = schemas[contentTypeOptions.name.canonical]
 
   if (!contentTypeSchema) {
-    // Custom content types are normalised as a Post
-    contentTypeSchema = schemas[ContentTypes.POST]
+    const name = contentTypeOptions.name[Plurality.SINGULAR].toLowerCase()
+    contentTypeSchema = addSchema(name, finalIdAttribute)
   }
 
   const schema = Array.isArray(content)
@@ -27,11 +28,11 @@ export function normalise (contentType, content, idAttribute, invalidateSchemaCa
   return normalize(flattened, schema)
 }
 
-export function normaliseFailed(contentType, idAttribute, subject, error, invalidateSchemaCache = false) {
+export function normaliseFailed(contentTypeOptions, idAttribute, subject, error, invalidateSchemaCache = false) {
   const content = {
     id: subject,
     slug: subject,
     error: error && error.message ? error.message : error
   };
-  return normalise(contentType, content, idAttribute, invalidateSchemaCache);
+  return normalise(contentTypeOptions.name.canonical, content, idAttribute, invalidateSchemaCache);
 }
