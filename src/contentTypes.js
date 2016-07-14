@@ -46,9 +46,7 @@ export function deriveContentTypeOptions (str, contentTypes) {
 }
 
 function makePlural (str) {
-  return str[str.length - 1] === 's'
-    ? str
-    : str + 's'
+  return str[str.length - 1] === 's' ? str : str + 's'
 }
 
 function makeCustomContentType (options) {
