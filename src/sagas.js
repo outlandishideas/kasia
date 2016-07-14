@@ -25,7 +25,7 @@ export function * fetchResource (action) {
     action.options)
 
   if (!error && data) {
-    error = data.error;
+    error = data.error
   }
 
   return error

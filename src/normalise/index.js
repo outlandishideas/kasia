@@ -30,10 +30,8 @@ export function normalise (contentTypeOptions, content, idAttribute, invalidateS
 }
 
 export function normaliseFailed (contentTypeOptions, idAttribute, subject, error, invalidateSchemaCache = false) {
-  const content = {
-    id: subject,
-    slug: subject,
-    error: error && error.message ? error.message : error
-  };
-  return normalise(contentTypeOptions.name.canonical, content, idAttribute, invalidateSchemaCache);
+  const id = subject
+  const slug = subject
+  const error = error && error.message ? error.message : error
+  return normalise(contentTypeOptions.name.canonical, { id, slug, error }, idAttribute, invalidateSchemaCache);
 }

@@ -91,9 +91,8 @@ export default function connectWordPress (contentType, identifier) {
         if (failedContentTypeCollection && failedContentTypeCollection[subject]) {
           // Return an entity object with no identifying properties
           entity = merge({}, failedContentTypeCollection[subject])
-
-          delete entity.id
-          delete entity.slug
+          
+          entity.id = entity.slug = null
 
           if (!hasWarnedNoEntity) {
             hasWarnedNoEntity = true
