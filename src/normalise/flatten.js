@@ -49,12 +49,7 @@ const effects = [
 ]
 
 export default function flatten (obj) {
-  if (Array.isArray(obj)) {
-    return obj.map(flatten)
-  }
-
-  return effects.reduce(
-    (flattened, effect) => effect(obj, flattened), 
-    merge({}, obj)
-  )
+  return Array.isArray(obj)
+    ? obj.map(flatten)
+    : effects.reduce((flattened, effect) => effect(obj, flattened), merge({}, obj))
 }

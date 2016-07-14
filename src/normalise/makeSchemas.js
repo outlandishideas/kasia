@@ -17,7 +17,7 @@ export function addSchema (name, idAttributeKey) {
       author: arrayOf(userSchema)
     }
   })
-  
+
   return contentTypeSchema
 }
 
