@@ -35,5 +35,5 @@ export function normaliseFailed(contentTypeOptions, idAttribute, subject, error,
     slug: subject,
     error: error && error.message ? error.message : error
   };
-  return normalise(contentTypeOptions.name.canonical, content, idAttribute, invalidateSchemaCache);
+  return normalise(contentTypeOptions, content, idAttribute, invalidateSchemaCache);
 }
