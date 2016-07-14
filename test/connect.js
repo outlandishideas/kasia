@@ -31,6 +31,7 @@ const testProps = {
 }
 
 const reducerCalls = interceptReducer.mock.calls
+
 let actionIndex = -1
 
 function nextActionOfType (actionType) {

@@ -8,7 +8,7 @@ const isMinified = wowSuchFunction.name !== 'wowSuchFunction'
 
 export default {
   hostNotString: (host) => invariant(
-    typeof host === 'string',
+    typeof host === 'string' && host.length > 0,
     'Expecting host to be a string, got "%s".',
     typeof host
   ),

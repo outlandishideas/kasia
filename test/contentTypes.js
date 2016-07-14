@@ -61,39 +61,24 @@ describe('contentTypes', () => {
   describe('happy path', () => {
     it('adds contentType to list', () => {
       createStore({ contentTypes: ['article'] })
-
-      const config = getConfig()
-
-      expect(config.contentTypes.article).toEqual(
+      expect(getConfig().contentTypes.article).toEqual(
         makeContentTypeObj('article', 'articles', 'articles')
       )
     })
 
     it('adds contentType to list with camelCased type', () => {
       createStore({ contentTypes: ['blogPost'] })
-
-      const config = getConfig()
-
-      expect(config.contentTypes.blogPost).toEqual(
+      expect(getConfig().contentTypes.blogPost).toEqual(
         makeContentTypeObj('blogPost', 'blogPosts', 'blog-posts')
       )
     })
 
     it('maintains more than one contentType on list', () => {
-      createStore({
-        contentTypes: [
-          'article',
-          'book'
-        ]
-      })
-
-      let config = getConfig()
-
-      expect(config.contentTypes.article).toEqual(
+      createStore({ contentTypes: ['article', 'book'] })
+      expect(getConfig().contentTypes.article).toEqual(
         makeContentTypeObj('article', 'articles', 'articles')
       )
-
-      expect(config.contentTypes.book).toEqual(
+      expect(getConfig().contentTypes.book).toEqual(
         makeContentTypeObj('book', 'books', 'books')
       )
     })
@@ -105,10 +90,7 @@ describe('contentTypes', () => {
           namePlural: 'plural'
         }]
       })
-
-      const config = getConfig()
-
-      expect(config.contentTypes.custom).toEqual(
+      expect(getConfig().contentTypes.custom).toEqual(
         makeContentTypeObj('custom', 'plural', 'plural')
       )
     })
@@ -120,10 +102,7 @@ describe('contentTypes', () => {
           requestSlug: 'parliament'
         }]
       })
-
-      const config = getConfig()
-
-      expect(config.contentTypes.owl).toEqual(
+      expect(getConfig().contentTypes.owl).toEqual(
         makeContentTypeObj('owl', 'owls', 'parliament')
       )
     })

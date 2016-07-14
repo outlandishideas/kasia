@@ -12,7 +12,7 @@ import invariant from 'invariant'
 
 import Pepperoni from '../src/index'
 import Plurality from '../src/constants/Plurality'
-import makeReducer from '../src/reducer'
+import { makeReducer } from '../src/reducer'
 import { builtInContentTypeOptions } from '../src/contentTypes'
 
 describe('Pepperoni', () => {

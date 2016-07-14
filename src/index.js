@@ -2,6 +2,7 @@ import merge from 'lodash.merge'
 import map from 'lodash.map'
 import zipObject from 'lodash.zipObject'
 import mapKeys from 'lodash.mapKeys'
+import WP from 'wpapi'
 
 import invariants from './invariants'
 import ContentTypes from './constants/ContentTypes'
@@ -9,7 +10,7 @@ import { makeReducer} from './reducer'
 import { fetchSaga } from './sagas'
 import { makeContentTypeOptions } from './contentTypes'
 
-export const __defaultConfig = {
+export const defaultConfig = {
   host: null,
   wpApiUrl: 'wp-json/wp/v2',
   entityKeyPropName: 'id',
@@ -24,7 +25,7 @@ let sagas = [fetchSaga]
  * @returns {Object} Pepperoni reducer
  */
 export default function configurePepperoni (opts) {
-  const {
+  let {
     host,
     entityKeyPropName,
     contentTypes = [],
@@ -32,6 +33,10 @@ export default function configurePepperoni (opts) {
   } = opts
 
   invariants.hostNotString(host)
+
+  if (host[host.length - 1] === '/') {
+    host = host.substr(0, host.length - 1)
+  }
 
   // Call each plugin function with the user's own plugin
   // config and also the initial configuration for Pepperoni
@@ -45,11 +50,10 @@ export default function configurePepperoni (opts) {
   )
 
   // Merge user options into default configuration
-  const config = merge({},
-    __defaultConfig,
-    { host, entityKeyPropName },
-    { plugins: pluginConfigs }
-  )
+  const config = merge({}, defaultConfig, { host, entityKeyPropName })
+
+  config.plugins = pluginConfigs
+  config.wpapi = new WP({ endpoint: `${host}` })
 
   // Create hash of content type name to options
   config.contentTypes = merge({},

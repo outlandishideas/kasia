@@ -42,7 +42,8 @@
     "lodash.mapkeys": "^4.3.0",
     "lodash.merge": "^4.3.5",
     "normalizr": "^2.0.1",
-    "urlencode": "^1.1.0"
+    "urlencode": "^1.1.0",
+    "wpapi": "^0.8.0"
   },
   "peerDependencies": {
     "react": "^15.0.1",

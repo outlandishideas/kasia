@@ -68,7 +68,6 @@ describe('fetchContent', () => {
     }}
 
     fetchContent(builtInContentTypeOptions[ContentTypes.POST_REVISION], 1337, config, options)
-
     expect(fetchCall()).toEqual('http://test/wp/posts/13/revisions/37?_embed')
   })
 
