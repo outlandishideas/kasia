@@ -59,6 +59,11 @@ function invariantContentTypeNotRecognised (contentTypeOptions, contentType) {
  * connectWordPress(Page, (props) => props.params.slug)(Component)
  * ```
  *
+ * Explicit custom content type, derived identifier:
+ * ```js
+ * connectWordPress('News', (props) => props.params.slug)(Component)
+ * ```
+ *
  * @params {String|Function|Number} contentType The content type of the data to fetch from WP-API
  * @params {String|Function|Number} [identifier] The subject identifier of the content
  * @returns {Function}
@@ -129,7 +134,7 @@ export default function connectWordPress (contentType, identifier) {
         // look in the failed entities instead
         const failedContentTypeCollection = state.wordpress.failedEntities[namePlural]
         if (failedContentTypeCollection && failedContentTypeCollection[subject]) {
-          
+
           // return an entity object with no identifying properties
           entity = {...failedContentTypeCollection[subject]};
           delete entity.id;

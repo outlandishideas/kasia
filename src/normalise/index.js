@@ -17,6 +17,7 @@ export function normalise (contentTypeOptions, content, idAttribute, invalidateS
   let contentTypeSchema = schemas[contentTypeOptions.name.canonical]
 
   if (!contentTypeSchema) {
+    // Custom content type
     const name = contentTypeOptions.name[Plurality.SINGULAR].toLowerCase()
     contentTypeSchema = addSchema(name, finalIdAttribute)
   }
