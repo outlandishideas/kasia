@@ -45,6 +45,12 @@ export function deriveContentTypeOptions (str, contentTypes) {
   return contentTypeOptions
 }
 
+function makePlural (str) {
+  return str[str.length - 1] === 's'
+    ? str
+    : str + 's'
+}
+
 function makeCustomContentType (options) {
   invariant(
     typeof options === 'string' || typeof options.name === 'string',
@@ -57,7 +63,7 @@ function makeCustomContentType (options) {
     : options
 
   options.nameSingle = options.nameSingle || options.name
-  options.namePlural = options.namePlural || options.name + 's'
+  options.namePlural = options.namePlural || makePlural(options.name)
   options.requestSlug = options.requestSlug || humps.decamelize(options.namePlural, { separator: '-' })
 
   const builtInContentNames = Object.keys(ContentTypes)
