@@ -1,53 +1,65 @@
 import merge from 'lodash.merge'
 
-import Plurality from './constants/Plurality'
-import { normalise, normaliseFailed } from './normalise'
-import { REQUEST, INVALIDATE } from './constants/ActionTypes'
+import normalise from './normalise'
+import { REQUEST, INVALIDATE } from './ActionTypes'
+import { getContentType } from './contentTypes'
 
-export const baseState = {
-  entities: {},
-  failedEntities: {},
-  config: {}
+const initialState = {
+  _queries: {},
+  entities: {}
 }
 
-export function makeReducer (config, plugins) {
-  const { contentTypes, entityKeyPropName } = config
-
-  const initialState = merge({},
-    baseState,
-    { config }
-  )
-
-  const pluginReducers = plugins
-    .reduce((obj, plugin) => merge(obj, plugin.reducer), {})
+export default function makeReducer (options, pluginReducers = []) {
+  const { entityKeyPropName } = options
 
   const reducer = merge({}, pluginReducers, {
-    [REQUEST.COMPLETE]: (state, action) => {
-      const contentTypeOptions = contentTypes[action.contentType]
+    // On `REQUEST.Put`: place a record of the query in the store
+    [REQUEST.Put]: (state, action) => {
+      return merge({}, state, {
+        _queries: {
+          [action.id]: {
+            complete: false,
+            OK: null,
+            id: action.id,
+            contentType: action.contentType
+          }
+        }
+      })
+    },
+    // On `REQUEST.Complete`: place entity on the store, update query record
+    [REQUEST.Complete]: (state, action) => {
+      const contentType = state._queries[action.id].contentType
+      const contentTypeOptions = getContentType(contentType)
       const normalisedData = normalise(contentTypeOptions, action.data, entityKeyPropName)
-      return merge({}, state, { entities: normalisedData.entities })
+
+      return merge({}, state, {
+        entities: normalisedData.entities,
+        _queries: {
+          [action.id]: {
+            complete: true,
+            OK: true
+          }
+        }
+      })
     },
-    [REQUEST.FAIL]: (state, action) => {
-      const contentTypeOptions = contentTypes[action.contentType]
-      const normalisedData = normaliseFailed(contentTypeOptions, entityKeyPropName, action.subject, action.error)
-      return merge({}, state, { failedEntities: normalisedData.entities })
-    },
-    [INVALIDATE]: (state, action) => {
-      const namePlural = contentTypes[action.contentType].name[Plurality.PLURAL]
-      delete state.entities[namePlural][action.id]
-      return merge({}, state)
+    // On `REQUEST.Fail`: update query record only
+    [REQUEST.Fail]: (state, action) => {
+      return merge({}, state, {
+        _queries: {
+          [action.id]: {
+            complete: true,
+            OK: false
+          }
+        }
+      })
     }
   })
 
   return {
     wordpress: function pepperoniReducer (state = initialState, action) {
-      const [actionNamespace] = action.type.split('/')
+      const [ actionNamespace ] = action.type.split('/')
 
-      if (actionNamespace !== 'pepperoni') {
-        return state
-      }
-
-      if (action.type in reducer) {
+      if (actionNamespace === 'pepperoni' && action.type in reducer) {
         return reducer[action.type](state, action)
       }
 

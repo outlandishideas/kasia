@@ -3,108 +3,81 @@
 
 jest.disableAutomock()
 
-import merge from 'lodash.merge'
+import values from 'lodash.values'
 
 import configureStore from './util/configureStore'
-import Plurality from '../src/constants/Plurality'
-
-const builtInContentTypes = [
-  'category',
-  'comment',
-  'media',
-  'page',
-  'post',
-  'postRevision',
-  'postType',
-  'postStatus',
-  'tag',
-  'taxonomy',
-  'user'
-]
+import { ContentTypes, getContentTypes } from '../src/contentTypes'
 
 let store
 
 function createStore (options) {
-  options = merge(options, { host: '' })
+  options.host = 'host'
   store = configureStore(options).store
 }
 
-function getConfig () {
-  return store.getState().wordpress.config
-}
-
-function makeContentTypeObj (single, plural, slug) {
-  return {
-    name: {
-      canonical: single,
-      [Plurality.SINGULAR]: single,
-      [Plurality.PLURAL]: plural
-    },
-    slug: {
-      [Plurality.SINGULAR]: `/${slug}/:id`,
-      [Plurality.PLURAL]: `/${slug}`
-    }
-  }
+function makeContentTypeObj (name, plural, slug) {
+  return { name, plural, slug }
 }
 
 describe('contentTypes', () => {
   describe('unhappy path', () => {
-    builtInContentTypes.forEach((builtInType) => {
+    values(ContentTypes).forEach((builtInType) => {
       it(`throws an invariant exception when name is a built in type ${builtInType}`, () => {
-        expect(() => {
-          createStore({ contentTypes: [builtInType] })
-        }).toThrowError(/taken/)
+        const contentTypes = [
+          makeContentTypeObj(builtInType, builtInType, builtInType)
+        ]
+
+        expect(() => createStore({ contentTypes }))
+          .toThrowError(/already exists/)
       })
     })
   })
 
   describe('happy path', () => {
     it('adds contentType to list', () => {
-      createStore({ contentTypes: ['article'] })
-      expect(getConfig().contentTypes.article).toEqual(
-        makeContentTypeObj('article', 'articles', 'articles')
-      )
+      const contentTypes = [{
+        name: 'article',
+        plural: 'articles',
+        slug: 'articles'
+      }]
+
+      createStore({ contentTypes })
+
+      expect(getContentTypes().article)
+        .toEqual(makeContentTypeObj('article', 'articles', 'articles'))
     })
 
     it('adds contentType to list with camelCased type', () => {
-      createStore({ contentTypes: ['blogPost'] })
-      expect(getConfig().contentTypes.blogPost).toEqual(
-        makeContentTypeObj('blogPost', 'blogPosts', 'blog-posts')
-      )
+      const contentTypes = [{
+        name: 'blogPost',
+        plural: 'blogPosts',
+        slug: 'blog-posts'
+      }]
+
+      createStore({ contentTypes })
+
+      expect(getContentTypes().blogPost)
+        .toEqual(makeContentTypeObj('blogPost', 'blogPosts', 'blog-posts'))
     })
 
     it('maintains more than one contentType on list', () => {
-      createStore({ contentTypes: ['article', 'book'] })
-      expect(getConfig().contentTypes.article).toEqual(
-        makeContentTypeObj('article', 'articles', 'articles')
-      )
-      expect(getConfig().contentTypes.book).toEqual(
-        makeContentTypeObj('book', 'books', 'books')
-      )
-    })
+      const contentTypes = [{
+        name: 'newspaper',
+        plural: 'newspapers',
+        slug: 'newspapers'
+      }, {
+        name: 'book',
+        plural: 'books',
+        slug: 'books'
+      }]
 
-    it('adds contentType to list with custom pluralisation', () => {
-      createStore({
-        contentTypes: [{
-          name: 'custom',
-          namePlural: 'plural'
-        }]
-      })
-      expect(getConfig().contentTypes.custom).toEqual(
-        makeContentTypeObj('custom', 'plural', 'plural')
-      )
-    })
+      createStore({ contentTypes })
 
-    it('adds contentType to list with custom endpoint', () => {
-      createStore({
-        contentTypes: [{
-          name: 'owl',
-          requestSlug: 'parliament'
-        }]
-      })
-      expect(getConfig().contentTypes.owl).toEqual(
-        makeContentTypeObj('owl', 'owls', 'parliament')
-      )
+      expect(getContentTypes().article)
+        .toEqual(makeContentTypeObj('article', 'articles', 'articles'))
+
+      expect(getContentTypes().book)
+        .toEqual(makeContentTypeObj('book', 'books', 'books'))
     })
   })
 })

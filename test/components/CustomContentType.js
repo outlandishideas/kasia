@@ -4,10 +4,10 @@ jest.disableAutomock()
 
 import React, { Component } from 'react'
 
-import connectWordPress from '../../src/connect'
+import { connectWpPost } from '../../src/connect'
 
-@connectWordPress('CustomContentType', (props) => props.params.id)
-export default class CustomContentType extends Component {
+@connectWpPost('News', (props) => props.params.id)
+export default class News extends Component {
   render () {
     return <div></div>
   }

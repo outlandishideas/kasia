@@ -1,76 +1,61 @@
-import merge from 'lodash.merge'
-import map from 'lodash.map'
-import zipObject from 'lodash.zipObject'
-import mapKeys from 'lodash.mapKeys'
-import WP from 'wpapi'
+import { camelize } from 'humps'
 
 import invariants from './invariants'
-import ContentTypes from './constants/ContentTypes'
-import { makeReducer} from './reducer'
+import makeReducer from './reducer'
+import { WP } from './wpapi'
 import { fetchSaga } from './sagas'
-import { makeContentTypeOptions } from './contentTypes'
+import { registerContentType, getContentTypes } from './contentTypes'
 
-export const defaultConfig = {
-  host: null,
-  wpApiUrl: 'wp-json/wp/v2',
-  entityKeyPropName: 'id',
-  contentTypes: {},
-  plugins: {}
-}
-
+/**
+ * Internal Pepperoni sagas.
+ * Extended with plugin sagas if available.
+ * @type {Array}
+ */
 let sagas = [fetchSaga]
 
 /**
  * Configure Pepperoni.
+ * @param {String} `opts.host` Host of the WordPress installation
+ * @param {String} `opts.entityKeyPropName` Property of an entity that is used to key it on the store
+ * @param {Array} `opts.plugins` Array of Pepperoni plugins
+ * @param {Array} `opts.contentTypes` Array of custom content type definition objects
  * @returns {Object} Pepperoni reducer
  */
-export default function configurePepperoni (opts) {
-  let {
+export default function configurePepperoni (opts = {}) {
+  const {
     host,
-    entityKeyPropName,
-    contentTypes = [],
-    plugins = []
+    entityKeyPropName = 'id',
+    plugins = [],
+    contentTypes = []
   } = opts
 
-  invariants.hostNotString(host)
+  invariants.isString(host, 'host')
+  invariants.isString(entityKeyPropName, 'entityKeyPropName')
+  invariants.isArray(plugins, 'plugins')
+  invariants.isArray(contentTypes, 'contentTypes')
 
-  if (host[host.length - 1] === '/') {
-    host = host.substr(0, host.length - 1)
-  }
+  const api = WP({ endpoint: host + '/wp-json' })
 
-  // Call each plugin function with the user's own plugin
-  // config and also the initial configuration for Pepperoni
-  const loadedPlugins = plugins
-    .map((plugin) => plugin[0](plugin[1] || {}, opts))
+  const pluginReducers = plugins
+    .map((plugin) => {
+      invariants.isFunction(plugin[0])
+      const pluginOptions = plugin[0](plugin[1] || {}, opts)
+      sagas = sagas.concat(plugin.sagas || [])
+      return pluginOptions
+    })
+    .map((p) => p.reducer || {})
 
-  // Create hash of plugin name to plugin config
-  const pluginConfigs = zipObject(
-    map(loadedPlugins, 'name'),
-    map(loadedPlugins, 'config')
-  )
-
-  // Merge user options into default configuration
-  const config = merge({}, defaultConfig, { host, entityKeyPropName })
-
-  config.plugins = pluginConfigs
-  config.wpapi = new WP({ endpoint: `${host}` })
-
-  // Create hash of content type name to options
-  config.contentTypes = merge({},
-    mapKeys(ContentTypes, makeContentTypeOptions),
-    zipObject(
-      contentTypes.map((ct) => ct.name || ct),
-      contentTypes.map(makeContentTypeOptions)
-    )
-  )
-
-  if (loadedPlugins.length) {
-    const pluginSagas = loadedPlugins.map((plugin) => plugin.sagas || [])
-    sagas = [fetchSaga].concat(...pluginSagas)
-  }
+  contentTypes.forEach((contentType, i) => {
+    invariants.isValidContentTypeObject(contentType, i)
+    invariants.isNewContentType(getContentTypes(), contentType)
+    const plural = contentType.plural
+    api[camelize(plural)] = api.registerRoute('/wp/v2', `/${plural}(?P<id>)`)
+    registerContentType(contentType)
+  })
 
   return {
-    pepperoniReducer: makeReducer(config, loadedPlugins),
+    api,
+    pepperoniReducer: makeReducer({ entityKeyPropName }, pluginReducers),
     pepperoniSagas: sagas
   }
 }

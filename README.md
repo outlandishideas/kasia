@@ -4,12 +4,9 @@
 
 ## Features
 
-- Declaratively connect React components to data from the WordPress API.
-- Register and consume Custom Content Types with very little configuration.
-- Provides a common sense interface for making requests to the WP-API.
-- All content data received is placed on the store for caching (and can be invalidated).
+- Declaratively connect React components to the WP-API.
+- Register and consume Custom Content Types with ease.
 - Built-in isomorphism.
-- An official boilerplate for getting started with Pepperoni in a matter of minutes.
 
 Check out the [Pepperoni boilerplate]() based on [WordPress Bedrock](https://github.com/roots/bedrock)
 if you are starting from scratch.

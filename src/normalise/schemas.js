@@ -1,14 +1,16 @@
 import { Schema, arrayOf } from 'normalizr'
 
-import ContentTypes from '../constants/ContentTypes'
+import { ContentTypes } from '../contentTypes'
 
 let schemas = null
 
 let categorySchema, mediaSchema, pageSchema, postSchema, revisionSchema, tagSchema, userSchema,
   commentSchema, postTypeSchema, postStatusSchema, taxonomySchema;
 
-export function addSchema (name, idAttributeKey) {
-  const contentTypeSchema = new Schema(name, { idAttribute: idAttributeKey.toLowerCase() })
+export function createSchema (name, idAttributeKey) {
+  const contentTypeSchema = new Schema(name, {
+    idAttribute: idAttributeKey.toLowerCase()
+  })
 
   contentTypeSchema.define({
     author: userSchema,
@@ -21,7 +23,7 @@ export function addSchema (name, idAttributeKey) {
   return contentTypeSchema
 }
 
-export default function makeSchemas (idAttributeKey, invalidateCache) {
+export function makeSchemas (idAttributeKey, invalidateCache) {
   if (schemas && !invalidateCache) {
     return schemas
   }

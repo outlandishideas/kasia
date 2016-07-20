@@ -1,46 +1,50 @@
 import invariant from 'invariant'
-
-import { QueryableBySlug } from './constants/ContentTypes'
-
-function wowSuchFunction () {}
-
-const isMinified = wowSuchFunction.name !== 'wowSuchFunction'
+import isArray from 'lodash.isArray'
 
 export default {
-  hostNotString: (host) => invariant(
-    typeof host === 'string' && host.length > 0,
-    'Expecting host to be a string, got "%s".',
-    typeof host
+  isString: (value, name) => invariant(
+    typeof value === 'string',
+    `Expecting ${name} to be a string, got "%s".`,
+    typeof value
   ),
-  alreadyWrappedByPepperoni: (target, targetName) => invariant(
+  isArray: (value, name) => invariant(
+    isArray(value),
+    `Expecting ${name} to be an array, got "%s".`,
+    typeof value
+  ),
+  isFunction: (value, name) => invariant(
+    typeof value === 'function',
+    `Expecting ${name} to be a function, got "%s".`,
+    typeof value
+  ),
+  isIdentifier: (identifier) => invariant(
+    typeof identifier === 'function' ||
+    typeof identifier === 'string' ||
+    typeof identifier === 'number',
+    'Expecting identifier to be function/string/number, got "%s"',
+    typeof identifier
+  ),
+  isValidContentTypeObject: (obj, i) => invariant(
+    typeof obj.name === 'string' &&
+    typeof obj.plural === 'string' &&
+    typeof obj.slug === 'string',
+    `Invalid content type object at position ${i}, see docs.`
+  ),
+  isValidContentType: (contentTypeOptions, name) => invariant(
+    typeof contentTypeOptions !== 'undefined',
+    'Content type "%s" is not recognised. ' +
+    'Built-in content types are available at `pepperoni/types`. ' +
+    'Pass the `name` of custom content types.',
+    name
+  ),
+  isNewContentType: (allTypes, contentType) => invariant(
+    typeof allTypes[contentType.name] === 'undefined',
+    'Content type with name "%s" already exists.',
+    contentType.name
+  ),
+  isNotWrapped: (target, targetName) => invariant(
     !target.__pepperoni,
     'The component "%s" is already wrapped by Pepperoni.',
     targetName
-  ),
-  targetMinifiedWithoutDisplayName: (target) => invariant(
-    !isMinified || (isMinified && !target.displayName),
-    'Pepperoni cannot derive the content type from a minified component. ' +
-    'Add a static property `displayName` to the component.'
-  ),
-  badContentType: (contentTypeOptions, contentType) => invariant(
-    contentTypeOptions,
-    'Content type "%s" is not recognised. ' +
-    'Built-in content types are available at `pepperoni/contentTypes`. ' +
-    'Custom content types should be registered at initialisation.',
-    contentType
-  ),
-  badCustomContentTypeName: (options) => invariant(
-    typeof options === 'string' || typeof options.name === 'string',
-    'Expecting custom content type name to be a string, got "%s".',
-    typeof (options.name ? options.name : options)
-  ),
-  notQueryableBySlug: (subject, name) => invariant(
-    QueryableBySlug.indexOf(name) !== -1,
-    'Got a slug ("%s") as the identifier, but Pepperoni cannot query the content type "%s" by slug. ' +
-    'Content types queryable by slug in Pepperoni are: %s. ' +
-    'For other content types, provide the slug as a query parameter in `options.query`.',
-    subject,
-    name,
-    QueryableBySlug.join(', ')
   )
 }

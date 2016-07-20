@@ -1,12 +1,11 @@
 import { normalize, Schema, arrayOf } from 'normalizr'
-import humps from 'humps'
+import { camelizeKeys } from 'humps'
 
-import Plurality from '../constants/Plurality'
-import makeSchemas, { addSchema } from './makeSchemas'
+import { makeSchemas, createSchema } from './schemas'
 import flatten from './flatten'
 
-export function normalise (contentTypeOptions, content, idAttribute, invalidateSchemaCache = false) {
-  const flattened = flatten(humps.camelizeKeys(content))
+export default function normalise (contentTypeOptions, content, idAttribute, invalidateSchemaCache = false) {
+  const flattened = flatten(camelizeKeys(content))
 
   const finalIdAttribute = typeof idAttribute === 'function'
     ? idAttribute(flattened)
@@ -14,12 +13,14 @@ export function normalise (contentTypeOptions, content, idAttribute, invalidateS
 
   const schemas = makeSchemas(finalIdAttribute, invalidateSchemaCache)
 
-  let contentTypeSchema = schemas[contentTypeOptions.name.canonical]
+  let contentTypeSchema = schemas[contentTypeOptions.name]
 
   if (!contentTypeSchema) {
     // Custom content type
-    const name = contentTypeOptions.name[Plurality.SINGULAR].toLowerCase()
-    contentTypeSchema = addSchema(name, finalIdAttribute)
+    contentTypeSchema = createSchema(
+      contentTypeOptions.plural,
+      finalIdAttribute
+    )
   }
 
   const schema = Array.isArray(content)
@@ -27,11 +28,4 @@ export function normalise (contentTypeOptions, content, idAttribute, invalidateS
     : contentTypeSchema
 
   return normalize(flattened, schema)
-}
-
-export function normaliseFailed (contentTypeOptions, idAttribute, subject, error, invalidateSchemaCache = false) {
-  const id = subject
-  const slug = subject
-  const error = error && error.message ? error.message : error
-  return normalise(contentTypeOptions.name.canonical, { id, slug, error }, idAttribute, invalidateSchemaCache);
 }

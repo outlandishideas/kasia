@@ -7,8 +7,8 @@ import merge from 'lodash.merge'
 import cloneDeep from 'lodash.clonedeep'
 
 import WpApiResponses from './fixtures/wp-api-responses'
-import ContentTypes from '../src/constants/ContentTypes'
-import { normalise } from '../src/normalise'
+import normalise from '../src/normalise'
+import { ContentTypes, getContentType } from '../src/contentTypes'
 
 function makeNormaliserTestData (contentType) {
   const first = WpApiResponses[contentType]
@@ -18,32 +18,32 @@ function makeNormaliserTestData (contentType) {
 }
 
 const tests = {
-  [ContentTypes.CATEGORY]: {
+  [ContentTypes.Category]: {
     expectedEntities: ['categories'],
     testKeyBySlug: true,
     testKeyById: true
   },
-  [ContentTypes.COMMENT]: {
+  [ContentTypes.Comment]: {
     expectedEntities: ['comments'],
     testKeyBySlug: true,
     testKeyById: false
   },
-  [ContentTypes.MEDIA]: {
+  [ContentTypes.Media]: {
     expectedEntities: ['media', 'users'],
     testKeyBySlug: true,
     testKeyById: true
   },
-  [ContentTypes.PAGE]: {
+  [ContentTypes.Page]: {
     expectedEntities: ['pages', 'users', 'media'],
     testKeyBySlug: true,
     testKeyById: true
   },
-  [ContentTypes.POST]: {
+  [ContentTypes.Single]: {
     expectedEntities: ['posts', 'users', 'media'],
     testKeyBySlug: true,
     testKeyById: true
   },
-  [ContentTypes.POST_STATUS]: {
+  [ContentTypes.PostStatus]: {
     expectedEntities: ['postStatuses'],
     testKeyBySlug: true,
     testKeyById: false
@@ -52,32 +52,34 @@ const tests = {
 }
 
 Object.keys(tests).forEach((contentType) => {
+  const options = getContentType(contentType)
+
   describe(`${contentType} normaliser`, () => {
     const { first, second, multiple } = makeNormaliserTestData(contentType)
     const { expectedEntities, testKeyBySlug, testKeyById } = tests[contentType]
 
     if (testKeyById) {
       it(`should normalise a single ${contentType} by ID`, () => {
-        const flattened = normalise(contentType, first, 'id', true)
+        const flattened = normalise(options, first, 'id', true)
         expect(flattened.result).toEqual(first.id)
         expect(Object.keys(flattened.entities)).toEqual(expectedEntities)
       })
 
       it(`should normalise multiple ${contentType} by ID`, () => {
-        const flattened = normalise(contentType, multiple, 'id', true)
+        const flattened = normalise(options, multiple, 'id', true)
         expect(flattened.result).toEqual([first.id, second.id])
       })
     }
 
     if (testKeyBySlug) {
       it(`should normalise a single ${contentType} by SLUG`, () => {
-        const flattened = normalise(contentType, first, 'slug', true)
+        const flattened = normalise(options, first, 'slug', true)
         expect(flattened.result).toEqual(first.slug)
         expect(Object.keys(flattened.entities)).toEqual(expectedEntities)
       })
 
       it(`should normalise multiple ${contentType} by SLUG`, () => {
-        const flattened = normalise(contentType, multiple, 'slug', true)
+        const flattened = normalise(options, multiple, 'slug', true)
         expect(flattened.result).toEqual([first.slug, second.slug])
       })
     }

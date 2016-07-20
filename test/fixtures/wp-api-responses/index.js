@@ -1,4 +1,4 @@
-import ContentTypes from '../../../src/constants/ContentTypes'
+import { ContentTypes } from '../../../src/contentTypes'
 
 import category from './category'
 import comment from './comment'
@@ -12,14 +12,14 @@ import taxonomy from './taxonomy'
 import user from './user'
 
 export default {
-  [ContentTypes.CATEGORY]: category,
-  [ContentTypes.COMMENT]: comment,
-  [ContentTypes.MEDIA]: media,
-  [ContentTypes.PAGE]: page,
-  [ContentTypes.POST]: post,
-  [ContentTypes.POST_TYPE]: postType,
-  [ContentTypes.POST_STATUS]: postStatus,
-  [ContentTypes.TAG]: tag,
-  [ContentTypes.TAXONOMY]: taxonomy,
-  [ContentTypes.USER]: user
+  [ContentTypes.Category]: category,
+  [ContentTypes.Comment]: comment,
+  [ContentTypes.Media]: media,
+  [ContentTypes.Page]: page,
+  [ContentTypes.Single]: post,
+  [ContentTypes.PostType]: postType,
+  [ContentTypes.PostStatus]: postStatus,
+  [ContentTypes.Tag]: tag,
+  [ContentTypes.Taxonomy]: taxonomy,
+  [ContentTypes.User]: user
 }
