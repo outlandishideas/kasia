@@ -1,9 +1,6 @@
-import { default as _WP } from 'wpapi'
+export let WP = null
 
-export let wpapi = null
-
-export function WP (endpoint) {
-  if (wpapi) return wpapi
-  wpapi = new _WP({ endpoint })
-  return wpapi
+// Set an internal reference to the wpapi instance
+export function setWP (_WP) {
+  WP = _WP
 }

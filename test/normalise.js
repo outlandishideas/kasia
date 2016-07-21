@@ -4,84 +4,134 @@
 jest.disableAutomock()
 
 import merge from 'lodash.merge'
-import cloneDeep from 'lodash.clonedeep'
 
-import WpApiResponses from './fixtures/wp-api-responses'
 import normalise from '../src/normalise'
-import { ContentTypes, getContentType } from '../src/contentTypes'
 
-function makeNormaliserTestData (contentType) {
-  const first = WpApiResponses[contentType]
-  const second = merge({}, cloneDeep(first), { id: first.id + 1, slug: first.slug + '1' })
-  const multiple = [first, second]
-  return { first, second, multiple }
-}
+import {
+  ContentTypes,
+  registerContentType,
+  getContentType
+} from '../src/contentTypes'
 
-const tests = {
-  [ContentTypes.Category]: {
-    expectedEntities: ['categories'],
-    testKeyBySlug: true,
-    testKeyById: true
-  },
-  [ContentTypes.Comment]: {
-    expectedEntities: ['comments'],
-    testKeyBySlug: true,
-    testKeyById: false
-  },
-  [ContentTypes.Media]: {
-    expectedEntities: ['media', 'users'],
-    testKeyBySlug: true,
-    testKeyById: true
-  },
-  [ContentTypes.Page]: {
-    expectedEntities: ['pages', 'users', 'media'],
-    testKeyBySlug: true,
-    testKeyById: true
-  },
-  [ContentTypes.Single]: {
-    expectedEntities: ['posts', 'users', 'media'],
-    testKeyBySlug: true,
-    testKeyById: true
-  },
-  [ContentTypes.PostStatus]: {
-    expectedEntities: ['postStatuses'],
-    testKeyBySlug: true,
-    testKeyById: false
+function normaliserTestData (contentType) {
+  const first = require('./fixtures/wp-api-responses/' + contentType).default
+
+  // Imitate another entity by modifying identifiers
+  const second = merge({}, first, {
+    id: first.id + 1,
+    slug: first.slug + '1'
+  })
+
+  return {
+    first,
+    second,
+    multiple: [first, second]
   }
-  // TODO test remaining content types + a custom content type
 }
 
-Object.keys(tests).forEach((contentType) => {
-  const options = getContentType(contentType)
+function setup () {
+  registerContentType({
+    name: 'book',
+    plural: 'books',
+    slug: 'books'
+  })
 
-  describe(`${contentType} normaliser`, () => {
-    const { first, second, multiple } = makeNormaliserTestData(contentType)
-    const { expectedEntities, testKeyBySlug, testKeyById } = tests[contentType]
-
-    if (testKeyById) {
-      it(`should normalise a single ${contentType} by ID`, () => {
-        const flattened = normalise(options, first, 'id', true)
-        expect(flattened.result).toEqual(first.id)
-        expect(Object.keys(flattened.entities)).toEqual(expectedEntities)
-      })
-
-      it(`should normalise multiple ${contentType} by ID`, () => {
-        const flattened = normalise(options, multiple, 'id', true)
-        expect(flattened.result).toEqual([first.id, second.id])
-      })
+  const tests = {
+    [ContentTypes.Category]: {
+      // The expected entity collections on the store
+      collections: ['categories'],
+      // Whether to test normalisation by 'id' attr.
+      testKeyById: true,
+      // Whether to test normalisation by 'slug' attr.
+      testKeyBySlug: true
+    },
+    [ContentTypes.Comment]: {
+      collections: ['comments'],
+      testKeyById: true,
+      testKeyBySlug: false
+    },
+    [ContentTypes.Media]: {
+      collections: ['media', 'users'],
+      testKeyById: true,
+      testKeyBySlug: true
+    },
+    [ContentTypes.Page]: {
+      collections: ['pages', 'users', 'media'],
+      testKeyById: true,
+      testKeyBySlug: true
+    },
+    [ContentTypes.Post]: {
+      collections: ['posts', 'users', 'media'],
+      testKeyById: true,
+      testKeyBySlug: true
+    },
+    [ContentTypes.PostStatus]: {
+      collections: ['statuses'],
+      testKeyById: false,
+      testKeyBySlug: true
+    },
+    [ContentTypes.PostType]: {
+      collections: ['types'],
+      testKeyById: false,
+      testKeyBySlug: true
+    },
+    [ContentTypes.Tag]: {
+      collections: ['tags'],
+      testKeyById: true,
+      testKeyBySlug: true
+    },
+    [ContentTypes.Taxonomy]: {
+      collections: ['taxonomies'],
+      testKeyById: false,
+      testKeyBySlug: true
+    },
+    [ContentTypes.User]: {
+      collections: ['users'],
+      testKeyById: true,
+      testKeyBySlug: true
+    },
+    book: {
+      collections: ['books'],
+      testKeyById: true,
+      testKeyBySlug: true
     }
+  }
 
-    if (testKeyBySlug) {
-      it(`should normalise a single ${contentType} by SLUG`, () => {
-        const flattened = normalise(options, first, 'slug', true)
-        expect(flattened.result).toEqual(first.slug)
-        expect(Object.keys(flattened.entities)).toEqual(expectedEntities)
-      })
+  return { tests }
+}
 
-      it(`should normalise multiple ${contentType} by SLUG`, () => {
-        const flattened = normalise(options, multiple, 'slug', true)
-        expect(flattened.result).toEqual([first.slug, second.slug])
-      })
-    }
+describe('Normaliser', () => {
+  const { tests } = setup()
+
+  Object.keys(tests).forEach((contentType) => {
+    describe('Normalise ' + contentType, () => {
+      const { plural } = getContentType(contentType)
+      const { first, second, multiple } = normaliserTestData(contentType)
+      const { collections, testKeyBySlug, testKeyById } = tests[contentType]
+
+      if (testKeyById) {
+        it(`should normalise single ${contentType} by id`, () => {
+          const result = normalise([first], 'id')
+          expect(Object.keys(result)).toEqual(collections)
+        })
+
+        it(`should normalise multiple ${contentType} by id`, () => {
+          const result = normalise(multiple, 'id')
+          expect(Object.keys(result[plural])).toEqual([first.id, second.id].map(String))
+        })
+      }
+
+      if (testKeyBySlug) {
+        it(`should normalise single ${contentType} by slug`, () => {
+          const result = normalise([first], 'slug')
+          expect(Object.keys(result)).toEqual(collections)
+        })
+
+        it(`should normalise multiple ${contentType} by slug`, () => {
+          const result = normalise(multiple, 'slug')
+          expect(Object.keys(result[plural])).toEqual([first.slug, second.slug])
+        })
+      }
+    })
   })
 })

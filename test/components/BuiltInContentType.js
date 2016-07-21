@@ -7,9 +7,15 @@ import React, { Component } from 'react'
 import { ContentTypes } from '../../src/contentTypes'
 import { connectWpPost } from '../../src/connect'
 
-@connectWpPost(ContentTypes.Single, (props) => props.params.id)
+@connectWpPost(ContentTypes.Post, (props) => props.params.id)
 export default class BuiltInContentType extends Component {
   render () {
-    return <div></div>
+    const { query, post } = this.props.kasia
+
+    if (!query.complete) {
+      return <div>Loading...</div>
+    }
+
+    return <div>{post.title}</div>
   }
 }

@@ -1,21 +1,30 @@
 import invariant from 'invariant'
-import isArray from 'lodash.isArray'
+
+const nodeWpApiGitHubUrl = 'http://bit.ly/2adfKKg'
 
 export default {
-  isString: (value, name) => invariant(
+  isString: (name, value) => invariant(
     typeof value === 'string',
-    `Expecting ${name} to be a string, got "%s".`,
+    'Expecting %s to be string, got %s',
+    name,
     typeof value
   ),
-  isArray: (value, name) => invariant(
-    isArray(value),
-    `Expecting ${name} to be an array, got "%s".`,
-    typeof value
-  ),
-  isFunction: (value, name) => invariant(
+  isFunction: (name, value) => invariant(
     typeof value === 'function',
-    `Expecting ${name} to be a function, got "%s".`,
+    'Expecting %s to be function, got %s',
+    name,
     typeof value
+  ),
+  isArray: (name, value) => invariant(
+    Array.isArray(value),
+    'Expecting %s to be array, got %s',
+    name,
+    typeof value
+  ),
+  isWpApiInstance: (value = {}) => invariant(
+    typeof value.registerRoute === 'function',
+    'Expecting WP to be instance of `node-wpapi`. ' +
+    `See ${nodeWpApiGitHubUrl} for docs.`
   ),
   isIdentifier: (identifier) => invariant(
     typeof identifier === 'function' ||
@@ -24,27 +33,30 @@ export default {
     'Expecting identifier to be function/string/number, got "%s"',
     typeof identifier
   ),
-  isValidContentTypeObject: (obj, i) => invariant(
+  isValidContentTypeObject: (obj = {}) => invariant(
     typeof obj.name === 'string' &&
     typeof obj.plural === 'string' &&
     typeof obj.slug === 'string',
-    `Invalid content type object at position ${i}, see docs.`
+    // TODO add in bit.ly link to docs
+    'Invalid content type object, see documentation.'
   ),
-  isValidContentType: (contentTypeOptions, name) => invariant(
+  isValidContentType: (contentTypeOptions, name, componentName) => invariant(
     typeof contentTypeOptions !== 'undefined',
     'Content type "%s" is not recognised. ' +
-    'Built-in content types are available at `pepperoni/types`. ' +
-    'Pass the `name` of custom content types.',
-    name
+    'Pass built-ins from `kasia/types`, e.g. Post. ' +
+    'Pass the `name` of custom content types, e.g. "Book". ' +
+    'See the %s component.',
+    name,
+    componentName
   ),
-  isNewContentType: (allTypes, contentType) => invariant(
+  isNewContentType: (allTypes = [], contentType) => invariant(
     typeof allTypes[contentType.name] === 'undefined',
     'Content type with name "%s" already exists.',
     contentType.name
   ),
-  isNotWrapped: (target, targetName) => invariant(
-    !target.__pepperoni,
-    'The component "%s" is already wrapped by Pepperoni.',
+  isNotWrapped: (target = () => {}, targetName) => invariant(
+    !target.__kasia,
+    'The component "%s" is already wrapped by Kasia.',
     targetName
   )
 }

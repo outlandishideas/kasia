@@ -1,62 +1,90 @@
-import { takeEvery, takeLatest } from 'redux-saga'
-import { call, put, select } from 'redux-saga/effects'
+import { takeEvery } from 'redux-saga'
+import { call, put } from 'redux-saga/effects'
 import { camelize } from 'humps'
 
-import { wpapi } from './wpapi'
+import { WP } from './wpapi'
 import { getContentType } from './contentTypes'
-import { putRequest, completeRequest, failRequest } from './actions'
-import { REQUEST, REQUEST_TYPES } from './ActionTypes'
+import { completeRequest, failRequest } from './actions'
+import { Request, RequestTypes } from './constants/ActionTypes'
+
+/**
+ * Chain call methods beginning with `fn` that are the keys of `calls` with
+ * the value of each being the argument for the corresponding invocation.
+ * @param {Function} fn The function to invoke calls on
+ * @param {Object} calls The methods and their args to call
+ */
+export function chain (fn, calls) {
+  return Object.keys(calls).reduce((result, method) => {
+    const args = calls[method]
+    return result[method](args)
+  }, fn)
+}
 
 /**
  * Create a function that dynamically calls the necessary wpapi
- * methods that will fetch data for the given arguments.
+ * methods that will fetch data for the given content type item.
  *
- * The resultant will look like:
+ * Example returned fn for `contentType`="posts", `identifier`=16:
  * ```js
- * () => wpapi.{contentType}().{id,slug}(<identifier>).embed().then(<handler>)
+ * () => {
+ *   return WP
+ *     .posts()
+ *     .id(16)
+ *     .embed()
+ *     .then((response) => response)
+ * }
  * ```
  *
- * Example result:
- * ```js
- * () => wpapi.posts().id(16).embed().then((response) => response)
- * ```
- *
- * @param {Object} contentTypeOptions The content type's options object
+ * @param {Object} contentTypeMethodName The method name on wpapi instance
  * @param {String|Number} identifier The identifier's id or slug
- * @returns {Function}
+ * @returns {Function} A function to make a request to the WP-API
  */
-function derivedQuery (contentTypeOptions, identifier) {
-  const methodChain = [
+export function derivedQueryFn (contentTypeMethodName, identifier) {
+  return () => chain(WP, {
     // Call the content type method
-    [camelize(contentTypeOptions.plural)],
+    [contentTypeMethodName]: null,
     // Call the identifier method
-    [typeof identifier === 'string' ? 'slug' : 'id', identifier],
+    [typeof identifier === 'string' ? 'slug' : 'id']: identifier,
     // Call 'embed' in order that embedded data is in the response
-    ['embed'],
+    embed: null,
     // Call `then` in order to invoke query and return a Promise
-    ['then', (response) => response]
-  ]
-
-  return () => methodChain.reduce((result, next) => {
-    const arg = next[1] || undefined
-    return result[next[0]](arg)
-  }, wpapi)
+    then: (response) => response
+  })
 }
 
+/**
+ * Given an `action`, produce a function that will query the WP-API.
+ * @param {Object} action
+ * @returns {Function}
+ */
+export function resolveQueryFn (action) {
+  const { contentType, identifier, queryFn } = action
+
+  let realQueryFn
+
+  if (action.request === RequestTypes.Post) {
+    const options = getContentType(contentType)
+    const methodName = camelize(options.plural)
+    realQueryFn = derivedQueryFn(methodName, identifier)
+  } else if (action.request === RequestTypes.Query) {
+    realQueryFn = queryFn
+  } else {
+    throw new Error(`Unknown request type "${action.request}".`)
+  }
+
+  return realQueryFn
+}
+
+/**
+ * Make a fetch request to the WP-API according to the action
+ * object and record the result in the store.
+ * @param {Object} action Action object
+ */
 export function * fetch (action) {
   const { id } = action
-  const { contentType, identifier } = action.options
-
-  yield put(putRequest(id, contentType))
-
-  const contentTypeOptions = getContentType(contentType)
-
-  const queryFn = action.requestType === REQUEST_TYPES.Single
-    ? derivedQuery(contentTypeOptions, identifier)
-    : action.queryFn
 
   try {
-    let result = yield call(queryFn)
+    const result = yield call(resolveQueryFn(action), WP)
     yield put(completeRequest(id, result))
   } catch (err) {
     yield put(failRequest(id, err))
@@ -64,5 +92,5 @@ export function * fetch (action) {
 }
 
 export function * fetchSaga () {
-  yield * takeEvery((action) => action.type === REQUEST.Create, fetch)
+  yield * takeEvery(Request.Create, fetch)
 }

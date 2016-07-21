@@ -5,79 +5,57 @@ jest.disableAutomock()
 
 import values from 'lodash.values'
 
-import configureStore from './util/configureStore'
-import { ContentTypes, getContentTypes } from '../src/contentTypes'
+import {
+  ContentTypes,
+  getContentTypes,
+  getContentType,
+  registerContentType
+} from '../src/contentTypes'
 
-let store
+describe('getContentTypes', () => {
+  it('returns an object', () => {
+    const type = typeof getContentTypes()
+    expect(type).toEqual('object')
+  })
+})
 
-function createStore (options) {
-  options.host = 'host'
-  store = configureStore(options).store
-}
+describe('getContentType', () => {
+  it('returns an object', () => {
+    const type = typeof getContentType(ContentTypes.Post)
+    expect(type).toEqual('object')
+  })
+})
 
-function makeContentTypeObj (name, plural, slug) {
-  return { name, plural, slug }
-}
+describe('registerContentType', () => {
+  it('throws with bad options object', () => {
+    expect(() => {
+      registerContentType('')
+    }).toThrowError('Invalid content type object, see documentation.')
+  })
 
-describe('contentTypes', () => {
-  describe('unhappy path', () => {
-    values(ContentTypes).forEach((builtInType) => {
-      it(`throws an invariant exception when name is a built in type ${builtInType}`, () => {
-        const contentTypes = [
-          makeContentTypeObj(builtInType, builtInType, builtInType)
-        ]
+  values(ContentTypes).forEach((builtInType) => {
+    it('throws an when name is ' + builtInType, () => {
+      const opts = {
+        name: builtInType,
+        plural: builtInType,
+        slug: builtInType
+      }
 
-        expect(() => createStore({ contentTypes }))
-          .toThrowError(/already exists/)
-      })
+      expect(() => {
+        registerContentType(opts)
+      }).toThrowError(`Content type with name "${builtInType}" already exists.`)
     })
   })
 
-  describe('happy path', () => {
-    it('adds contentType to list', () => {
-      const contentTypes = [{
-        name: 'article',
-        plural: 'articles',
-        slug: 'articles'
-      }]
+  it('adds custom content type to cache', () => {
+    const contentType = {
+      name: 'article',
+      plural: 'articles',
+      slug: 'articles'
+    }
 
-      createStore({ contentTypes })
+    registerContentType(contentType)
 
-      expect(getContentTypes().article)
-        .toEqual(makeContentTypeObj('article', 'articles', 'articles'))
-    })
-
-    it('adds contentType to list with camelCased type', () => {
-      const contentTypes = [{
-        name: 'blogPost',
-        plural: 'blogPosts',
-        slug: 'blog-posts'
-      }]
-
-      createStore({ contentTypes })
-
-      expect(getContentTypes().blogPost)
-        .toEqual(makeContentTypeObj('blogPost', 'blogPosts', 'blog-posts'))
-    })
-
-    it('maintains more than one contentType on list', () => {
-      const contentTypes = [{
-        name: 'newspaper',
-        plural: 'newspapers',
-        slug: 'newspapers'
-      }, {
-        name: 'book',
-        plural: 'books',
-        slug: 'books'
-      }]
-
-      createStore({ contentTypes })
-
-      expect(getContentTypes().article)
-        .toEqual(makeContentTypeObj('article', 'articles', 'articles'))
-
-      expect(getContentTypes().book)
-        .toEqual(makeContentTypeObj('book', 'books', 'books'))
-    })
+    expect(getContentTypes().article).toEqual(contentType)
   })
 })

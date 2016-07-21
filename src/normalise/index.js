@@ -1,31 +1,35 @@
-import { normalize, Schema, arrayOf } from 'normalizr'
-import { camelizeKeys } from 'humps'
+import { normalize, arrayOf } from 'normalizr'
+import merge from 'lodash.merge'
+import modifyResponse from 'wp-api-response-modify'
 
 import { makeSchemas, createSchema } from './schemas'
-import flatten from './flatten'
+import { deriveContentType } from '../contentTypes'
 
-export default function normalise (contentTypeOptions, content, idAttribute, invalidateSchemaCache = false) {
-  const flattened = flatten(camelizeKeys(content))
+/**
+ * Split a response from the WP-API into its constituent entities.
+ * @param {Array} data The WP API response data
+ * @param {String} idAttribute The property name of an entity's identifier
+ * @returns {Object}
+ */
+export default function normalise (data, idAttribute) {
+  const schemas = makeSchemas(idAttribute)
 
-  const finalIdAttribute = typeof idAttribute === 'function'
-    ? idAttribute(flattened)
-    : idAttribute
+  return data.reduce((entities, rawEntity) => {
+    const entity = modifyResponse(rawEntity)
+    const type = deriveContentType(entity)
 
-  const schemas = makeSchemas(finalIdAttribute, invalidateSchemaCache)
+    const contentTypeSchema = schemas[type]
+      // Built-in content type or previously registered custom content type
+      ? schemas[type]
+      // Custom content type, will only get here once for each type
+      : createSchema(type, idAttribute)
 
-  let contentTypeSchema = schemas[contentTypeOptions.name]
+    const schema = Array.isArray(entity)
+      ? arrayOf(contentTypeSchema)
+      : contentTypeSchema
 
-  if (!contentTypeSchema) {
-    // Custom content type
-    contentTypeSchema = createSchema(
-      contentTypeOptions.plural,
-      finalIdAttribute
-    )
-  }
+    const normalised = normalize(entity, schema)
 
-  const schema = Array.isArray(content)
-    ? arrayOf(contentTypeSchema)
-    : contentTypeSchema
-
-  return normalize(flattened, schema)
+    return merge({}, entities, normalised.entities)
+  }, {})
 }

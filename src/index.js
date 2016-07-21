@@ -1,61 +1,69 @@
+import merge from 'lodash.merge'
 import { camelize } from 'humps'
 
 import invariants from './invariants'
 import makeReducer from './reducer'
-import { WP } from './wpapi'
+import { setWP } from './wpapi'
 import { fetchSaga } from './sagas'
-import { registerContentType, getContentTypes } from './contentTypes'
+import { registerContentType } from './contentTypes'
 
 /**
- * Internal Pepperoni sagas.
- * Extended with plugin sagas if available.
- * @type {Array}
+ * Components of the toolset that are extensible via plugins.
+ * @type {Object}
  */
-let sagas = [fetchSaga]
+const componentsBase = {
+  sagas: [fetchSaga],
+  reducers: {}
+}
 
 /**
- * Configure Pepperoni.
- * @param {String} `opts.host` Host of the WordPress installation
- * @param {String} `opts.entityKeyPropName` Property of an entity that is used to key it on the store
- * @param {Array} `opts.plugins` Array of Pepperoni plugins
- * @param {Array} `opts.contentTypes` Array of custom content type definition objects
- * @returns {Object} Pepperoni reducer
+ * Configure Kasia.
+ * @param {WP} opts.WP Instance of node-wpapi
+ * @param {String} [opts.keyEntitiesBy] Property used to key entities in the store
+ * @param {Array} [opts.plugins] Kasia plugins
+ * @param {Array} [opts.contentTypes] Custom content type definition objects
+ * @returns {Object} Kasia reducer
  */
-export default function configurePepperoni (opts = {}) {
+export default function Kasia (opts = {}) {
   const {
-    host,
-    entityKeyPropName = 'id',
-    plugins = [],
+    WP = {},
+    keyEntitiesBy = 'id',
+    plugins: _plugins = [],
     contentTypes = []
   } = opts
 
-  invariants.isString(host, 'host')
-  invariants.isString(entityKeyPropName, 'entityKeyPropName')
-  invariants.isArray(plugins, 'plugins')
-  invariants.isArray(contentTypes, 'contentTypes')
+  invariants.isWpApiInstance(WP)
+  invariants.isString('keyEntitiesBy', keyEntitiesBy)
+  invariants.isArray('plugins', _plugins)
+  invariants.isArray('contentTypes', contentTypes)
 
-  const api = WP({ endpoint: host + '/wp-json' })
+  setWP(WP)
 
-  const pluginReducers = plugins
-    .map((plugin) => {
-      invariants.isFunction(plugin[0])
-      const pluginOptions = plugin[0](plugin[1] || {}, opts)
-      sagas = sagas.concat(plugin.sagas || [])
-      return pluginOptions
-    })
-    .map((p) => p.reducer || {})
+  const plugins = _plugins.reduce((plugins, _plugin, i) => {
+    invariants.isFunction(
+      'plugin at index ' + i,
+      _plugin instanceof Array ? _plugin[0] : _plugin
+    )
 
-  contentTypes.forEach((contentType, i) => {
-    invariants.isValidContentTypeObject(contentType, i)
-    invariants.isNewContentType(getContentTypes(), contentType)
-    const plural = contentType.plural
-    api[camelize(plural)] = api.registerRoute('/wp/v2', `/${plural}(?P<id>)`)
+    const plugin = _plugin instanceof Array
+      ? _plugin[0](WP, _plugin[1] || {}, opts)
+      : _plugin(WP, {}, opts)
+
+    return {
+      sagas: plugins.sagas.concat(plugin.sagas),
+      reducers: merge(plugins.reducers, plugin.reducers)
+    }
+  }, componentsBase)
+
+  contentTypes.forEach((contentType) => {
+    const { namespace = 'wp/v2', methodName, plural, route, slug } = contentType
+    const realRoute = route || `/${slug}/(?P<id>)`
     registerContentType(contentType)
+    WP[camelize(methodName || plural)] = WP.registerRoute(namespace, realRoute)
   })
 
   return {
-    api,
-    pepperoniReducer: makeReducer({ entityKeyPropName }, pluginReducers),
-    pepperoniSagas: sagas
+    kasiaReducer: makeReducer({ keyEntitiesBy }, plugins),
+    kasiaSagas: plugins.sagas
   }
 }

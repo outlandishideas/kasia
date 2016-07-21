@@ -3,54 +3,38 @@
 
 jest.disableAutomock()
 
-jest.mock('invariant')
-
-jest.mock('../src/reducer')
-
-import invariant from 'invariant'
 import WP from 'wpapi'
 
-import Pepperoni from '../src/index'
-import { makeReducer } from '../src/reducer'
+import Kasia from '../src/index'
 
-describe('Pepperoni', () => {
-  beforeEach(() => {
-    invariant.mockClear()
-    makeReducer.mockClear()
-  })
+describe('Kasia', () => {
+  const wpapi = new WP({ endpoint: 'http://localhost' })
 
   it('exports a function', () => {
-    expect(typeof Pepperoni).toEqual('function')
+    expect(typeof Kasia).toEqual('function')
   })
 
-  it('throws an invariant violation when `host` is not a string', () => {
-    Pepperoni({ host: 11111 })
-
-    expect(invariant).toBeCalledWith(
-      false,
-      'Expecting host to be a string, got "%s".',
-      'number'
-    )
+  it('throws with bad WP value', () => {
+    expect(() => {
+      Kasia({ WP: '' })
+    }).toThrowError(/Expecting WP to be instance of `node-wpapi`/)
   })
 
-  it('throws when `host` is not given', () => {
-    expect(() => Pepperoni())
-      .toThrowError('Expecting host in options')
+  it('throws with bad plugins value', () => {
+    expect(() => {
+      Kasia({ WP: wpapi, plugins: '' })
+    }).toThrowError(/Expecting plugins to be array/)
   })
 
-  it('accepts a plugin and includes its saga', () => {
-    const saga = () => {}
-
-    const { pepperoniSagas } = Pepperoni({
-      host: 'host',
-      plugins: [[() => ({ sagas: [saga] })]]
-    })
-
-    expect(pepperoniSagas.indexOf(saga) !== -1).toEqual(true)
+  it('throws with bad keyEntitiesBy value', () => {
+    expect(() => {
+      Kasia({ WP: wpapi, keyEntitiesBy: 0 })
+    }).toThrowError(/Expecting keyEntitiesBy to be string/)
   })
 
-  it('returns an instance of node-wpapi', () => {
-    const result = Pepperoni({ host: 'host' })
-    expect(result.api instanceof WP).toEqual(true)
+  it('throws with bad contentTypes value', () => {
+    expect(() => {
+      Kasia({ WP: wpapi, contentTypes: '' })
+    }).toThrowError(/Expecting contentTypes to be array/)
   })
 })
