@@ -362,18 +362,6 @@ Elements:
 
 - `action` {Object} An action object containing information for the saga to fetch data
 
-Example:
-
-```js
-// Somewhere in an application's router middleware,
-// after matching a route and gathering components
-const preloadMakers = components
-  .map((component) => component.makePreloader) // get preload makers
-  .filter(Boolean) // remove falsey values (components that don't have `makePreloader`)
-
-preloadMakers.forEach
-```
-
 Consult the [boilerplate](https://github.com/outlandishideas/kasia-boilerplate)
 for an example implementation of a universal Kasia application.
 
