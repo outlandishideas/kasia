@@ -1,83 +1,111 @@
-/* global fetch:false */
-
 import { takeEvery } from 'redux-saga'
 import { call, put } from 'redux-saga/effects'
 import merge from 'lodash.merge'
 
-import ActionTypes  from './ActionTypes'
+import ActionTypes  from './constants/ActionTypes'
 
-const defaultConfig = {
-  route: 'wp-json/wp-api-menus/v2'
-}
+// The default wp-api-menus namespace in the WP-API.
+const defaultRoute = 'wp-api-menus/v2'
 
-const routes = {
-  [ActionTypes.REQUEST_MENUS]: 'menus',
-  [ActionTypes.REQUEST_MENU]: 'menus/:id',
-  [ActionTypes.REQUEST_LOCATIONS]: 'menu-locations',
-  [ActionTypes.REQUEST_LOCATION]: 'menu-locations/:id'
-}
-
-const actionRequestTypes = [
+// Set of action type names that is used to capture
+// only actions of these type in the reducer.
+const requestTypes = [
   ActionTypes.REQUEST_MENU,
   ActionTypes.REQUEST_MENUS,
   ActionTypes.REQUEST_LOCATION,
   ActionTypes.REQUEST_LOCATIONS
-];
+]
 
-function doFetch (endpoint) {
-  return fetch(endpoint)
-    .then(response => response.json())
-    .then(data => ({ data }))
-    .catch(error => ({ data: { error } }))
-}
-
-export function * fetchResource (pepperoniConfig, pluginConfig, action) {
-  const { id } = action
-
-  const preparedRoute = routes[action.type]
-    .replace(':id', id || '')
-
-  const endpoint = [pepperoniConfig.host, pluginConfig.route, preparedRoute].join('/');
-
-  const { data } = yield call(doFetch, endpoint)
-
-  yield put({ type: ActionTypes.RECEIVE_DATA, dataType: action.type, data, id })
-}
-
-export default function (pluginConfig, pepperoniConfig) {
-  const config = merge({},
-    defaultConfig,
-    pluginConfig
-  )
-
-  const reducer = {
-    [ActionTypes.RECEIVE_DATA]: (state, action) => {
-      switch (action.dataType) {
-        case ActionTypes.REQUEST_MENU:
-          return merge({}, state, { menus: { [action.id]: action.data } })
-        case ActionTypes.REQUEST_MENUS:
-          return merge({}, state, { menus: action.data })
-        case ActionTypes.REQUEST_LOCATION:
-          return merge({}, state, { menuLocations: { [action.id]: action.data } })
-        case ActionTypes.REQUEST_LOCATIONS:
-          return merge({}, state, { menuLocations: action.data })
-        default:
-          return state
-      }
+const reducer = {
+  // RECEIVE DATA
+  // Place data in the store according to the type of data that was requested.
+  [ActionTypes.RECEIVE_DATA]: (state, action) => {
+    switch (action.request) {
+      case ActionTypes.REQUEST_MENU:
+        return merge({}, state, { menus: { [action.id]: action.data } })
+      case ActionTypes.REQUEST_MENUS:
+        return merge({}, state, { menus: action.data })
+      case ActionTypes.REQUEST_LOCATION:
+        return merge({}, state, { menuLocations: { [action.id]: action.data } })
+      case ActionTypes.REQUEST_LOCATIONS:
+        return merge({}, state, { menuLocations: action.data })
+      default:
+        return state
     }
   }
+}
 
-  const sagas = [function * () {
+/**
+ * Perform the actual request for data from wp-api-menus.
+ * @param {Object} WP Instance of `wpapi`
+ * @param {Object} action Action object
+ * @returns {Promise} Resolves to response data
+ */
+function fetch (WP, action) {
+  switch (action.type) {
+    case ActionTypes.REQUEST_MENU:
+      return WP.menus().id(action.id).get()
+    case ActionTypes.REQUEST_MENUS:
+      return WP.menus().get()
+    case ActionTypes.REQUEST_LOCATION:
+      return WP.locations().id(action.id).get()
+    case ActionTypes.REQUEST_LOCATIONS:
+      return ActionTypes.locations().get()
+    default:
+      throw new Error(`Unknown request type "${action.request}".`)
+  }
+}
+
+/**
+ * Produce the plugin's own sagas array.
+ * A single saga that deals with requests for wp-api-menus data.
+ * @param {Object} WP Instance of `wpapi`
+ * @returns {Array} Array of sagas
+ */
+function makeSagas (WP) {
+  return [function * fetchSaga () {
     yield * takeEvery(
-      action => actionRequestTypes.indexOf(action.type) !== -1,
-      fetchResource, pepperoniConfig, config
+      action => requestTypes.indexOf(action.type) !== -1,
+      fetchResource, WP
     )
   }]
+}
+
+/**
+ * Make a preloader function that can be used to request data on the server.
+ * @param {Object} WP Instance of `wpapi`
+ * @param {Object} action Action object
+ * @returns {Function} Function that returns a collection of saga operation definitions
+ */
+export function makePreloader (WP, action) {
+  return () => [[fetchResource, WP, action]]
+}
+
+/**
+ * Orchestrate a request for wp-api-menus data.
+ * @param {Object} WP Instance of `wpapi`
+ * @param {Object} action Action object
+ */
+export function * fetchResource (WP, action) {
+  const { id, type } = action
+  const data = yield call(fetch, WP, action)
+  yield put({ type: ActionTypes.RECEIVE_DATA, request: type, data, id })
+}
+
+/**
+ * Initialise the plugin, returning the plugins own reducer and sagas.
+ * @param {Object} WP Instance of `wpapi`
+ * @param {Object} config User's plugin configuration
+ * @returns {Object} Plugin reducer and sagas
+ */
+export default function (WP, config) {
+  config.route = config.route || defaultRoute
+
+  WP.menus = WP.registerRoute(config.route, 'menus/(?P<id>)')
+  WP.locations = WP.registerRoute(config.route, 'menu-locations/(?P<id>)')
 
   return {
-    name: 'menus',
-    reducer,
-    sagas,
-    config
+    reducers: reducer,
+    sagas: makeSagas(WP)
   }
 }

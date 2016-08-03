@@ -1,17 +1,17 @@
 {
-  "name": "pepperoni-plugin-wp-api-menus",
-  "version": "0.0.1",
-  "description": "Adds support for the WP-API menus routes to Pepperoni",
+  "name": "kasia-plugin-wp-api-menus",
+  "version": "1.0.0",
+  "description": "Provides support for the WP-API menus to Kasia",
   "main": "lib/index.js",
   "jsnext:main": "src/index.js",
   "scripts": {
-    "compile": "rimraf lib && babel -d lib/ src/",
+    "build": "rimraf lib && babel -d lib/ src/",
     "lint": "standard src/**/*.js",
-    "postinstall": "npm run -s compile"
+    "postinstall": "npm run build"
   },
   "repository": {
     "type": "git",
-    "url": "git@gitlab.outlandish.com:pepperoni/pepperoni-plugin-wp-api-menus.git"
+    "url": "git+https://github.com/outlandishideas/kasia-plugin-wp-api-menus.git"
   },
   "keywords": [
     "javascript",
@@ -25,15 +25,13 @@
     "menu"
   ],
   "author": "Outlandish <hello@outlandish.com>",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
-    "url": "https://github.com/outlandishideas/pepperoni-plugin-wp-api-menus/issues"
+    "url": "https://github.com/outlandishideas/kasia-plugin-wp-api-menus/issues"
   },
-  "homepage": "https://github.com/outlandishideas/pepperoni-plugin-wp-api-menus#readme",
+  "homepage": "https://github.com/outlandishideas/kasia-plugin-wp-api-menus#readme",
   "dependencies": {
-    "lodash.merge": "^4.3.5"
-  },
-  "peerDependencies": {
+    "lodash.merge": "^4.3.5",
     "redux-saga": "^0.9.5"
   },
   "devDependencies": {
