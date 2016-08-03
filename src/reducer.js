@@ -1,53 +1,93 @@
 import merge from 'lodash.merge'
+import pickToArray from 'pick-to-array'
 
-import Plurality from './constants/Plurality'
-import { normalise, normaliseFailed } from './normalise'
-import { REQUEST, INVALIDATE } from './constants/ActionTypes'
+import normalise from './normalise'
+import { ContentTypesWithoutId, deriveContentType } from './contentTypes'
+import { Request } from './constants/ActionTypes'
 
-export const baseState = {
-  entities: {},
-  failedEntities: {},
-  config: {}
-}
+/**
+ * Pick all entity identifiers from a raw WP-API response.
+ * @param {Object} data Raw WP-API JSON
+ * @returns {Array} Entity identifiers
+ */
+export function pickEntityIds (data) {
+  const entityIdentifiers = pickToArray(data, 'id')
 
-export default function makeReducer (config, plugins) {
-  const { contentTypes, entityKeyPropName } = config
-
-  const initialState = merge({},
-    baseState,
-    { config }
-  )
-
-  const pluginReducers = plugins
-    .reduce((obj, plugin) => merge(obj, plugin.reducer), {})
-
-  const reducer = merge({}, pluginReducers, {
-    [REQUEST.COMPLETE]: (state, action) => {
-      const contentTypeOptions = contentTypes[action.contentType]
-      const normalisedData = normalise(contentTypeOptions, action.data, entityKeyPropName)
-      return merge({}, state, { entities: normalisedData.entities })
-    },
-    [REQUEST.FAIL]: (state, action) => {
-      const contentTypeOptions = contentTypes[action.contentType]
-      const normalisedData = normaliseFailed(contentTypeOptions, entityKeyPropName, action.subject, action.error)
-      return merge({}, state, { failedEntities: normalisedData.entities })
-    },
-    [INVALIDATE]: (state, action) => {
-      const namePlural = contentTypes[action.contentType].name[Plurality.PLURAL]
-      delete state.entities[namePlural][action.id]
-      return merge({}, state)
+  // Accommodate content types that do not have an `id` property
+  data.forEach((entity) => {
+    const type = deriveContentType(entity)
+    if (ContentTypesWithoutId[type]) {
+      entityIdentifiers.push(pickToArray(entity, 'slug'))
     }
   })
 
-  return {
-    wordpress: function pepperoniReducer (state = initialState, action) {
-      const [actionNamespace] = action.type.split('/')
+  return entityIdentifiers
+}
 
-      if (actionNamespace !== 'pepperoni') {
-        return state
+// COMPLETE
+// Place entity on the store; update query record
+// The entities are normalised by the `keyEntitiesBy` parameter passed in during
+// creation of the action fn, however entities are recorded in the query by their IDs
+// (or slugs if they do not have an ID property) and resolved later within the HOC.
+export const completeReducer = (keyEntitiesBy) => (state, action) => {
+  const data = action.data instanceof Array ? action.data : [action.data]
+  const entities = normalise(data, keyEntitiesBy)
+
+  return merge({}, state, {
+    entities,
+    queries: {
+      [action.id]: {
+        id: action.id,
+        entities: pickEntityIds(data),
+        paging: action.data._paging || false,
+        complete: true,
+        OK: true
       }
+    }
+  })
+}
 
-      if (action.type in reducer) {
+// FAIL
+// Update query record only
+export const failReducer = (state, action) => {
+  return merge({}, state, {
+    queries: {
+      [action.id]: {
+        id: action.id,
+        error: String(action.error),
+        complete: true,
+        OK: false
+      }
+    }
+  })
+}
+
+/**
+ * Make the reducer for Kasia.
+ * @param {Object} options Options object
+ * @param {Object} plugins Plugin configurations, e.g. sagas/config
+ * @returns {Object} Kasia reducer
+ */
+export default function makeReducer (options, plugins) {
+  const { keyEntitiesBy } = options
+
+  const reducer = merge({}, plugins.reducers, {
+    [Request.Complete]: completeReducer(keyEntitiesBy),
+    [Request.Fail]: failReducer
+  })
+
+  const initialState = {
+    // Record query requests to the WP-API here
+    queries: {},
+    // Entities are normalised and stored here
+    entities: {}
+  }
+
+  return {
+    wordpress: function kasiaReducer (state = initialState, action) {
+      const [ actionNamespace ] = action.type.split('/')
+
+      if (actionNamespace === 'kasia' && action.type in reducer) {
         return reducer[action.type](state, action)
       }
 

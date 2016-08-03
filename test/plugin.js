@@ -3,17 +3,16 @@
 
 jest.disableAutomock()
 
-import merge from 'lodash.merge'
+import { combineReducers, createStore } from 'redux'
+import WP from 'wpapi'
 
-import configureStore from './util/configureStore'
+import Kasia from '../src'
+
+const testActionType = 'kasia/TEST_ACTION'
 
 let didHitPluginReducer = false
 
-const testPluginName = 'testPluginName'
-const config = { foo: 'bar' }
-const testActionType = 'pepperoni/TEST_ACTION'
-
-const pluginSaga = jest.fn()
+function pluginSaga () {}
 
 const pluginReducer = {
   [testActionType]: (action, state) => {
@@ -22,36 +21,34 @@ const pluginReducer = {
   }
 }
 
-const plugin = (pluginConfig) => {
+const plugin = () => {
   return {
-    name: testPluginName,
-    reducer: pluginReducer,
-    sagas: [pluginSaga],
-    config: merge({}, config, pluginConfig)
+    reducers: pluginReducer,
+    sagas: [pluginSaga]
   }
 }
 
-const { store, pepperoniSagas } = configureStore({
-  host: 'test',
-  plugins: [
-    [plugin, { userPluginOption: true }]
-  ]
-})
-
-describe('Pepperoni plugin', () => {
-  it('should add plugin config to the default state', () => {
-    const state = store.getState()
-    expect(typeof state.wordpress.config.plugins[testPluginName]).toEqual('object')
-    expect(state.wordpress.config.plugins[testPluginName].foo).toEqual('bar')
-    expect(state.wordpress.config.plugins[testPluginName].userPluginOption).toEqual(true)
+function setup () {
+  const { kasiaReducer, kasiaSagas } = Kasia({
+    WP: new WP({ endpoint: 'http://localhost' }),
+    plugins: [plugin]
   })
 
-  it('should call plugin reducer action handler when action type is matched', () => {
+  const rootReducer = combineReducers(kasiaReducer)
+  const store = createStore(rootReducer)
+
+  return { store, kasiaSagas }
+}
+
+describe('Plugin', () => {
+  const { store, kasiaSagas } = setup()
+
+  it('should call plugin action handler when type is matched', () => {
     store.dispatch({ type: testActionType })
     expect(didHitPluginReducer).toEqual(true)
   })
 
-  it('should add the plugin saga to internal sagas array', () => {
-    expect(pepperoniSagas.indexOf(pluginSaga)).toEqual(1)
+  it('should add the plugin saga to sagas array', () => {
+    expect(kasiaSagas.indexOf(pluginSaga)).toEqual(1)
   })
 })

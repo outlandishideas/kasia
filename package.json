@@ -1,52 +1,53 @@
 {
-  "name": "pepperoni",
-  "version": "0.0.6",
-  "description": "A React Redux Toolset for the WordPress API",
+  "name": "kasia",
+  "version": "1.0.0",
+  "description": "A React Redux toolset for the WordPress API",
   "main": "lib/index.js",
   "jsnext:main": "src/index.js",
   "scripts": {
-    "compile": "rimraf lib && babel -d lib/ src/",
+    "build": "rimraf lib && babel -d lib/ src/",
     "lint": "snazzy",
     "test": "jest --verbose",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "postinstall": "npm run -s compile"
+    "postinstall": "npm run build",
+    "prepublish": "npm run lint && npm run test && npm run build"
   },
   "repository": {
     "type": "git",
-    "url": "git@gitlab.outlandish.com:pepperoni/pepperoni.git"
+    "url": "git+https://github.com/outlandishideas/kasia.git"
   },
   "keywords": [
     "javascript",
     "react",
     "redux",
     "wordpress",
-    "word press",
+    "word",
+    "press",
     "wp-api",
-    "wordpress api"
+    "wp",
+    "api"
   ],
   "author": "Outlandish <hello@outlandish.com>",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
-    "url": "https://github.com/outlandishideas/pepperoni/issues"
+    "url": "https://github.com/outlandishideas/kasia/issues"
   },
-  "homepage": "https://github.com/outlandishideas/pepperoni#readme",
+  "homepage": "https://github.com/outlandishideas/kasia#readme",
   "dependencies": {
     "humps": "^1.0.0",
     "invariant": "^2.2.1",
-    "lodash.clonedeep": "^4.1.0",
     "lodash.find": "^4.3.0",
-    "lodash.mapkeys": "^4.3.0",
+    "lodash.isequal": "^4.2.0",
     "lodash.merge": "^4.3.5",
     "normalizr": "^2.0.1",
-    "urlencode": "^1.1.0"
-  },
-  "peerDependencies": {
+    "pick-to-array": "^1.0.0",
     "react": "^15.0.1",
     "react-dom": "^15.0.1",
     "react-redux": "^4.4.5",
     "redux": "^3.4.0",
-    "redux-saga": "^0.9.5"
+    "redux-saga": "^0.9.5",
+    "wp-api-response-modify": "^2.0.0"
   },
   "devDependencies": {
     "babel-cli": "6.6.5",
@@ -62,9 +63,10 @@
     "enzyme": "^2.2.0",
     "jest": "^0.1.40",
     "jest-cli": "^11.0.2",
+    "lodash.values": "^4.1.0",
     "rimraf": "^2.5.2",
     "snazzy": "^4.0.0",
-    "standard": "^7.0.1"
+    "standard": "^7.1.2"
   },
   "jest": {
     "testDirectoryName": [

@@ -1,180 +1,287 @@
-# Pepperoni
+# kasia
 
 > A React Redux toolset for the WordPress API
 
+Made with ❤ at [@outlandish](http://www.twitter.com/outlandish)
+
+<a href="http://badge.fury.io/js/kasia"><img alt="npm version" src="https://badge.fury.io/js/kasia.svg"></a>
+[![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg)](http://standardjs.com/)
+
 ## Features
 
-- Declaratively connect React components to data from the WordPress API.
-- Register and consume Custom Content Types with very little configuration.
-- Provides a common sense interface for making requests to the WP-API.
-- All content data received is placed on the store for caching (and can be invalidated).
-- Built-in isomorphism.
-- An official boilerplate for getting started with Pepperoni in a matter of minutes.
+- Declaratively connect React components to data from WordPress.
+- Uses [`node-wpapi`](https://github.com/WP-API/node-wpapi) internally in order to facilitate complex queries.
+- Register and consume Custom Content Types with ease.
+- Support for universal applications.
+- Support for plugins, e.g. [`wp-api-menus`]().
 
-Check out the [Pepperoni boilerplate]() based on [WordPress Bedrock](https://github.com/roots/bedrock)
-if you are starting from scratch.
+Check out the [Kasia boilerplate WordPress theme](https://github.com/outlandishideas/kasia-boilerplate).
+
+## Glossary
+
+- [Requirements](#requirements)
+- [Install](#install)
+- [Import](#import)
+- [__Connect a Component__](#connect-a-component)
+- [API](#api)
+- [Exports](#exports)
+- [The Shape of Things](#the-shape-of-things)
+- [Plugins](#plugins)
+- [Universal Applications](#universal-applications)
+- [Author & License](#author-&-license)
 
 ## Requirements
 
-- React >0.14 ??????
+Kasia suits applications that are built using these technologies:
+
+- React
 - Redux
-- Redux Saga
-- WordPress w/ [WP-API](http://v2.wp-api.org/) plugin
-- [`isomorphic-fetch`](https://github.com/matthew-andrews/isomorphic-fetch)*
-<p></p>
-_\* isomorphic applications only_
+- Redux Sagas
+- WordPress
+- [WP-API plugin](http://v2.wp-api.org/)
+- [`node-wpapi`](https://github.com/WP-API/node-wpapi)
 
 ## Install
 
-`npm install pepperoni --save`
+`npm install kasia --save`
 
 ## Import
 
-Import the main configuration function:
-
 ```js
 // ES6
-import pepperoni from 'pepperoni';
+import kasia from 'kasia'
 ```
 
 ```js
 // non-ES6
-var pepperoni = require('pepperoni');
+var kasia = require('kasia')
 ```
-
-Pepperoni has other exports, listed in the [API](#API) documentation.
 
 ## Configure
 
-Create and then include the Pepperoni reducer when composing
-your application's root reducer with `redux#combineReducers`:
+1. Initialise Kasia with an instance of `node-wpapi`.
+
+2. Spread the Kasia reducer and sagas when creating your redux store.
 
 ```js
-import { combineReducers } from 'redux';
-import pepperoni from 'pepperoni';
+import { combineReducers, createStore, applyMiddleware } from 'redux'
+import createSagaMiddleware from 'redux-saga'
+import Kasia from 'kasia'
+import wpapi from 'wpapi'
 
-const pepperoniReducer = pepperoni({
-  wpApiUrl: 'https://example.com/wp-api/v2/'
-});
+const WP = new wpapi({ endpoint: 'http://wordpress/' })
+
+const { kasiaReducer, kasiaSagas } = Kasia({ WP })
 
 const rootReducer = combineReducers({
-  ...pepperoniReducer
-});
+  ...kasiaReducer
+})
 
-export default rootReducer;
-```
-
-Use the root reducer when creating your redux store, passing
-in Pepperoni's own sagas to `redux-saga#createSagaMiddleware`.
-
-```js
-import { createStore, applyMiddleware } from 'redux';
-import { pepperoniSagas } from 'pepperoni';
-import createSagaMiddleware from 'redux-saga';
-
-import rootReducer from '../reducers';
+const sagaMiddleware = createSagaMiddleware(
+  ...kasiaSagas
+)
 
 export default function configureStore (initialState) {
-  const sagaMiddleware = createSagaMiddleware(
-    ...pepperoniSagas()
-  );
-
-  const store = createStore(
+  return createStore(
     rootReducer,
     initialState,
     applyMiddleware(sagaMiddleware)
-  );
-
-  return store;
+  )
 }
 ```
 
 ## Connect a Component
 
-After configuration you can connect a component in order that it receives content
-data via `props` by decorating that component with `connectWordPress`:
+Things to keep in mind:
 
-```js
-import React, { Component } from 'react';
-import { connectWordPress } from 'pepperoni';
+- A component will make a request for data 1) when it mounts and 2) if its props change.
+- Content data should be parsed before being rendered as it may contain encoded HTML entities.
+- In arbitrary queries with `connectWpQuery`, we suggest that you always call the `embed` method on the
+query chain, otherwise embedded content data will be omitted from the response.
+- Paging data for the request made on behalf of the component is available at `this.props.kasia.query.paging`.
+- The examples given assume the use of [decorators.](https://github.com/loganfsmyth/babel-plugin-transform-decorators-legacy)
+However decorator support is not necessary. See the end of each example for the alternative Higher Order Component approach.
 
-class MyPost extends Component {
-  render () {
-    const { post } = this.props;
+### `@connectWpPost(contentType, identifier) : Component`
 
-    if (!post) {
-      return <div>Loading...</div>;
-    }
+Connect a component to a single entity in WordPress, e.g. Post, Page, or custom content type. 
 
-    return <div dangerouslySetInnerHTML={this.props.post.title}></div>;
-  }
-}
+- __contentType__ {String} The content type to fetch
+- __identifier__ {String|Number|Function} ID of the entity to fetch or function that derives it from `props`
 
-// Connect the component to data from WP-API
-export default connectWordPress()(MyPost);
-```
+Returns a connected component.
 
-## Use a Connected Component
-
-Example:
+Example, using identifier derived from route parameter on `props`:
 
 ```js
 import React, { Component } from 'react'
-import { Route, IndexRoute } from 'react-router'
-import connectWordPress from 'pepperoni/connect'
+import { Route } from 'react-router'
+import { connectWpPost } from 'kasia/connect'
+import { Page } from 'kasia/types'
 
-@connectedWordPress()
-class Post extends Component {
+@connectWpPost(Page, (props) => props.params.slug)
+export default class Page extends Component {
   render () {
-    const { post } = this.props
+    const { query, page } = this.props.kasia
 
-    if (!post) {
-      return <span>Loading</span>
+    if (!query.complete) {
+      return <span>Loading...</span>
     }
 
-    return <h1>{post.title}</h1>
+    return <h1>{page.title}</h1>
   }
 }
 
-export default (
- <Route component={Post} path="/:slug" />
-)
+// Without decorator support
+export default connectWpPost(Page, (props) => props.params.slug)(Post)
 ```
 
-It will just work. Eventually `MyPost` will receive the post information as `this.props.post`.
-If something goes wrong it will receive `this.props.error` which it should handle if required.
+### `@connectWpQuery(queryFn) : Component`
 
-The works by simple convention. Anything with `Post` in it is assumed to be a wanted the post post type in WordPress,
-anything with `Page` is assumed to be wanting that, anything with `Taxonomy` is assumed to be a taxonomy and so on.
-The information from React Router passed as props (for example `slug` or `id`) is assumed to correspond to those
-meanings in WordPress REST API generally. You can also override this if neccessary as we will see.
+Connect a component to the result of an arbitrary WP-API query.
 
-## Ready-made Components
+- __queryFn__ {Function} A function that accepts `wpapi` and returns a WP-API query
 
-Pepperoni comes with all built-in content types available as ready-made React components.
+Returns a connected component.
 
-It also provides a generic `Pepperoni.Component` component that can be configured to receive data for
-custom content types.
+Entities returned from the query will be placed on `this.props.kasia.entities` under the same
+normalised structure as described in [The Shape of Things](#the-shape-of-things).
 
-This API is useful for components that do not depend on configuration received via a router.
+Example, fetching the most recent "News" entities:
 
 ```js
-const Component,
+import React, { Component } from 'react'
+import { Route } from 'react-router'
+import { connectWpPost } from 'kasia/connect'
+
+// Note the invocation of `embed` in the query chain
+@connectWpQuery((wpapi) => {
+  return wpapi.news().embed().get()
+})
+export default class RecentNews extends Component {
+  render () {
+    const {
+      query,
+      entities: { news }
+    } = this.props.kasia
+
+    if (!query.complete) {
+      return <span>Loading...</span>
+    }
+
+    return (
+      <div>
+        <h1>Recent News Headlines</h1>
+        {Object.keys(news).map((key) =>
+          <h2>{news[key].title}</h2>)}
+      </div>
+    )
+  }
+}
+
+// Without decorator support
+export default connectWpQuery((wpapi) => {
+  return wpapi.news().embed().get()
+})(Post)
 ```
 
-## The Shape of Data
+## API
 
-__Pepperoni restructures data returned from the WP-API__.
+### `Kasia(options) : Object`
 
-> Why?
+Configure Kasia.
 
-The JSON returned from WP-API contains such things as objects with a single property (e.g. objects with `rendered`),
-property names prefixed with underscores (e.g. `_links`), and most importantly it does not by default embed content
-types within one another without the use of the `_embed` query parameter.
+- __options__ {Object} Options object
 
-> What changes should I be aware of?
+Returns an object containing the Kasia reducer and sagas.
 
-- __The `_embed` query parameter is enabled by default in Pepperoni.__
+```js
+const { kasiaReducer, kasiaSagas } = Kasia({
+  WP: new wpapi({ endpoint: 'http://wordpress/' })
+})
+```
+
+The `options` object accepts:
+
+- `WP` {wpapi}
+
+    An instance of `node-wpapi`.
+
+- `keyEntitiesBy` {String} _(optional)_ (default `'id'`)
+
+    Property of entities used to key them in the store
+
+- `customContentTypes` {Array} _(optional)_
+
+    Array of custom content type definitions
+
+    ```js
+    // Example custom content type definition
+    customContentTypes: [{
+      name: 'book',
+      plural: 'books',
+      slug: 'books',
+      route, // optional, default="/{plural}/(?P<id>)"
+      namespace, // optional, default="wp/v2"
+      methodName // optional, default={plural}
+    }]
+    ```
+
+- `plugins` {Array} _(optional)_
+
+    Array of Kasia plugins.
+
+    ```js
+    import KasiaWpApiMenusPlugin from 'kasia-plugin-wp-api-menus'
+
+    // Example passing in plugin
+    plugins: [
+        [KasiaWpApiMenusPlugin, { route: 'menus' }], // with configuration
+        KasiaWpApiMenusPlugin, // without configuration
+    ]
+    ```
+
+## Exports
+
+### `kasia/connect`
+
+The connect Higher Order Components.
+
+```js
+import { connectWpPost, connectWpQuery } from 'kasia/connect'
+```
+
+### `kasia/types`
+
+The built-in WordPress content types that can be passed to `connectWpPost` to define what content type
+a request should be made for.
+
+```js
+import {
+  Category, Comment, Media, Page,
+  Post, PostStatus, PostType,
+  PostRevision, Tag, Taxonomy, User
+} from 'kasia/types'
+```
+
+## The Shape of Things
+
+Kasia restructures the [shape of things](https://www.youtube.com/watch?v=Zn2JFlteeJ0) returned from the WP-API.
+
+The changes made to the data are all effects available in the
+[`wp-api-response-modify`](https://github.com/outlandishideas/wp-api-response-modify) library.
+
+### Why?
+
+The JSON returned from WP-API contains such things as objects with a single property (e.g. objects with `rendered`), 
+meta data property names prefixed with an underscore (e.g. `_links`), and
+
+### What changes should I be aware of?
+
+- Queries initiated by `connectWpPost` will always request embedded data.
+
+    The primary reason for this is to reduce the number of requests made to the WP-API as it is very common
+    to not only want content data, but also any metadata such as authors.
 
 - All property names are camel-cased.
 
@@ -182,279 +289,105 @@ types within one another without the use of the `_embed` query parameter.
     "featured_media" => "featuredMedia"
     ```
 
+- Links are removed.
+
+    ```js
+    { title: 'Wow what an amazing title!', _links: {}, ... }
+    // becomes...
+    { title: 'Wow what an amazing  title!', ... }
+    ```
+
 - Objects that have a single property `'rendered'` are flattened.
 
     ```js
-    {
-      content: {
-        rendered: '<h1>Hello, World!</h1>'
-      }
-    }
-
-    =>
-
-    { content: '<h1>Hello, World!</h1>' }
+    { content: { rendered: '<h1>Hello, World!</h1>' }, ... }
+    // becomes...
+    { content: '<h1>Hello, World!</h1>', ... }
     ```
 
-- Wherever a nested content type appears under `_embedded` that content type is flattened into the parent. It is also
-lifted into the store as a separate entity and so can be accessed independently of the parent content.
+- Content types are normalised using [`normalizr`](https://github.com/paularmstrong/normalizr).
+This means that any embedded content data is made available on the store within its respective content type collection.
+  
+## Plugins
 
-    So in the following instance, both the post and user (authors are users) become available in their respective
-    collections within the store.
+Kasia exposes a simple API for third-party plugins.
 
+A plugin should:
 
-   ```js
-    {
-      id: 10,
-      author: 50,
-      embedded: {
-        author: { id: 50, name: "Special Agent Pepperoni" }
-      }
-    }
+- be a function that accepts these arguments:
+    - __WP__ {wpapi} An instance of `wpapi`
+    - __pluginOptions__ {Object} The user's options for the plugin
+    - __kasiaOptions__ {Object} The user's options for Kasia
 
-    =>
+- return an object containing `reducers` (Object) and `sagas` (Array).
 
-    {
-      id: 10,
-      author: { id: 50, name: "Special Agent Pepperoni" }
-    }
-  ```
-
-## API
-
-### `pepperoni(options) : Object`
-
-Configure Pepperoni.
-
-Returns the Pepperoni reducer as an object.
+- use the `'kasia/'` action type prefix.
 
 ```js
-const pepperoniReducer = pepperoni({
-  wpApiUrl: 'http://website.com/wp/v2'
-});
-```
-
-The required `options` object accepts properties:
-
-- `wpApiUrl` (required)
-
-    The location of the WP-API.
-
-    ```js
-    // Example WP-API URL
-    { wpApiUrl: 'http://website.com/wp/v2' }
-    ```
-
-- `customContentTypes` (optional) (default: `[]`)
-
-    An array of custom content type definitions.
-
-    ```js
-    // Example custom content types
-    { customContentTypes: ['Book', 'Article'] }
-    ```
-
-    A custom content type can be an `Object` or a `String`.
-
-    When a string is given, the `requestSlug` and `namePlural` are generated automatically.
-    For example, for a custom content type `'CustomUser'`:
-
-        requestSlug === 'custom-users' // string used in WP-API requests
-        nameSingle === 'customUser' // string used to namespace single item on component `props`
-        namePlural === 'customUsers' // string used to namespace entities in the store
-
-    The above properties are can be overridden by providing a custom content type as an `Object`.
-
-- `entityKeyPropName` (optional) (default: `EntityKeyPropNames.ID`)
-
-    The property on content returned from the WP-API that is used to key that content in the store.
-
-    Available values live in `pepperoni.EntityKeyPropNames` and are `ID` and `SLUG`.
-
-    For example, given a post `{ title: 'My Post', id: '123' }` and `entityKeyPropName === EntityKeyPropNames.ID`
-    the post will be available in the store under `posts['123']`.
-
-### `connectWordPress([options]) : Component`
-
-Connect a component to data from the WP-API.
-
-```js
-@connectWordPress(/*<options>*/)
-class Post extends Component {}
-
-// or, without support for decorators...
-
-class Post extends Component {}
-connectWordPress(/*<options>*/)(Post)
-```
-
-The optional `options` object accepts properties:
-
-- `contentType` (optional) (default: derived from Component name)
-
-    The name of the content type for which the connected component will receive data.
-
-    When a `contentType` is not given (default) Pepperoni will derive the content type from the component name. e.g.
-    A component named `MyCustomPost` will automatically use the registered custom content type `'CustomPost'`.
-
-    When passing explicitly, built-in content types are available at `pepperoni.ContentTypes` and custom content
-    types should be passed in using the `name` they were registered with.
-
-    ```js
-    // Example explicit built-in content type:
-    { contentType: ContentTypes.POST }
-
-    // Example explicit custom content type
-    { contentType: 'CustomContentType' }
-    ```
-
-- `routeParamsPropName` (optional) (default: `'params'`)
-
-    The property on a component's `props` where route parameters for a request to the WP-API will be derived.
-    The default is `'props'`, so folks using `react-router` are not required to configure this option.
-
-    ```js
-    // Example overriding route parameters property name
-    { routeParamsPropName: 'routeParams' }
-    ```
-
-- `routeParamSubjectKey` (optional) (default: `'id'`)
-
-    The property on `props[routeParamsPropName]` where the subject identifier for the request to the
-    WP-API will be derived.
-
-    ```js
-    // Example overriding route parameters property name
-    { routeParamSubjectKey: 'postId' }
-    ```
-
------
-
-Pepperoni delivers the data to you straight out of WordPress by default. We have found this data to be excessively nested and this to be a problem. Therefore if you set up as follows, you will receive information from the WordPress API in a lightly restructured format that makes it easier to handle in Javascript - for example keys are camel-cased and nesting is reduced. See [below](#) for how this data is structured internal to Redux store.
-
-```js
-pepperoniReducers = createPepperoniReducers({
-  api: 'https://example.com/wp-api/v2/',
-  restructureData: true
-});
-```
-
-Sometimes you might not want to make these assumptions. `connectToWordPress` accepts a number of possible arguments to explicitly tell Pepperoni what data is wanted from WordPress REST API.
-
-```js
-// Connect to WordPress
-connectToWordPress({
-  routeParamsPropName: 'params.slug', //  From which property on the component's props will the route parameters be derived?
-  type 'post', // The type of thing to get from WordPress - can be any provided by WordPress API - e.g. post, page, taxonomy and so on
-  mapStateToProps: someFunction // A custom version of Redux's mapStateToProps that will be passed the store so you can perform your own mapping here.
-  useEmbedRequestQuery: true // - on by default, should WordPress REST API
-  extraActionInfo: {
-  	something: 'blah'
-  } // Extra action into to be merged when dispatcher is called to make fetch from WordPress (or a function to add extra action info)
-})(MyPost);
-```
-
-### Getting Data Directly
-
-Sometimes, for example when you are using WordPress as a data store, not as a simple CMS, you might want to fetch data directly.
-
-You can do this by dispatching the action handlers that under the hood are responsible for making the fetches.
-
-For example, if we wanted to fetch a post for our own component.
-
-```js
-import React, { Component } from 'react';
-
-import { connectToWordPressDirectly } from 'pepperoni';
-import { fetchPost } from 'pepperoni/action';
-
-class MyComponent extends Component {
-  componentDidMount() {
-    const { dispatch, id } = this.props;
-
-    dispatch(fetchPost(id));
-
-    this.handleClick = this.handleClick.bind(this);
-  }
-
-  handleOnClick() {
-    const { dispatch, id } = this.props;
-
-    dispatch(fetchPost(10));
-  }
-
-  render() {
-    const { post } = this.props;
-
-    if (!post) {
-      return (<div>Loading</div>);
-    }
-
-    return (
-      <div>
-        {post.title.rendered}
-        <button onClick={this.handleClick}>Click to make this another post</button>
-      </div>
-    );
-  }
+// Example definition returned by a plugin
+{
+  reducer: {
+    'kasia/SET_DATA': function setDataReducer () {}
+    'kasia/REMOVE_DATA': function removeDataReducer () {}
+  },
+  sagas: [function * fetchDataSaga () {}]
 }
-
-function mapStateToProps(state, ownProps) {
-  // [...]
- }
-
-connectToWordPressDirectly(mapStateToProps)(MyPost);
 ```
 
-`connectToWordPressDirectly` is a sugar over `react-redux`'s `connect` method. If you are already performing a `connect` with Redux there is no need to do anything more.
+See [kasia-plugin-wp-api-menus]() for an example implementation of a Kasia plugin.
 
-For simple mapping of state to props we provide an example implementation of `mapStateToProps`. This can just be turned on in the simple case with the following and props will be returned simply as the `this.props[type]`:
+## Universal Applications
+
+Connected components expose a static method `makePreloader` that produces an array of saga operations
+to facilitate the request for entity data on the server. It is recommended that important
+data is declared at the highest level as traversing the component tree to load data from children
+is currently unsupported.
+
+### `ConnectedComponent.makePreloader(renderProps) : Function`
+
+Create a preloader function.
+
+- __renderProps__ {Object} Component's render props
+
+Returns a function that returns an array of saga operations in the form:
 
 ```js
-import React, { Component } from 'react';
-
-import { connectToWordPressDirectly } from 'pepperoni';
-import { fetchPost } from 'pepperoni/action';
-
-class MyComponent extends Component {
-  componentDidMount() {
-    const { dispatch, id } = this.props;
-
-    dispatch(fetchPost(id));
-  }
-
-  render() {
-    const { post } = this.props;
-
-    if (!post) {
-      return (<div>Loading</div>);
-    }
-
-    return (<div>post.title.rendered</div>);
-  }
-}
-
-connectToWordPressDirectly({ automap: true })(MyPost);
+// Saga operations
+[ [sagaGeneratorFn, actionObj] ]
 ```
 
-## Components
+Elements:
 
-Pepperoni contains a series of components that can be used for implementing common WordPress style functionality. There are.
+- `sagaGenerator` {Function} Must be called with the `actionObj`
 
-[...etc....]
+- `action` {Object} An action object containing information for the saga to fetch data
 
-## Porting From A WordPress Theme To React
+Example:
 
-We provide a [WordPress plugin]() for doing this. It attempts to work out how your theme is structured and outputs WordPress components based on this that can be seen by moving around the site normally.
+```js
+// Somewhere in an application's router middleware,
+// after matching a route and gathering components
+const preloadMakers = components
+  .map((component) => component.makePreloader) // get preload makers
+  .filter(Boolean) // remove falsey values (components that don't have `makePreloader`)
 
-(quick note on how this could be done - basically the same as any cache - interupt the render on the way out and introspect to work out how it is should look - anything that is something like `header.php` then put it into its own component and so on)
+preloadMakers.forEach
+```
 
-(should this be a WordPress plugin or a command line script to run across the thing in PHP (or JS?)? Parsing PHP is the key factor and maybe the layout of how themes work in WordPress is consistent enough that we could skip out the bit where we have to use WordPress at all. Presumably all the basic WordPress theme functions are well known and documented (the Loop etc) that you could translate stuff across pretty easily)
+Consult the [boilerplate](https://github.com/outlandishideas/kasia-boilerplate)
+for an example implementation of a universal Kasia application.
 
-We've ported the default WordPress theme [Twenty Sixteen]() to React using this tool and a little cleaning up.
+## Contributing
 
-## Justification
+All pull requests and issues welcome! 
 
-## Makes Use Of
+- When submitting an issue please provide adequate steps to reproduce the problem.
+- PRs must be made using the `standard` code style.
 
-## Prior Art
+If you're not sure how to contribute, check out Kent C. Dodds'
+[great video tutorials on egghead.io](https://egghead.io/lessons/javascript-identifying-how-to-contribute-to-an-open-source-project-on-github)!
+
+## Author & License
+
+`kasia` was created by [Outlandish](https://twitter.com/outlandish) and is released under the MIT license.
+

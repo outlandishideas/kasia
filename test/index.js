@@ -3,92 +3,38 @@
 
 jest.disableAutomock()
 
-jest.mock('invariant')
+import WP from 'wpapi'
 
-jest.mock('../src/reducer')
+import Kasia from '../src/index'
 
-import merge from 'lodash.merge'
-import invariant from 'invariant'
-
-import Pepperoni from '../src/index'
-import Plurality from '../src/constants/Plurality'
-import makeReducer from '../src/reducer'
-import { builtInContentTypeOptions } from '../src/contentTypes'
-
-describe('Pepperoni', () => {
-  beforeEach(() => {
-    invariant.mockClear()
-    makeReducer.mockClear()
-  })
+describe('Kasia', () => {
+  const wpapi = new WP({ endpoint: 'http://localhost' })
 
   it('exports a function', () => {
-    expect(typeof Pepperoni).toEqual('function')
+    expect(typeof Kasia).toEqual('function')
   })
 
-  it('throws an invariant violation when `host` is not a string', () => {
-    Pepperoni({ host: 11111 })
-
-    expect(invariant).toBeCalledWith(
-      false,
-      'Expecting host to be a string, got "%s".',
-      'number'
-    )
+  it('throws with bad WP value', () => {
+    expect(() => {
+      Kasia({ WP: '' })
+    }).toThrowError(/Expecting WP to be instance of `node-wpapi`/)
   })
 
-  it('throws an invariant violation when `host` is undefined', () => {
-    Pepperoni({ host: undefined })
-
-    expect(invariant).toBeCalledWith(
-      false,
-      'Expecting host to be a string, got "%s".',
-      'undefined'
-    )
+  it('throws with bad plugins value', () => {
+    expect(() => {
+      Kasia({ WP: wpapi, plugins: '' })
+    }).toThrowError(/Expecting plugins to be array/)
   })
 
-  it('calls makeReducer with the correct object shape', () => {
-    const input = {
-      host: 'some-url.com',
-      contentTypes: [
-        'FirstCustomPostType',
-        'SecondCustomPostType'
-      ]
-    }
+  it('throws with bad keyEntitiesBy value', () => {
+    expect(() => {
+      Kasia({ WP: wpapi, keyEntitiesBy: 0 })
+    }).toThrowError(/Expecting keyEntitiesBy to be string/)
+  })
 
-    const contentTypeOptions = {
-      FirstCustomPostType: {
-        slug: {
-          [Plurality.SINGULAR]: '/first-custom-post-types/:id',
-          [Plurality.PLURAL]: '/first-custom-post-types'
-        },
-        name: {
-          canonical: 'FirstCustomPostType',
-          [Plurality.SINGULAR]: 'firstCustomPostType',
-          [Plurality.PLURAL]: 'firstCustomPostTypes'
-        }
-      },
-      SecondCustomPostType: {
-        slug: {
-          [Plurality.SINGULAR]: '/second-custom-post-types/:id',
-          [Plurality.PLURAL]: '/second-custom-post-types'
-        },
-        name: {
-          canonical: 'SecondCustomPostType',
-          [Plurality.SINGULAR]: 'secondCustomPostType',
-          [Plurality.PLURAL]: 'secondCustomPostTypes'
-        }
-      }
-    }
-
-    const expected = {
-      host: 'some-url.com',
-      wpApiUrl: 'wp-json/wp/v2',
-      entityKeyPropName: 'id',
-      contentTypes: merge({}, builtInContentTypeOptions, contentTypeOptions),
-      plugins: {}
-    }
-
-    Pepperoni(input)
-
-    expect(makeReducer).toBeCalledWith(expected, [])
+  it('throws with bad contentTypes value', () => {
+    expect(() => {
+      Kasia({ WP: wpapi, contentTypes: '' })
+    }).toThrowError(/Expecting contentTypes to be array/)
   })
 })

@@ -1,39 +1,35 @@
-import { normalize, Schema, arrayOf } from 'normalizr'
-import humps from 'humps'
+import { normalize, arrayOf } from 'normalizr'
+import merge from 'lodash.merge'
+import modifyResponse from 'wp-api-response-modify'
 
-import Plurality from '../constants/Plurality'
-import makeSchemas, { addSchema } from './makeSchemas'
-import flatten from './flatten'
+import { makeSchemas, createSchema } from './schemas'
+import { deriveContentType } from '../contentTypes'
 
-export function normalise (contentTypeOptions, content, idAttribute, invalidateSchemaCache = false) {
-  const flattened = flatten(humps.camelizeKeys(content))
+/**
+ * Split a response from the WP-API into its constituent entities.
+ * @param {Array} data The WP API response data
+ * @param {String} idAttribute The property name of an entity's identifier
+ * @returns {Object}
+ */
+export default function normalise (data, idAttribute) {
+  const schemas = makeSchemas(idAttribute)
 
-  const finalIdAttribute = typeof idAttribute === 'function'
-    ? idAttribute(flattened)
-    : idAttribute
+  return data.reduce((entities, rawEntity) => {
+    const entity = modifyResponse(rawEntity)
+    const type = deriveContentType(entity)
 
-  const schemas = makeSchemas(finalIdAttribute, invalidateSchemaCache)
+    const contentTypeSchema = schemas[type]
+      // Built-in content type or previously registered custom content type
+      ? schemas[type]
+      // Custom content type, will only get here once for each type
+      : createSchema(type, idAttribute)
 
-  let contentTypeSchema = schemas[contentTypeOptions.name.canonical]
+    const schema = Array.isArray(entity)
+      ? arrayOf(contentTypeSchema)
+      : contentTypeSchema
 
-  if (!contentTypeSchema) {
-    // Custom content type
-    const name = contentTypeOptions.name[Plurality.SINGULAR].toLowerCase()
-    contentTypeSchema = addSchema(name, finalIdAttribute)
-  }
+    const normalised = normalize(entity, schema)
 
-  const schema = Array.isArray(content)
-    ? arrayOf(contentTypeSchema)
-    : contentTypeSchema
-
-  return normalize(flattened, schema)
-}
-
-export function normaliseFailed(contentTypeOptions, idAttribute, subject, error, invalidateSchemaCache = false) {
-  const content = {
-    id: subject,
-    slug: subject,
-    error: error && error.message ? error.message : error
-  };
-  return normalise(contentTypeOptions, content, idAttribute, invalidateSchemaCache);
+    return merge({}, entities, normalised.entities)
+  }, {})
 }
