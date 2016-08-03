@@ -13,7 +13,7 @@ Made with ❤ at [@outlandish](http://www.twitter.com/outlandish)
 - Uses [`node-wpapi`](https://github.com/WP-API/node-wpapi) internally in order to facilitate complex queries.
 - Register and consume Custom Content Types with ease.
 - Support for universal applications.
-- Support for plugins, e.g. [`wp-api-menus`]().
+- Support for plugins, e.g. [`wp-api-menus`](https://github.com/outlandishideas/kasia-plugin-wp-api-menus).
 
 Check out the [Kasia boilerplate WordPress theme](https://github.com/outlandishideas/kasia-boilerplate).
 
