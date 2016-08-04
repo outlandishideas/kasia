@@ -1,5 +1,4 @@
-import { takeEvery } from 'redux-saga'
-import { call, put } from 'redux-saga/effects'
+import * as effects from 'redux-saga/effects'
 import { camelize } from 'humps'
 
 import { WP } from './wpapi'
@@ -84,13 +83,16 @@ export function * fetch (action) {
   const { id } = action
 
   try {
-    const result = yield call(resolveQueryFn(action), WP)
-    yield put(completeRequest(id, result))
+    const result = yield effects.call(resolveQueryFn(action), WP)
+    yield effects.put(completeRequest(id, result))
   } catch (err) {
-    yield put(failRequest(id, err))
+    yield effects.put(failRequest(id, err))
   }
 }
 
-export function * fetchSaga () {
-  yield * takeEvery(Request.Create, fetch)
+export function * watchRequests () {
+  while (true) {
+    const action = yield effects.take(Request.Create)
+    yield effects.fork(fetch, action)
+  }
 }

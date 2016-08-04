@@ -7,11 +7,26 @@ Made with ❤ at [@outlandish](http://www.twitter.com/outlandish)
 <a href="http://badge.fury.io/js/kasia"><img alt="npm version" src="https://badge.fury.io/js/kasia.svg"></a>
 [![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg)](http://standardjs.com/)
 
+Get data from WordPress and into components with ease...
+
+```js
+// e.g. Get a Post by its slug
+@connectWpPost(Post, 'spongebob-squarepants')
+function SpongebobSquarepants (props) {
+  const { post: spongebob } = props.kasia
+
+  return spongebob
+    ? <h1>{spongebob.title}</h1> //=> Spongebob Squarepants
+    : <span>Loading...</span>
+}
+```
+
 ## Features
 
 - Declaratively connect React components to data from WordPress.
 - Uses [`node-wpapi`](https://github.com/WP-API/node-wpapi) internally in order to facilitate complex queries.
 - Register and consume Custom Content Types with ease.
+- All WP data is normalised at `store.wordpress`, e.g. `store.wordpress.pages`
 - Support for universal applications.
 - Support for plugins, e.g. [`wp-api-menus`](https://github.com/outlandishideas/kasia-plugin-wp-api-menus).
 
@@ -22,8 +37,8 @@ Check out the [Kasia boilerplate WordPress theme](https://github.com/outlandishi
 - [Requirements](#requirements)
 - [Install](#install)
 - [Import](#import)
-- [__Connect a Component__](#connect-a-component)
-- [API](#api)
+- [__Configure__](#configure)
+- [__Usage__](#usage)
 - [Exports](#exports)
 - [The Shape of Things](#the-shape-of-things)
 - [Plugins](#plugins)
@@ -49,19 +64,25 @@ Kasia suits applications that are built using these technologies:
 
 ```js
 // ES6
-import kasia from 'kasia'
+import Kasia from 'kasia'
 ```
 
 ```js
 // non-ES6
-var kasia = require('kasia')
+var Kasia = require('kasia')
 ```
 
 ## Configure
 
+Configure Kasia in three steps:
+
 1. Initialise Kasia with an instance of `node-wpapi`.
 
-2. Spread the Kasia reducer and sagas when creating your redux store.
+2. Spread the Kasia reducer when creating the redux root reducer.
+
+3. Run the Kasia sagas after creating the redux-saga middleware.
+
+A slimline example...
 
 ```js
 import { combineReducers, createStore, applyMiddleware } from 'redux'
@@ -69,7 +90,9 @@ import createSagaMiddleware from 'redux-saga'
 import Kasia from 'kasia'
 import wpapi from 'wpapi'
 
-const WP = new wpapi({ endpoint: 'http://wordpress/' })
+import { rootSaga } from './redux/sagas'
+
+const WP = new wpapi({ endpoint: 'http://wordpress/wp-json' })
 
 const { kasiaReducer, kasiaSagas } = Kasia({ WP })
 
@@ -77,9 +100,10 @@ const rootReducer = combineReducers({
   ...kasiaReducer
 })
 
-const sagaMiddleware = createSagaMiddleware(
-  ...kasiaSagas
-)
+const sagaMiddleware = createSagaMiddleware()
+
+sagaMiddleware.run(rootSaga)
+sagaMiddleware.run(kasiaSagas)
 
 export default function configureStore (initialState) {
   return createStore(
@@ -90,11 +114,13 @@ export default function configureStore (initialState) {
 }
 ```
 
-## Connect a Component
+## Usage
 
 Things to keep in mind:
 
-- A component will make a request for data 1) when it mounts and 2) if its props change.
+- A component will make a request for data 1) when it mounts and 2) if its props change. For `connectWpPost` a change
+in props will trigger Kasia to try and find entity data for the new identifier in the store. If it is found, no request
+is made.
 - Content data should be parsed before being rendered as it may contain encoded HTML entities.
 - In arbitrary queries with `connectWpQuery`, we suggest that you always call the `embed` method on the
 query chain, otherwise embedded content data will be omitted from the response.
@@ -185,8 +211,6 @@ export default connectWpQuery((wpapi) => {
 })(Post)
 ```
 
-## API
-
 ### `Kasia(options) : Object`
 
 Configure Kasia.
@@ -197,7 +221,7 @@ Returns an object containing the Kasia reducer and sagas.
 
 ```js
 const { kasiaReducer, kasiaSagas } = Kasia({
-  WP: new wpapi({ endpoint: 'http://wordpress/' })
+  WP: new wpapi({ endpoint: 'http://wordpress/wp-json' })
 })
 ```
 
@@ -243,9 +267,17 @@ The `options` object accepts:
 
 ## Exports
 
+### `kasia`
+
+The Kasia configurator.
+
+```js
+import Kasia from 'kasia'
+```
+
 ### `kasia/connect`
 
-The connect Higher Order Components.
+The connect decorators.
 
 ```js
 import { connectWpPost, connectWpQuery } from 'kasia/connect'
@@ -307,7 +339,18 @@ meta data property names prefixed with an underscore (e.g. `_links`), and
 
 - Content types are normalised using [`normalizr`](https://github.com/paularmstrong/normalizr).
 This means that any embedded content data is made available on the store within its respective content type collection.
-  
+For example:
+
+    ```js
+    {
+      posts: {},
+      users: {},
+      pages: {},
+      news: {}, // custom content type
+      ...
+    }
+    ```
+
 ## Plugins
 
 Kasia exposes a simple API for third-party plugins.
@@ -371,6 +414,7 @@ All pull requests and issues welcome!
 
 - When submitting an issue please provide adequate steps to reproduce the problem.
 - PRs must be made using the `standard` code style.
+- PRs must update the version of the library according to [semantic versioning](http://semver.org/).
 
 If you're not sure how to contribute, check out Kent C. Dodds'
 [great video tutorials on egghead.io](https://egghead.io/lessons/javascript-identifying-how-to-contribute-to-an-open-source-project-on-github)!

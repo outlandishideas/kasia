@@ -3,8 +3,9 @@
 
 jest.disableAutomock()
 
-import { combineReducers, createStore } from 'redux'
 import WP from 'wpapi'
+import { combineReducers, createStore } from 'redux'
+import * as effects from 'redux-saga/effects'
 
 import Kasia from '../src'
 
@@ -14,23 +15,23 @@ let didHitPluginReducer = false
 
 function pluginSaga () {}
 
-const pluginReducer = {
-  [testActionType]: (action, state) => {
-    didHitPluginReducer = true
-    return state
-  }
-}
-
-const plugin = () => {
-  return {
-    reducers: pluginReducer,
-    sagas: [pluginSaga]
-  }
-}
-
 function setup () {
+  const pluginReducer = {
+    [testActionType]: (action, state) => {
+      didHitPluginReducer = true
+      return state
+    }
+  }
+
+  const plugin = () => {
+    return {
+      reducers: pluginReducer,
+      sagas: [pluginSaga]
+    }
+  }
+
   const { kasiaReducer, kasiaSagas } = Kasia({
-    WP: new WP({ endpoint: 'http://localhost' }),
+    WP: new WP({ endpoint: 'wow-so-much-endpoint' }),
     plugins: [plugin]
   })
 
@@ -49,6 +50,6 @@ describe('Plugin', () => {
   })
 
   it('should add the plugin saga to sagas array', () => {
-    expect(kasiaSagas.indexOf(pluginSaga)).toEqual(1)
+    expect(kasiaSagas).toContain(effects.spawn(pluginSaga))
   })
 })

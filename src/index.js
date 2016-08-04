@@ -1,10 +1,11 @@
 import merge from 'lodash.merge'
 import { camelize } from 'humps'
+import * as effects from 'redux-saga/effects'
 
 import invariants from './invariants'
 import makeReducer from './reducer'
 import { setWP } from './wpapi'
-import { fetchSaga } from './sagas'
+import { watchRequests } from './sagas'
 import { registerContentType } from './contentTypes'
 
 /**
@@ -12,7 +13,7 @@ import { registerContentType } from './contentTypes'
  * @type {Object}
  */
 const componentsBase = {
-  sagas: [fetchSaga],
+  sagas: [watchRequests],
   reducers: {}
 }
 
@@ -51,7 +52,7 @@ export default function Kasia (opts = {}) {
 
     return {
       sagas: plugins.sagas.concat(plugin.sagas),
-      reducers: merge(plugins.reducers, plugin.reducers)
+      reducers: merge({}, plugins.reducers, plugin.reducers)
     }
   }, componentsBase)
 
@@ -64,6 +65,6 @@ export default function Kasia (opts = {}) {
 
   return {
     kasiaReducer: makeReducer({ keyEntitiesBy }, plugins),
-    kasiaSagas: plugins.sagas
+    kasiaSagas: plugins.sagas.map((saga) => effects.spawn(saga))
   }
 }
