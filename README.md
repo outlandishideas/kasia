@@ -167,7 +167,7 @@ export default connectWpPost(Page, (props) => props.params.slug)(Post)
 
 Connect a component to the result of an arbitrary WP-API query.
 
-- __queryFn__ {Function} A function that accepts `wpapi` and returns a WP-API query
+- __queryFn__ {Function} A function that accepts args `wpapi` and `props` and should return a WP-API query
 
 Returns a connected component.
 
@@ -182,8 +182,8 @@ import { Route } from 'react-router'
 import { connectWpPost } from 'kasia/connect'
 
 // Note the invocation of `embed` in the query chain
-@connectWpQuery((wpapi) => {
-  return wpapi.news().embed().get()
+@connectWpQuery((wpapi, props) => {
+  return wpapi.news().month(props.month).embed().get()
 })
 export default class RecentNews extends Component {
   render () {
