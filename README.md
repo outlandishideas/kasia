@@ -90,11 +90,13 @@ import createSagaMiddleware from 'redux-saga'
 import Kasia from 'kasia'
 import wpapi from 'wpapi'
 
-import { rootSaga } from './redux/sagas'
-
 const WP = new wpapi({ endpoint: 'http://wordpress/wp-json' })
 
 const { kasiaReducer, kasiaSagas } = Kasia({ WP })
+
+const rootSaga = [
+  ...kasiaSagas
+]
 
 const rootReducer = combineReducers({
   ...kasiaReducer
@@ -103,7 +105,6 @@ const rootReducer = combineReducers({
 const sagaMiddleware = createSagaMiddleware()
 
 sagaMiddleware.run(rootSaga)
-sagaMiddleware.run(kasiaSagas)
 
 export default function configureStore (initialState) {
   return createStore(
