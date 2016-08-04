@@ -13,7 +13,7 @@ jest.unmock('../../src/wpapi')
 jest.unmock('../../src/index')
 jest.unmock('../../src/sagas')
 
-import { put, call } from 'redux-saga/effects'
+import * as effects from 'redux-saga/effects'
 
 import { setWP } from '../../src/wpapi'
 import { fetch } from '../../src/sagas'
@@ -54,7 +54,7 @@ describe('Sagas', () => {
 
     it('yields a put with completeRequest action', () => {
       expect(generator.next().value)
-        .toEqual(put(completeRequest(queryId, undefined)))
+        .toEqual(effects.put(completeRequest(queryId, undefined)))
     })
   })
 
@@ -64,12 +64,12 @@ describe('Sagas', () => {
     const generator = fetch(action)
 
     it('yields a call to correctly resolved queryFn', () => {
-      expect(generator.next().value).toEqual(call(queryFn, WP))
+      expect(generator.next().value).toEqual(effects.call(queryFn, WP))
     })
 
     it('puts a completeRequest action with result', () => {
       expect(generator.next(mockResult).value)
-        .toEqual(put(completeRequest(queryId, mockResult)))
+        .toEqual(effects.put(completeRequest(queryId, mockResult)))
     })
   })
 })
