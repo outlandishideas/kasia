@@ -1,7 +1,7 @@
 import merge from 'lodash.merge'
 import pickToArray from 'pick-to-array'
 
-import normalise from './normalise'
+import normalise from './normalise/index'
 import { ContentTypesWithoutId, deriveContentType } from './contentTypes'
 import { Request } from './constants/ActionTypes'
 
