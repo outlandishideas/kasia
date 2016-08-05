@@ -1,13 +1,13 @@
 {
   "name": "kasia-plugin-wp-api-menus",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Provides support for the WP-API menus to Kasia",
   "main": "lib/index.js",
   "jsnext:main": "src/index.js",
   "scripts": {
     "build": "rimraf lib && babel -d lib/ src/",
     "lint": "standard src/**/*.js",
-    "postinstall": "npm run build"
+    "prepublish": "npm run lint && npm run build"
   },
   "repository": {
     "type": "git",
