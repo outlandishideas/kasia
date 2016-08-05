@@ -51,7 +51,7 @@ Kasia suits applications that are built using these technologies:
 
 - React
 - Redux
-- Redux Sagas
+- Redux Sagas (>= 0.10.0)
 - WordPress
 - [WP-API plugin](http://v2.wp-api.org/)
 - [`node-wpapi`](https://github.com/WP-API/node-wpapi)
@@ -94,9 +94,9 @@ const WP = new wpapi({ endpoint: 'http://wordpress/wp-json' })
 
 const { kasiaReducer, kasiaSagas } = Kasia({ WP })
 
-const rootSaga = [
-  ...kasiaSagas
-]
+const rootSaga = function * () {
+  yield [...kasiaSagas]
+}
 
 const rootReducer = combineReducers({
   ...kasiaReducer
