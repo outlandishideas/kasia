@@ -74,6 +74,10 @@ Menu will be available at `store.wordpress.menuLocations[id]`.
 
 All pull requests and issues welcome!
 
+- When submitting an issue please provide adequate steps to reproduce the problem.
+- PRs must be made using the `standard` code style.
+- PRs must update the version of the library according to [semantic versioning](http://semver.org/).
+
 If you're not sure how to contribute, check out Kent C. Dodds'
 [great video tutorials on egghead.io](https://egghead.io/lessons/javascript-identifying-how-to-contribute-to-an-open-source-project-on-github)!
 

@@ -1,5 +1,4 @@
-import { takeEvery } from 'redux-saga'
-import { call, put } from 'redux-saga/effects'
+import * as effects from 'redux-saga/effects'
 import merge from 'lodash.merge'
 
 import ActionTypes  from './constants/ActionTypes'
@@ -64,10 +63,10 @@ function fetch (WP, action) {
  */
 function makeSagas (WP) {
   return [function * fetchSaga () {
-    yield * takeEvery(
-      action => requestTypes.indexOf(action.type) !== -1,
-      fetchResource, WP
-    )
+    while (true) {
+      const action = yield effects.take(action => requestTypes.indexOf(action.type) !== -1)
+      yield fetchResource(WP, action)
+    }
   }]
 }
 
@@ -88,8 +87,8 @@ export function makePreloader (WP, action) {
  */
 export function * fetchResource (WP, action) {
   const { id, type } = action
-  const data = yield call(fetch, WP, action)
-  yield put({ type: ActionTypes.RECEIVE_DATA, request: type, data, id })
+  const data = yield effects.call(fetch, WP, action)
+  yield effects.put({ type: ActionTypes.RECEIVE_DATA, request: type, data, id })
 }
 
 /**
