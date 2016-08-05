@@ -104,14 +104,16 @@ const rootReducer = combineReducers({
 
 const sagaMiddleware = createSagaMiddleware()
 
-sagaMiddleware.run(rootSaga)
-
 export default function configureStore (initialState) {
-  return createStore(
+  const store = createStore(
     rootReducer,
     initialState,
     applyMiddleware(sagaMiddleware)
   )
+  
+  sagaMiddleware.run(rootSaga)
+
+  return store
 }
 ```
 
