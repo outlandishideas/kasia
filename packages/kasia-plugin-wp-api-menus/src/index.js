@@ -1,7 +1,7 @@
 import * as effects from 'redux-saga/effects'
 import merge from 'lodash.merge'
 
-import ActionTypes  from './constants/ActionTypes'
+import ActionTypes from './constants/ActionTypes'
 
 // The default wp-api-menus namespace in the WP-API.
 const defaultRoute = 'wp-api-menus/v2'
