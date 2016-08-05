@@ -116,7 +116,7 @@ export default function connectWpQuery (queryFn) {
 
       componentWillMount () {
         this.queryId = queryIds.length ? queryIds.pop() : idGen()
-        this.dispatch()
+        this.dispatch(this.props)
       }
 
       componentWillReceiveProps (_nextProps) {
@@ -131,7 +131,7 @@ export default function connectWpQuery (queryFn) {
         // Make a request for new data if the current props and next props are different
         if (!isEqual(nextProps, thisProps)) {
           this.queryId = queryIds.length ? queryIds.pop() : idGen()
-          this.dispatch()
+          this.dispatch(nextProps)
         }
       }
     }
