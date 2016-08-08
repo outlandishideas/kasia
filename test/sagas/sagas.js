@@ -1,7 +1,6 @@
 /* eslint-env jasmine */
 /* global jest:false */
 
-jest.unmock('lodash')
 jest.unmock('normalizr')
 jest.unmock('redux-saga')
 jest.unmock('redux-saga/effects')

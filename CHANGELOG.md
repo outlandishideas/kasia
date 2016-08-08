@@ -1,5 +1,16 @@
 # Kasia Changelog
 
+- __v2.2.0__ - _08/08/16_
+
+    - Added missing dependencies in `package.json`.
+    - Removed unnecessary unmock of `lodash` in tests.
+    - Fix query IDs being picked in reverse order when server-side rendering.
+    - Added `.travis.yml`.
+
+- __v2.1.0__ - _05/08/16_
+
+    - Fix `connectWpQuery` fn not receiving props.
+
 - __v2.0.0__ - _04/08/16_
 
     - [BREAKING] Updated sagas export to accommodate changes to redux-saga API introduced in [v0.10.0]().
