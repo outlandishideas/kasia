@@ -46,7 +46,8 @@
     "react-redux": "^4.4.5",
     "redux": "^3.4.0",
     "redux-saga": "^0.11.0",
-    "wp-api-response-modify": "^2.0.0"
+    "wp-api-response-modify": "^2.0.0",
+    "wpapi": "^0.9.1"
   },
   "devDependencies": {
     "babel-cli": "6.6.5",
@@ -63,6 +64,7 @@
     "jest": "^0.1.40",
     "jest-cli": "^11.0.2",
     "lodash.values": "^4.1.0",
+    "react-addons-test-utils": "^15.3.0",
     "rimraf": "^2.5.2",
     "snazzy": "^4.0.0",
     "standard": "^7.1.2"

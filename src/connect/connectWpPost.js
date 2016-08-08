@@ -122,7 +122,7 @@ export default function connectWpPost (contentType, id) {
       }
 
       componentWillMount () {
-        this.queryId = queryIds.length ? queryIds.pop() : idGen()
+        this.queryId = queryIds.length ? queryIds.shift() : idGen()
         this.dispatch(this.props)
       }
 
@@ -135,7 +135,7 @@ export default function connectWpPost (contentType, id) {
         //  - the identifier has changed
         //  - an entity cannot be derived from the store using `nextProps`
         if (shouldDispatch && !nextBuiltProps.kasia[name]) {
-          this.queryId = queryIds.length ? queryIds.pop() : idGen()
+          this.queryId = queryIds.length ? queryIds.shift() : idGen()
           this.dispatch(nextProps)
         }
       }
