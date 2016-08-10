@@ -1,7 +1,14 @@
-import mixins from 'wpapi/lib/mixins/index'
+import wpFilterMixins from 'wpapi/lib/mixins/filters'
+import wpParamMixins from 'wpapi/lib/mixins/parameters'
+import merge from 'lodash.merge'
 import { camelize } from 'humps'
 
 import invariants from './invariants'
+
+const mixins = merge({},
+  wpFilterMixins,
+  wpParamMixins
+)
 
 /**
  * The built-in content types available in WordPress.
