@@ -1,3 +1,6 @@
+import mixins from 'wpapi/lib/mixins/index'
+import { camelize } from 'humps'
+
 import invariants from './invariants'
 
 /**
@@ -63,14 +66,26 @@ const optionsCache = Object.keys(ContentTypes).reduce((cache, key) => {
 }, {})
 
 /**
- * Create and set the options object for a content type in the cache.
- * @param {Object} options Content type options object
+ * Create and set the options object for a content type in the cache
+ * and create the method on an instance of wpapi.
+ * @param {Object} WP Instance of wpapi
+ * @param {Object} contentType Content type options object
  * @returns {Object}
  */
-export function registerContentType (options) {
-  invariants.isValidContentTypeObject(options)
-  invariants.isNewContentType(getContentTypes(), options)
-  optionsCache[options.name] = options
+export function registerContentType (WP, contentType) {
+  invariants.isValidContentTypeObject(contentType)
+  invariants.isNewContentType(getContentTypes(), contentType)
+
+  const {
+    namespace = 'wp/v2',
+    name, methodName, plural, route, slug
+  } = contentType
+
+  const realRoute = route || `/${slug}/(?P<id>)`
+  const realMethodName = camelize(methodName || plural)
+
+  optionsCache[name] = contentType
+  WP[realMethodName] = WP.registerRoute(namespace, realRoute, { mixins })
 }
 
 /**

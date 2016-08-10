@@ -1,5 +1,4 @@
 import merge from 'lodash.merge'
-import { camelize } from 'humps'
 import * as effects from 'redux-saga/effects'
 
 import invariants from './invariants'
@@ -56,12 +55,7 @@ export default function Kasia (opts = {}) {
     }
   }, componentsBase)
 
-  contentTypes.forEach((contentType) => {
-    const { namespace = 'wp/v2', methodName, plural, route, slug } = contentType
-    const realRoute = route || `/${slug}/(?P<id>)`
-    registerContentType(contentType)
-    WP[camelize(methodName || plural)] = WP.registerRoute(namespace, realRoute)
-  })
+  contentTypes.forEach((contentType) => registerContentType(WP, contentType))
 
   return {
     kasiaReducer: makeReducer({ keyEntitiesBy }, plugins),

@@ -1,7 +1,7 @@
 import * as effects from 'redux-saga/effects'
 import { camelize } from 'humps'
 
-import { WP } from './wpapi'
+import { getWP } from './wpapi'
 import { getContentType } from './contentTypes'
 import { completeRequest, failRequest } from './actions'
 import { Request, RequestTypes } from './constants/ActionTypes'
@@ -14,7 +14,8 @@ import { Request, RequestTypes } from './constants/ActionTypes'
 export function chain (obj, calls) {
   return calls.reduce((result, call) => {
     const args = call[1]
-    return args ? result[call[0]](args) : result[call[0]]()
+    const methodName = call[0]
+    return args ? result[methodName](args) : result[methodName]()
   }, obj)
 }
 
@@ -38,7 +39,7 @@ export function chain (obj, calls) {
  * @returns {Function} A function to make a request to the WP-API
  */
 export function derivedQueryFn (contentTypeMethodName, identifier) {
-  return () => chain(WP, [
+  return () => chain(getWP(), [
     // Call the content type method
     [contentTypeMethodName, null],
     // Call the identifier method
@@ -82,7 +83,7 @@ export function * fetch (action) {
   const { id } = action
 
   try {
-    const result = yield effects.call(resolveQueryFn(action), WP)
+    const result = yield effects.call(resolveQueryFn(action), getWP())
     yield effects.put(completeRequest(id, result))
   } catch (err) {
     yield effects.put(failRequest(id, err))

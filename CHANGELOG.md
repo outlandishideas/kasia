@@ -1,5 +1,10 @@
 # Kasia Changelog
 
+- __v2.4.0__ - _10/08/16_
+
+    - Mixin `node-wpapi`'s available mixins to internal calls to `registerRoute` by default in order
+    that filtering can be performed on custom content types, e.g. `news.filter(<options>).get()`.
+
 - __v2.3.0__ - _10/08/16_
 
     - Fix functions passed as props to `connectWpQuery` causing infinite dispatching.

@@ -58,5 +58,6 @@ export default {
     !target.__kasia,
     'The component "%s" is already wrapped by Kasia.',
     targetName
-  )
+  ),
+  noWPInstance: (WP) => invariant(!WP, 'A WP instance is already set.')
 }

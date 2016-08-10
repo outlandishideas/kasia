@@ -12,6 +12,10 @@ import {
   registerContentType
 } from '../src/contentTypes'
 
+const mockWP = {
+  registerRoute: jest.fn()
+}
+
 describe('getContentTypes', () => {
   it('returns an object', () => {
     const type = typeof getContentTypes()
@@ -29,7 +33,7 @@ describe('getContentType', () => {
 describe('registerContentType', () => {
   it('throws with bad options object', () => {
     expect(() => {
-      registerContentType('')
+      registerContentType(mockWP, '')
     }).toThrowError('Invalid content type object, see documentation.')
   })
 
@@ -42,7 +46,7 @@ describe('registerContentType', () => {
       }
 
       expect(() => {
-        registerContentType(opts)
+        registerContentType(mockWP, opts)
       }).toThrowError(`Content type with name "${builtInType}" already exists.`)
     })
   })
@@ -54,7 +58,7 @@ describe('registerContentType', () => {
       slug: 'articles'
     }
 
-    registerContentType(contentType)
+    registerContentType(mockWP, contentType)
 
     expect(getContentTypes().article).toEqual(contentType)
   })

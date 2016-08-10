@@ -36,5 +36,10 @@ describe('Kasia', () => {
     expect(() => {
       Kasia({ WP: wpapi, contentTypes: '' })
     }).toThrowError(/Expecting contentTypes to be array/)
+    Kasia({ WP: wpapi, contentTypes: [{
+      name: 'news',
+      plural: 'news',
+      slug: 'news'
+    }] })
   })
 })

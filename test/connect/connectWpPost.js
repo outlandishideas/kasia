@@ -47,7 +47,11 @@ function setup () {
     subscribe
   }
 
-  registerContentType({
+  const mockWP = {
+    registerRoute: jest.fn()
+  }
+
+  registerContentType(mockWP, {
     name: 'book',
     plural: 'books',
     slug: 'books'
