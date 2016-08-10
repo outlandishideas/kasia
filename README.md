@@ -239,13 +239,13 @@ The `options` object accepts:
 
     Property of entities used to key them in the store
 
-- `customContentTypes` {Array} _(optional)_
+- `contentTypes` {Array} _(optional)_
 
     Array of custom content type definitions
 
     ```js
     // Example custom content type definition
-    customContentTypes: [{
+    contentTypes: [{
       name: 'book',
       plural: 'books',
       slug: 'books',
