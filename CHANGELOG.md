@@ -1,5 +1,14 @@
 # Kasia Changelog
 
+- __v2.3.0__ - _10/08/16_
+
+    - Fix functions passed as props to `connectWpQuery` causing infinite dispatching.
+    ([#16](https://github.com/outlandishideas/kasia/issues/16))
+    - Added second parameter `propsComparatorFn` to `connectWpQuery`.
+    - Fix `connectWpPost` derived query chaining failing due to dependency on object property order.
+    - Updates to README: added docs for new functionality, fix typos
+    ([#19](https://github.com/outlandishideas/kasia/pull/19)).
+
 - __v2.2.0__ - _08/08/16_
 
     - Added missing dependencies in `package.json`.

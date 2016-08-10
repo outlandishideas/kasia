@@ -7,16 +7,15 @@ import { completeRequest, failRequest } from './actions'
 import { Request, RequestTypes } from './constants/ActionTypes'
 
 /**
- * Chain call methods beginning with `fn` that are the keys of `calls` with
- * the value of each being the argument for the corresponding invocation.
- * @param {Function} fn The function to invoke calls on
+ * Chain call methods beginning with `fn`.
+ * @param {Object} obj The object to invoke calls on
  * @param {Object} calls The methods and their args to call
  */
-export function chain (fn, calls) {
-  return Object.keys(calls).reduce((result, method) => {
-    const args = calls[method]
-    return result[method](args)
-  }, fn)
+export function chain (obj, calls) {
+  return calls.reduce((result, call) => {
+    const args = call[1]
+    return args ? result[call[0]](args) : result[call[0]]()
+  }, obj)
 }
 
 /**
@@ -39,16 +38,16 @@ export function chain (fn, calls) {
  * @returns {Function} A function to make a request to the WP-API
  */
 export function derivedQueryFn (contentTypeMethodName, identifier) {
-  return () => chain(WP, {
+  return () => chain(WP, [
     // Call the content type method
-    [contentTypeMethodName]: null,
+    [contentTypeMethodName, null],
     // Call the identifier method
-    [typeof identifier === 'string' ? 'slug' : 'id']: identifier,
+    [typeof identifier === 'string' ? 'slug' : 'id', identifier],
     // Call 'embed' in order that embedded data is in the response
-    embed: null,
+    ['embed'],
     // Call `then` in order to invoke query and return a Promise
-    then: (response) => response
-  })
+    ['then', (response) => response]
+  ])
 }
 
 /**
