@@ -166,17 +166,17 @@ export default class Page extends Component {
 export default connectWpPost(Page, (props) => props.params.slug)(Post)
 ```
 
-### `@connectWpQuery(queryFn) : Component`
+### `@connectWpQuery(queryFn[, propsComparatorFn]) : Component`
 
 Connect a component to the result of an arbitrary WP-API query.
 
 - __queryFn__ {Function} Function that accepts args `wpapi` and `props` and should return a WP-API query
-- __propsComparatorFn__ {Function} Function that determines if new data should be requested by inspecting props
+- __propsComparatorFn__ {Function} _(optional)_ Function that determines if new data should be requested by inspecting props
 
 Returns a connected component.
 
 By default the component will request new data via the given `queryFn` if the `propsComparatorFn` returns true.
-The default property comparison is performed only on primitive values on the props objects.
+The default property comparison behaviour is to diff primitive values on the props objects.
 
 Entities returned from the query will be placed on `this.props.kasia.entities` under the same
 normalised structure as described in [The Shape of Things](#the-shape-of-things).
