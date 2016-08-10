@@ -1,6 +1,6 @@
 {
   "name": "kasia",
-  "version": "2.2.1",
+  "version": "2.3.0",
   "description": "A React Redux toolset for the WordPress API",
   "main": "lib/index.js",
   "jsnext:main": "src/index.js",
@@ -37,7 +37,7 @@
     "humps": "^1.0.0",
     "invariant": "^2.2.1",
     "lodash.find": "^4.3.0",
-    "lodash.isequal": "^4.2.0",
+    "lodash.isequalwith": "^4.3.1",
     "lodash.merge": "^4.3.5",
     "normalizr": "^2.0.1",
     "pick-to-array": "^1.0.0",

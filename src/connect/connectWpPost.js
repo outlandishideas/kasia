@@ -9,6 +9,12 @@ import { getContentType } from '../contentTypes'
 import { makeWpPostPreloaderFn } from './preloaders'
 
 /**
+ * IDs of queries created through the preloader.
+ * @type {Array<Number>}
+ */
+const queryIds = []
+
+/**
  * Find an entity in `entities` with the given `identifier`.
  * @param {Object} entities Entity collection
  * @param {String|Number} identifier Entity ID or slug
@@ -53,11 +59,9 @@ function findEntity (entities, identifier) {
  *
  * @params {String} contentType The content type of the data to fetch from WP-API
  * @params {Function|String|Number} id The entity's ID or slug or a function that derives either from props
- * @returns {Function}
+ * @returns {Function} Decorated component
  */
 export default function connectWpPost (contentType, id) {
-  const queryIds = []
-
   return (target) => {
     const targetName = target.displayName || target.name
     const getIdentifier = (props) => typeof id === 'function' ? id(props) : id

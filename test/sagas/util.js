@@ -15,10 +15,10 @@ describe('chain', () => {
   }
 
   it('correctly chains method calls', () => {
-    const result = chain(mockApi, {
-      feedOnce: null,
-      feedTwice: 'result'
-    })
+    const result = chain(mockApi, [
+      ['feedOnce'],
+      ['feedTwice', 'result']
+    ])
 
     expect(result).toEqual('result')
   })
