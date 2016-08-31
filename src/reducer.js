@@ -1,9 +1,23 @@
 import merge from 'lodash.merge'
 import pickToArray from 'pick-to-array'
 
-import normalise from './normalise/index'
+import { Request, ShiftPreparedQueryId } from './constants/ActionTypes'
 import { ContentTypesWithoutId, deriveContentType } from './contentTypes'
-import { Request } from './constants/ActionTypes'
+import normalise from './normalise'
+
+function updateStateWithNextQueryId (state, action, stateUpdateFn) {
+  const _preparedQueryIds = [].concat(state._preparedQueryIds)
+  const queryId = state._nextQueryId
+
+  if (action.prepared) {
+    _preparedQueryIds.push(queryId)
+  }
+
+  return merge({}, state, stateUpdateFn(queryId), {
+    _preparedQueryIds,
+    _nextQueryId: queryId + 1
+  })
+}
 
 /**
  * Pick all entity identifiers from a raw WP-API response.
@@ -11,13 +25,13 @@ import { Request } from './constants/ActionTypes'
  * @returns {Array} Entity identifiers
  */
 export function pickEntityIds (data) {
-  const entityIdentifiers = pickToArray(data, 'id')
+  let entityIdentifiers = pickToArray(data, 'id')
 
   // Accommodate content types that do not have an `id` property
   data.forEach((entity) => {
     const type = deriveContentType(entity)
     if (ContentTypesWithoutId[type]) {
-      entityIdentifiers.push(pickToArray(entity, 'slug'))
+      entityIdentifiers = entityIdentifiers.concat(pickToArray(entity, 'slug'))
     }
   })
 
@@ -26,62 +40,77 @@ export function pickEntityIds (data) {
 
 // COMPLETE
 // Place entity on the store; update query record
-// The entities are normalised by the `keyEntitiesBy` parameter passed in during
-// creation of the action fn, however entities are recorded in the query by their IDs
-// (or slugs if they do not have an ID property) and resolved later within the HOC.
-export const completeReducer = (keyEntitiesBy) => (state, action) => {
-  const data = action.data instanceof Array ? action.data : [action.data]
-  const entities = normalise(data, keyEntitiesBy)
+export const completeReducer = (normaliseData) => (state, action) => {
+  const data = [].concat(action.data)
 
-  return merge({}, state, {
-    entities,
+  return updateStateWithNextQueryId(state, action, (queryId) => ({
+    entities: normaliseData(data),
     queries: {
-      [action.id]: {
-        id: action.id,
+      [queryId]: {
+        id: queryId,
         entities: pickEntityIds(data),
-        paging: action.data._paging || false,
+        paging: action.data._paging || null,
         complete: true,
         OK: true
       }
     }
-  })
+  }))
 }
 
 // FAIL
 // Update query record only
 export const failReducer = (state, action) => {
-  return merge({}, state, {
+  return updateStateWithNextQueryId(state, action, (queryId) => ({
     queries: {
-      [action.id]: {
-        id: action.id,
+      [queryId]: {
+        id: queryId,
         error: String(action.error),
         complete: true,
         OK: false
       }
     }
-  })
+  }))
+}
+
+// SHIFT PREPARED QUERY ID
+// Remove the first element of the prepared query IDs array
+export const shiftPreparedQueryId = (state) => {
+  const _preparedQueryIds = [].concat(state._preparedQueryIds)
+  const newState = merge({}, state)
+
+  _preparedQueryIds.shift()
+  newState._preparedQueryIds = _preparedQueryIds
+
+  return newState
+}
+
+export const initialState = {
+  // The next query identifier
+  _nextQueryId: 0,
+  // Query identifiers that were created by queries made on the server
+  _preparedQueryIds: [],
+  // Record query requests to the WP-API here
+  queries: {},
+  // Entities are normalised and stored here
+  entities: {}
 }
 
 /**
  * Make the reducer for Kasia.
  * @param {Object} options Options object
- * @param {Object} plugins Plugin configurations, e.g. sagas/config
+ * @param {Object} plugins Plugin configurations
  * @returns {Object} Kasia reducer
  */
 export default function makeReducer (options, plugins) {
   const { keyEntitiesBy } = options
 
-  const reducer = merge({}, plugins.reducers, {
-    [Request.Complete]: completeReducer(keyEntitiesBy),
-    [Request.Fail]: failReducer
-  })
+  const normaliseData = (data) => normalise(data, keyEntitiesBy)
 
-  const initialState = {
-    // Record query requests to the WP-API here
-    queries: {},
-    // Entities are normalised and stored here
-    entities: {}
-  }
+  const reducer = merge({}, plugins.reducers, {
+    [Request.Complete]: completeReducer(normaliseData),
+    [Request.Fail]: failReducer,
+    [ShiftPreparedQueryId]: shiftPreparedQueryId
+  })
 
   return {
     wordpress: function kasiaReducer (state = initialState, action) {

@@ -2,17 +2,13 @@ import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import merge from 'lodash.merge'
 
-import idGen from './idGen'
-import invariants from '../invariants'
-import { createPostRequest } from '../actions'
+import { fetch } from '../sagas'
 import { getContentType } from '../contentTypes'
-import { makeWpPostPreloaderFn } from './preloaders'
+import { createPostRequest, shiftPreparedQueryId } from '../actions'
+import invariants from '../invariants'
+import isNode from '../isNode'
 
-/**
- * IDs of queries created through the preloader.
- * @type {Array<Number>}
- */
-const queryIds = []
+const __IS_NODE__ = isNode()
 
 /**
  * Find an entity in `entities` with the given `identifier`.
@@ -25,16 +21,11 @@ function findEntity (entities, identifier) {
     return entities[identifier]
   }
 
-  let entity = null
-
-  Object.keys(entities).forEach((key) => {
-    if (entities[key].slug === identifier) {
-      entity = entities[key]
-      return false
-    }
+  const id = Object.keys(entities).find((key) => {
+    return entities[key].slug === identifier
   })
 
-  return entity
+  return id ? entities[id] : null
 }
 
 /**
@@ -64,39 +55,92 @@ function findEntity (entities, identifier) {
 export default function connectWpPost (contentType, id) {
   return (target) => {
     const targetName = target.displayName || target.name
-    const getIdentifier = (props) => typeof id === 'function' ? id(props) : id
+
+    const getIdentifier = (props) => {
+      const realId = typeof id === 'function' ? id(props) : id
+      invariants.isIdentifierValue(realId)
+      return realId
+    }
 
     invariants.isNotWrapped(target, targetName)
     invariants.isString('contentType', contentType)
-    invariants.isIdentifier(id)
+    invariants.isIdentifierArg(id)
 
-    const mapStateToProps = (state, ownProps) => ({
-      wordpress: state.wordpress
-    })
+    const mapStateToProps = (state) => {
+      invariants.hasWordpressObjectInStore(state)
+      return { wordpress: state.wordpress }
+    }
 
     class KasiaIntermediateComponent extends Component {
       static __kasia = true
 
-      static makePreloader = () => {
-        const id = idGen()
-        queryIds.push(id)
-        return makeWpPostPreloaderFn(id, contentType, getIdentifier, targetName)
+      static makePreloader = (renderProps) => {
+        invariants.isValidContentType(getContentType(contentType), contentType, targetName)
+        const identifier = getIdentifier(renderProps)
+        const action = createPostRequest({ contentType, identifier, prepared: true })
+        return [fetch, action]
       }
 
       render () {
         invariants.isValidContentType(getContentType(contentType), contentType, targetName)
-        const props = merge({}, this.props, this.reconcileKasiaData(this.props))
+        const props = merge({}, this.props, this.reconcileWpData(this.props))
         return React.createElement(target, props)
+      }
+
+      componentWillMount () {
+        const { _preparedQueryIds } = this.props.wordpress
+        const _isNode = typeof this.props.__IS_NODE__ !== 'undefined'
+          ? this.props.__IS_NODE__
+          : __IS_NODE__
+
+        if (_preparedQueryIds.length) {
+          this.queryId = _preparedQueryIds[0]
+
+          if (!_isNode) {
+            this.props.dispatch(shiftPreparedQueryId())
+          }
+        } else {
+          this.dispatchRequestAction(this.props)
+        }
+      }
+
+      /**
+       * Make a request for new data if the identifier has changed or
+       * an entity cannot be derived from the store using `nextProps`.
+       * @param {Object} nextProps
+       */
+      componentWillReceiveProps (nextProps) {
+        const { name } = getContentType(contentType)
+        const nextBuiltProps = this.reconcileWpData(nextProps)
+        const changedIdentifier = getIdentifier(nextProps) !== getIdentifier(this.props)
+        const cannotDeriveEntityFromNextProps = !nextBuiltProps.kasia[name]
+
+        if (changedIdentifier && cannotDeriveEntityFromNextProps) {
+          this.dispatchRequestAction(nextProps)
+        }
+      }
+
+      /**
+       * Dispatch a new request action to fetch data according to the props.
+       * @param {Object} props Props object
+       */
+      dispatchRequestAction (props) {
+        const identifier = getIdentifier(props)
+        const action = createPostRequest({ contentType, identifier })
+
+        this.queryId = props.wordpress._nextQueryId
+        this.props.dispatch(action)
       }
 
       /**
        * Build an object of properties containing entity and query data maintained by Kasia.
-       * @params {Object} Props object to use for reconciliation
+       * @params {Object} props Props object to use for reconciliation
        * @returns {Object} Props object
        */
-      reconcileKasiaData (props) {
+      reconcileWpData (props) {
+        const { queries } = props.wordpress
         const { plural, name } = getContentType(contentType)
-        const query = props.wordpress.queries[this.queryId]
+        const query = queries[this.queryId]
 
         if (!query) {
           return {
@@ -115,32 +159,6 @@ export default function connectWpPost (contentType, id) {
             query,
             [name]: findEntity(entityCollection, entityId)
           }
-        }
-      }
-
-      // Dispatch a new request action to fetch data according to the props
-      dispatch (props) {
-        const identifier = getIdentifier(props)
-        const action = createPostRequest(this.queryId, { contentType, identifier })
-        this.props.dispatch(action)
-      }
-
-      componentWillMount () {
-        this.queryId = queryIds.length ? queryIds.shift() : idGen()
-        this.dispatch(this.props)
-      }
-
-      componentWillReceiveProps (nextProps) {
-        const { name } = getContentType(contentType)
-        const shouldDispatch = getIdentifier(nextProps) !== getIdentifier(this.props)
-        const nextBuiltProps = this.reconcileKasiaData(nextProps)
-
-        // Make a request for new data if:
-        //  - the identifier has changed
-        //  - an entity cannot be derived from the store using `nextProps`
-        if (shouldDispatch && !nextBuiltProps.kasia[name]) {
-          this.queryId = queryIds.length ? queryIds.shift() : idGen()
-          this.dispatch(nextProps)
         }
       }
     }

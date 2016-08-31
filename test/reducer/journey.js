@@ -1,4 +1,3 @@
-/* eslint-env jasmine */
 /* global jest:false */
 
 jest.disableAutomock()
@@ -28,6 +27,8 @@ function setup () {
 
   const initialState = {
     wordpress: {
+      _nextQueryId: 0,
+      _preparedQueryIds: [],
       queries: {},
       entities: {}
     }
@@ -39,9 +40,6 @@ function setup () {
 describe('Reducer journey', () => {
   const { store, initialState } = setup()
 
-  let queryId1 = 'mockId1'
-  let queryId2 = 'mockId2'
-
   it('has initial state on store', () => {
     expect(store.getState()).toEqual(initialState)
   })
@@ -52,7 +50,7 @@ describe('Reducer journey', () => {
   })
 
   it('can REQUEST_CREATE', () => {
-    const action = createPostRequest(queryId1, {
+    const action = createPostRequest({
       contentType: ContentTypes.Post,
       identifier: 16
     })
@@ -61,24 +59,27 @@ describe('Reducer journey', () => {
   })
 
   it('can REQUEST_COMPLETE', () => {
+    const id = 0
     const entities = normalise([modify(postJson)], 'id')
 
-    store.dispatch(completeRequest(queryId1, postJson))
+    store.dispatch(completeRequest({ id, data: postJson }))
 
     expect(store.getState().wordpress.entities).toEqual(entities)
   })
 
   it('can REQUEST_FAIL', () => {
-    const action = createPostRequest(queryId2, {
+    const id = 1
+
+    const action = createPostRequest({
       contentType: ContentTypes.Post,
       identifier: 16
     })
 
     store.dispatch(action)
-    store.dispatch(failRequest(queryId2, new Error('Request failed')))
+    store.dispatch(failRequest({ id, error: new Error('Request failed') }))
 
-    expect(store.getState().wordpress.queries[queryId2]).toEqual({
-      id: queryId2,
+    expect(store.getState().wordpress.queries[1]).toEqual({
+      id,
       complete: true,
       OK: false,
       error: 'Error: Request failed'

@@ -1,4 +1,3 @@
-/* eslint-env jasmine */
 /* global jest:false */
 
 jest.disableAutomock()
@@ -12,22 +11,6 @@ import {
   registerContentType,
   getContentType
 } from '../src/contentTypes'
-
-function normaliserTestData (contentType) {
-  const first = require('./fixtures/wp-api-responses/' + contentType).default
-
-  // Imitate another entity by modifying identifiers
-  const second = merge({}, first, {
-    id: first.id + 1,
-    slug: first.slug + '1'
-  })
-
-  return {
-    first,
-    second,
-    multiple: [first, second]
-  }
-}
 
 function setup () {
   const mockWP = {
@@ -104,13 +87,29 @@ function setup () {
   return { tests }
 }
 
+function fixtures (contentType) {
+  const first = require('./fixtures/wp-api-responses/' + contentType).default
+
+  // Imitate another entity by modifying identifiers
+  const second = merge({}, first, {
+    id: first.id + 1,
+    slug: first.slug + '1'
+  })
+
+  return {
+    first,
+    second,
+    multiple: [first, second]
+  }
+}
+
 describe('Normaliser', () => {
   const { tests } = setup()
 
   Object.keys(tests).forEach((contentType) => {
     describe('Normalise ' + contentType, () => {
       const { plural } = getContentType(contentType)
-      const { first, second, multiple } = normaliserTestData(contentType)
+      const { first, second, multiple } = fixtures(contentType)
       const { collections, testKeyBySlug, testKeyById } = tests[contentType]
 
       if (testKeyById) {

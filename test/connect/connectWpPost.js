@@ -1,4 +1,3 @@
-/* eslint-env jasmine */
 /* global jest:false */
 
 jest.disableAutomock()
@@ -12,7 +11,8 @@ import postJson from '../fixtures/wp-api-responses/post'
 import bookJson from '../fixtures/wp-api-responses/book'
 
 import { Request, RequestTypes } from '../../src/constants/ActionTypes'
-import { registerContentType } from '../../src/contentTypes'
+import { getContentType, registerContentType } from '../../src/contentTypes'
+import { initialState } from '../../src/reducer'
 
 import BuiltInContentType from '../components/BuiltInContentType'
 import CustomContentType from '../components/CustomContentType'
@@ -20,10 +20,11 @@ import BadContentTypeComponent from '../components/BadContentType'
 
 function setup () {
   const dispatch = jest.fn()
-  const subscribe = jest.fn()
 
-  const getState = jest.fn(() => ({
-    wordpress: {
+  const subscribe = () => {}
+
+  const getState = () => ({
+    wordpress: merge(initialState, {
       queries: {
         '0': { complete: true, OK: true, entities: [postJson.id] },
         '1': { complete: true, OK: true, entities: [postJson.id + 1] },
@@ -38,26 +39,26 @@ function setup () {
           [String(bookJson.id)]: modifyResponse(bookJson)
         }
       }
-    }
-  }))
-
-  const store = {
-    dispatch,
-    getState,
-    subscribe
-  }
+    })
+  })
 
   const mockWP = {
     registerRoute: jest.fn()
   }
 
-  registerContentType(mockWP, {
-    name: 'book',
-    plural: 'books',
-    slug: 'books'
-  })
+  if (!getContentType('book')) {
+    registerContentType(mockWP, {
+      name: 'book',
+      plural: 'books',
+      slug: 'books'
+    })
+  }
 
-  return { store }
+  return {
+    dispatch,
+    getState,
+    subscribe
+  }
 }
 
 function makeProps (store, id) {
@@ -68,26 +69,18 @@ function makeProps (store, id) {
 }
 
 describe('connectWpPost', () => {
-  const { store } = setup()
-
-  const dispatch = store.dispatch
-
   describe('with built-in content type', () => {
-    let rendered
+    const store = setup()
+    const dispatch = store.dispatch
+    const props = makeProps(store, postJson.id)
+    const rendered = mount(<BuiltInContentType {...props} />)
 
     it('should wrap the component', () => {
-      const props = makeProps(store, postJson.id)
-      rendered = mount(<BuiltInContentType {...props} testProp />)
       expect(BuiltInContentType.__kasia).toBe(true)
-    })
-
-    it('should pass props down', () => {
-      expect(rendered.props().testProp).toBe(true)
     })
 
     it('should dispatch REQUEST_CREATE', () => {
       const action = dispatch.mock.calls[0][0]
-      expect(action.id).toEqual('0')
       expect(action.type).toEqual(Request.Create)
       expect(action.request).toEqual(RequestTypes.Post)
     })
@@ -107,15 +100,12 @@ describe('connectWpPost', () => {
   })
 
   describe('with custom content type', () => {
-    let rendered
+    const store = setup()
+    const props = makeProps(store, bookJson.id)
+    const rendered = mount(<CustomContentType {...props} />)
 
     it('should dispatch REQUEST_CREATE', () => {
-      const props = makeProps(store, bookJson.id)
-
-      rendered = mount(<CustomContentType {...props} />)
-
-      const action = dispatch.mock.calls[1][0]
-      expect(action.id).toEqual('1')
+      const action = store.dispatch.mock.calls[0][0]
       expect(action.type).toEqual(Request.Create)
       expect(action.request).toEqual(RequestTypes.Post)
     })
@@ -126,6 +116,7 @@ describe('connectWpPost', () => {
   })
 
   describe('with bad content type', () => {
+    const store = setup()
     const props = makeProps(store, postJson.id)
 
     it('should throw with bad content type', () => {

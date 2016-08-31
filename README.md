@@ -7,6 +7,7 @@ Made with ❤ at [@outlandish](http://www.twitter.com/outlandish)
 <a href="http://badge.fury.io/js/kasia"><img alt="npm version" src="https://badge.fury.io/js/kasia.svg"></a>
 [![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg)](http://standardjs.com/)
 <a href="https://travis-ci.org/outlandishideas/kasia"><img alt="travis ci build" src="https://travis-ci.org/outlandishideas/kasia.svg""></a>
+<a href="https://coveralls.io/repos/github/outlandishideas/kasia/badge.svg?branch=master"><img alt="coverage" src="https://coveralls.io/repos/github/outlandishideas/kasia/badge.svg?branch=master"></a>
 
 Get data from WordPress and into components with ease...
 
@@ -27,11 +28,11 @@ function SpongebobSquarepants (props) {
 - Declaratively connect React components to data from WordPress.
 - Uses [`node-wpapi`](https://github.com/WP-API/node-wpapi) internally in order to facilitate complex queries.
 - Register and consume Custom Content Types with ease.
-- All WP data is normalised at `store.wordpress`, e.g. `store.wordpress.pages`
+- All WP data is normalised at `store.wordpress`, e.g. `store.wordpress.pages`.
 - Support for universal applications.
 - Support for plugins, e.g. [`wp-api-menus`](https://github.com/outlandishideas/kasia-plugin-wp-api-menus).
 
-Check out the [Kasia boilerplate WordPress theme](https://github.com/outlandishideas/kasia-boilerplate).
+Check out the [Kasia boilerplate](https://github.com/outlandishideas/kasia-boilerplate)!
 
 ## Glossary
 
@@ -64,12 +65,12 @@ Kasia suits applications that are built using these technologies:
 ## Import
 
 ```js
-// ES6
+// ES2015
 import Kasia from 'kasia'
 ```
 
 ```js
-// non-ES6
+// CommonJS
 var Kasia = require('kasia')
 ```
 
@@ -304,6 +305,16 @@ import {
 } from 'kasia/types'
 ```
 
+### `kasia/util`
+
+Utility methods to help you when building your application.
+
+At the moment it just exports a function `makePreloaderSaga`, see [Universal Applications](#universal-applications) for more details.
+
+```js
+import { makePreloaderSaga } from 'kasia/util'
+```
+
 ## The Shape of Things
 
 Kasia restructures the [shape of things](https://www.youtube.com/watch?v=Zn2JFlteeJ0) returned from the WP-API.
@@ -387,34 +398,79 @@ A plugin should:
 
 See [kasia-plugin-wp-api-menus]() for an example implementation of a Kasia plugin.
 
-## Universal Applications
+## Universal Applications 
+
+### `makePreloaderSaga(components, renderProps) : Generator`
+
+Create a single saga operation that will preload all data for any Kasia components in `components`.
+
+- __components__ {Array} Array of components
+- __renderProps__ {Object} Render props object derived from the matched route
+
+Returns a saga operation.
+
+A somewhat contrived example:
+
+```js
+import { match } from 'react-router'
+import { makePreloaderSaga } from 'kasia/util'
+
+// Our application's react-router routes
+import routes from './routes'
+
+// Configures the redux store with saga middleware
+// and enhances it with the `runSaga` method
+import store from './store'
+
+// Takes the components and render props from matched route, and
+// the store state and produces the complete HTML as a string
+import renderToString from './render'
+
+// Produce a static webpage and send to the client for the given `route`
+export function preload (res, route) { 
+  return match({ routes, location: route })
+    .then((error, redirectLocation, renderProps) => {
+      if (error) {
+        res.sendStatus(500)
+        return
+      }
+        
+      if (redirectLocation) {
+        res.redirect(302, redirectLocation.pathname + redirectLocation.search)
+        return
+      }
+        
+      const preloader = makePreloaderSaga(renderProps.components, renderProps)
+        
+      return store
+        .runSaga(preloader).done
+        .then(() => renderToString(components, renderProps, store.getState()))
+        .then((document) => res.send(document))
+    })
+}
+```
+
+### `ConnectedComponent.makePreloader(renderProps) : Array<Array>`
 
 Connected components expose a static method `makePreloader` that produces an array of saga operations
-to facilitate the request for entity data on the server. It is recommended that important
-data is declared at the highest level as traversing the component tree to load data from children
-is currently unsupported.
+to facilitate the request for entity data on the server ("preloaders").
 
-### `ConnectedComponent.makePreloader(renderProps) : Function`
+Create an array of preloader operations.
 
-Create a preloader function.
+- __renderProps__ {Object} Render props object derived from the matched route 
 
-- __renderProps__ {Object} Component's render props
-
-Returns a function that returns an array of saga operations in the form:
+Returns an array of saga operations in the form:
 
 ```js
 // Saga operations
-[ [sagaGeneratorFn, actionObj] ]
+[ [sagaGeneratorFn, action] ]
 ```
 
 Elements:
 
-- `sagaGenerator` {Function} Must be called with the `actionObj`
+- `sagaGenerator` {Function} Must be called with the `action`
 
 - `action` {Object} An action object containing information for the saga to fetch data
-
-Consult the [boilerplate](https://github.com/outlandishideas/kasia-boilerplate)
-for an example implementation of a universal Kasia application.
 
 ## Contributing
 

@@ -1,4 +1,3 @@
-/* eslint-env jasmine */
 /* global jest:false */
 
 jest.unmock('../../src/sagas')

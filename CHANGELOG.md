@@ -1,5 +1,18 @@
 # Kasia Changelog
 
+- __v3.0.0__ - _31/08/16_
+
+    - [BREAKING] Fix bug in Universal Application solution that prevented components picking 
+    up prepared query data on the client. Also involves change in API that means `ConnectComponent.makePreloader` returns array
+    immediately instead of a function. ([#24](https://github.com/outlandishideas/kasia/issues/24))
+    - Improved test coverage of universal application solution. ([#26](https://github.com/outlandishideas/kasia/issues/26))
+    - Additional utility export `kasia/util`, currently only exporting `makePreloaderSaga()` for use with server-side rendering.
+    - Improved developer feedback. ([#4](https://github.com/outlandishideas/kasia/issues/4), [#24](https://github.com/outlandishideas/kasia/issues/23))
+    - Updates to README: better documentation of Universal Application solution. ([#25](https://github.com/outlandishideas/kasia/issues/25))
+    - Update to latest version of Jest.
+    
+---
+
 - __v2.4.0__ - _10/08/16_
 
     - Mixin `node-wpapi`'s available mixins to internal calls to `registerRoute` by default in order
