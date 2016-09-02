@@ -96,7 +96,9 @@ export default function connectWpPost (contentType, id) {
           : __IS_NODE__
 
         if (_numPreparedQueries) {
-          this.queryId = nextPreparedQueryId()
+          this.queryId = typeof this.props.__QUERY_ID__ !== 'undefined'
+            ? this.props.__QUERY_ID__
+            : nextPreparedQueryId()
 
           if (!_isNode) {
             this.props.dispatch(subtractPreparedQueries())

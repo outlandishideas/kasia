@@ -100,14 +100,25 @@ describe('Universal journey', function () {
     })
   })
 
+  it('should render the prepared query data on server', () => {
+    rendered = mount(<BuiltInContentType store={store} params={{ id: postJson1.id }} />)
+    expect(rendered.html()).toEqual(`<div>${postJson1.title}</div>`)
+  })
+
   it('should not subtract from remaining number of prepared queries', () => {
     expect(store.getState().wordpress._numPreparedQueries).toEqual(1)
   })
 
   // Client
 
-  it('should render the prepared query data', () => {
-    rendered = mount(<BuiltInContentType store={store} params={{ id: postJson1.id }} __IS_NODE__={false} />)
+  it('should render the prepared query data on client', () => {
+    rendered = mount(
+      <BuiltInContentType
+        store={store} params={{ id: postJson1.id }}
+        __QUERY_ID__={0} __IS_NODE__={false}
+      />
+    )
+
     expect(rendered.html()).toEqual(`<div>${postJson1.title}</div>`)
   })
 
