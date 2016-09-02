@@ -1,6 +1,6 @@
-<center>
+<p align="center">
     <img src="https://raw.githubusercontent.com/outlandishideas/kasia/master/assets/tophat.png" />
-</center>
+</p>
 
 <p><h1 align="center">kasia</h1></p>
 
