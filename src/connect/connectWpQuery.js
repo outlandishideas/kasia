@@ -4,7 +4,8 @@ import isEqualWith from 'lodash.isequalwith'
 import merge from 'lodash.merge'
 
 import { fetch } from '../sagas'
-import { createQueryRequest, shiftPreparedQueryId } from '../actions'
+import { createQueryRequest, subtractPreparedQueries } from '../actions'
+import { nextPreparedQueryId } from './util'
 import invariants from '../invariants'
 import isNode from '../isNode'
 
@@ -123,16 +124,19 @@ export default function connectWpQuery (queryFn, propsComparatorFn = defaultProp
       }
 
       componentWillMount () {
-        const { _preparedQueryIds } = this.props.wordpress
+        const { _numPreparedQueries } = this.props.wordpress
 
-        if (_preparedQueryIds.length) {
-          this.queryId = _preparedQueryIds[0]
+        const _isNode = typeof this.props.__IS_NODE__ !== 'undefined'
+          ? this.props.__IS_NODE__
+          : __IS_NODE__
 
-          if (!__IS_NODE__) {
-            this.props.dispatch(shiftPreparedQueryId())
+        if (_numPreparedQueries.length) {
+          this.queryId = nextPreparedQueryId()
+
+          if (!_isNode) {
+            this.props.dispatch(subtractPreparedQueries())
           }
         } else {
-          this.queryId = null
           this.dispatchRequestAction(this.props)
         }
       }

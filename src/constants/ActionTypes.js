@@ -16,5 +16,5 @@ export const Request = {
   Fail: 'kasia/REQUEST_FAILED'
 }
 
-// Shift a query ID from the prepared query ID array
-export const ShiftPreparedQueryId = 'kasia/SHIFT_PREPARED_QUERY_ID'
+// Subtract from the number of remaining prepared queries
+export const SubtractPreparedQueries = 'kasia/SUBTRACT_PREPARED_QUERIES'

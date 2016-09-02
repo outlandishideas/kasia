@@ -28,7 +28,7 @@ function setup () {
   const initialState = {
     wordpress: {
       _nextQueryId: 0,
-      _preparedQueryIds: [],
+      _numPreparedQueries: 0,
       queries: {},
       entities: {}
     }

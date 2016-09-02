@@ -74,68 +74,61 @@ describe('Universal journey', function () {
     }).done
   }
 
-  describe('Server', () => {
-    let rendered
-    let preloader
+  let rendered
+  let preloader
 
-    it('should have a makePreloader static method', () => {
-      expect(typeof BuiltInContentType.makePreloader).toEqual('function')
-    })
+  // Server
 
-    it('should make a preloader array', () => {
-      preloader = BuiltInContentType.makePreloader(renderProps)
-      expect(Array.isArray(preloader)).toEqual(true)
-    })
+  it('should have a makePreloader static method', () => {
+    expect(typeof BuiltInContentType.makePreloader).toEqual('function')
+  })
 
-    it('that contains a saga function and action object', () => {
-      expect(preloader[0]).toEqual(fetch)
-      expect(preloader[1]).toEqual(expectedAction)
-    })
+  it('that returns a preloader operation array', () => {
+    preloader = BuiltInContentType.makePreloader(renderProps)
+    expect(Array.isArray(preloader)).toEqual(true)
+  })
 
-    it('that when run updates _preparedQueryIds on the store', (done) => {
-      return completeRequest(id, postJson1, true).then(() => {
-        expect(store.getState().wordpress._preparedQueryIds).toEqual([id])
-        done()
-      })
-    })
+  it('that contains a saga function and action object', () => {
+    expect(preloader[0]).toEqual(fetch)
+    expect(preloader[1]).toEqual(expectedAction)
+  })
 
-    it('should pull the prepared query data from the store when mounted', () => {
-      rendered = mount(<BuiltInContentType store={store} params={{ id: postJson1.id }} />)
-      expect(rendered.html()).toEqual(`<div>${postJson1.title}</div>`)
-    })
-
-    it('should not shift the prepared query ID from the store', () => {
-      expect(store.getState().wordpress._preparedQueryIds).toEqual([id])
+  it('that when run updates number of prepared queries', (done) => {
+    return completeRequest(id, postJson1, true).then(() => {
+      expect(store.getState().wordpress._numPreparedQueries).toEqual(1)
+      done()
     })
   })
 
-  describe('Client', () => {
-    let rendered
+  it('should not subtract from remaining number of prepared queries', () => {
+    expect(store.getState().wordpress._numPreparedQueries).toEqual(1)
+  })
 
-    it('should pull the prepared query data from the store when mounted', () => {
-      rendered = mount(<BuiltInContentType store={store} params={{ id: postJson1.id }} __IS_NODE__={false} />)
-      expect(rendered.html()).toEqual(`<div>${postJson1.title}</div>`)
+  // Client
+
+  it('should render the prepared query data', () => {
+    rendered = mount(<BuiltInContentType store={store} params={{ id: postJson1.id }} __IS_NODE__={false} />)
+    expect(rendered.html()).toEqual(`<div>${postJson1.title}</div>`)
+  })
+
+  it('should subtract from the remaining number of prepared queries', () => {
+    expect(store.getState().wordpress._numPreparedQueries).toEqual(0)
+  })
+
+  it('should make a non-prepared query on props change', (done) => {
+    completeRequest(++id, postJson2).then(() => {
+      const state = store.getState().wordpress
+
+      rendered.setProps({ params: { id: 1 } })
+
+      expect(state._numPreparedQueries).toEqual(0)
+      expect(Object.keys(state.queries)).toContain(String(id))
+
+      done()
     })
+  })
 
-    it('should shift the prepared query ID from the store', () => {
-      expect(store.getState().wordpress._preparedQueryIds).toEqual([])
-    })
-
-    it('should make a non-prepared query on props change', (done) => {
-      completeRequest(++id, postJson2).then(() => {
-        const state = store.getState().wordpress
-
-        rendered.setProps({ params: { id: 1 } })
-
-        expect(state._preparedQueryIds).toEqual([])
-        expect(Object.keys(state.queries)).toContain(String(id))
-
-        done()
-      })
-    })
-
-    it('should update the component with result of non-prepared query', () => {
-      expect(rendered.html()).toEqual(`<div>${postJson2.title}</div>`)
-    })
+  it('should render result of the non-prepared query', () => {
+    expect(rendered.html()).toEqual(`<div>${postJson2.title}</div>`)
   })
 })

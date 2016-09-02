@@ -1,6 +1,6 @@
 {
   "name": "kasia",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "A React Redux toolset for the WordPress API",
   "main": "lib/index.js",
   "jsnext:main": "src/index.js",

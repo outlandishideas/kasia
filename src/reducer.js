@@ -1,20 +1,19 @@
 import merge from 'lodash.merge'
 import pickToArray from 'pick-to-array'
 
-import { Request, ShiftPreparedQueryId } from './constants/ActionTypes'
+import { Request, SubtractPreparedQueries } from './constants/ActionTypes'
 import { ContentTypesWithoutId, deriveContentType } from './contentTypes'
 import normalise from './normalise'
 
 function updateStateWithNextQueryId (state, action, stateUpdateFn) {
-  const _preparedQueryIds = [].concat(state._preparedQueryIds)
   const queryId = state._nextQueryId
 
-  if (action.prepared) {
-    _preparedQueryIds.push(queryId)
-  }
+  let _numPreparedQueries = action.prepared
+    ? state._numPreparedQueries + 1
+    : state._numPreparedQueries
 
   return merge({}, state, stateUpdateFn(queryId), {
-    _preparedQueryIds,
+    _numPreparedQueries,
     _nextQueryId: queryId + 1
   })
 }
@@ -72,23 +71,19 @@ export const failReducer = (state, action) => {
   }))
 }
 
-// SHIFT PREPARED QUERY ID
+// SUBTRACT PREPARED QUERIES
 // Remove the first element of the prepared query IDs array
-export const shiftPreparedQueryId = (state) => {
-  const _preparedQueryIds = [].concat(state._preparedQueryIds)
-  const newState = merge({}, state)
-
-  _preparedQueryIds.shift()
-  newState._preparedQueryIds = _preparedQueryIds
-
-  return newState
+export const subtractPreparedQueries = (state) => {
+  return merge({}, state, {
+    _numPreparedQueries: state._numPreparedQueries - 1
+  })
 }
 
 export const initialState = {
   // The next query identifier
   _nextQueryId: 0,
   // Query identifiers that were created by queries made on the server
-  _preparedQueryIds: [],
+  _numPreparedQueries: 0,
   // Record query requests to the WP-API here
   queries: {},
   // Entities are normalised and stored here
@@ -109,7 +104,7 @@ export default function makeReducer (options, plugins) {
   const reducer = merge({}, plugins.reducers, {
     [Request.Complete]: completeReducer(normaliseData),
     [Request.Fail]: failReducer,
-    [ShiftPreparedQueryId]: shiftPreparedQueryId
+    [SubtractPreparedQueries]: subtractPreparedQueries
   })
 
   return {

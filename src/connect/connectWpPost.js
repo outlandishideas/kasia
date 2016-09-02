@@ -4,7 +4,8 @@ import merge from 'lodash.merge'
 
 import { fetch } from '../sagas'
 import { getContentType } from '../contentTypes'
-import { createPostRequest, shiftPreparedQueryId } from '../actions'
+import { createPostRequest, subtractPreparedQueries } from '../actions'
+import { nextPreparedQueryId } from './util'
 import invariants from '../invariants'
 import isNode from '../isNode'
 
@@ -88,16 +89,17 @@ export default function connectWpPost (contentType, id) {
       }
 
       componentWillMount () {
-        const { _preparedQueryIds } = this.props.wordpress
+        const { _numPreparedQueries } = this.props.wordpress
+
         const _isNode = typeof this.props.__IS_NODE__ !== 'undefined'
           ? this.props.__IS_NODE__
           : __IS_NODE__
 
-        if (_preparedQueryIds.length) {
-          this.queryId = _preparedQueryIds[0]
+        if (_numPreparedQueries) {
+          this.queryId = nextPreparedQueryId()
 
           if (!_isNode) {
-            this.props.dispatch(shiftPreparedQueryId())
+            this.props.dispatch(subtractPreparedQueries())
           }
         } else {
           this.dispatchRequestAction(this.props)

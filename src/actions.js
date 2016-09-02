@@ -1,4 +1,4 @@
-import { Request, RequestTypes, ShiftPreparedQueryId } from './constants/ActionTypes'
+import { Request, RequestTypes, SubtractPreparedQueries } from './constants/ActionTypes'
 
 /**
  * Initiate a request for a single entity from the WP-API.
@@ -38,5 +38,5 @@ export const failRequest = ({ id, error, prepared = false }) =>
   ({ type: Request.Fail, id, error, prepared })
 
 // Remove an ID from the prepared query ID array.
-export const shiftPreparedQueryId = () =>
-  ({ type: ShiftPreparedQueryId })
+export const subtractPreparedQueries = () =>
+  ({ type: SubtractPreparedQueries })
