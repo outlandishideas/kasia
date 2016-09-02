@@ -1,4 +1,3 @@
-/* eslint-env jasmine */
 /* global jest:false */
 
 jest.disableAutomock()
@@ -50,6 +49,6 @@ describe('Plugin', () => {
   })
 
   it('should add the plugin saga to sagas array', () => {
-    expect(kasiaSagas).toContain(effects.spawn(pluginSaga))
+    expect(kasiaSagas.toString()).toContain(effects.spawn(pluginSaga).toString())
   })
 })

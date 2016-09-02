@@ -1,16 +1,6 @@
-/* eslint-env jasmine */
 /* global jest:false */
 
-jest.unmock('normalizr')
-jest.unmock('redux-saga')
-jest.unmock('redux-saga/effects')
-
-jest.unmock('../../src/constants/ActionTypes')
-jest.unmock('../../src/contentTypes')
-jest.unmock('../../src/actions')
-jest.unmock('../../src/wpapi')
-jest.unmock('../../src/index')
-jest.unmock('../../src/sagas')
+jest.disableAutomock()
 
 import * as effects from 'redux-saga/effects'
 
@@ -25,7 +15,6 @@ import {
 } from '../../src/actions'
 
 function setup () {
-  const queryId = 'mockId'
   const mockResult = 'mockResult'
   const WP = jest.fn()
   const queryFn = jest.fn()
@@ -34,41 +23,50 @@ function setup () {
 
   setWP(WP)
 
-  return { WP, queryFn, queryId, mockResult }
+  return { WP, queryFn, mockResult }
 }
 
 describe('Sagas', () => {
+  const { WP, queryFn, mockResult } = setup()
+
   describe('on createPostRequest', () => {
-    const { queryId } = setup()
+    const queryId = 0
 
     const opts = {
       contentType: ContentTypes.Post,
       identifier: 16
     }
 
-    const action = createPostRequest(queryId, opts)
+    const action = createPostRequest(opts)
     const generator = fetch(action)
 
+    // Skip select
     generator.next()
 
+    // Skip call
+    generator.next(queryId)
+
     it('yields a put with completeRequest action', () => {
-      expect(generator.next().value)
-        .toEqual(effects.put(completeRequest(queryId, undefined)))
+      expect(generator.next(mockResult).value)
+        .toEqual(effects.put(completeRequest({ id: queryId, data: mockResult })))
     })
   })
 
   describe('on createQueryRequest', () => {
-    const { WP, queryFn, queryId, mockResult } = setup()
-    const action = createQueryRequest(queryId, { queryFn })
+    const queryId = 1
+    const action = createQueryRequest({ id: queryId, queryFn })
     const generator = fetch(action)
 
+    // Skip select
+    generator.next()
+
     it('yields a call to correctly resolved queryFn', () => {
-      expect(generator.next().value).toEqual(effects.call(queryFn, WP))
+      expect(generator.next(queryId).value).toEqual(effects.call(queryFn, WP))
     })
 
     it('puts a completeRequest action with result', () => {
       expect(generator.next(mockResult).value)
-        .toEqual(effects.put(completeRequest(queryId, mockResult)))
+        .toEqual(effects.put(completeRequest({ id: queryId, data: mockResult })))
     })
   })
 })

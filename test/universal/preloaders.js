@@ -1,44 +1,26 @@
-/* eslint-env jasmine */
 /* global jest:false */
 
-jest.unmock('invariant')
-
-jest.unmock('../../src/connect/connectWpPost')
-jest.unmock('../../src/connect/connectWpQuery')
-jest.unmock('../../src/connect/preloaders')
-jest.unmock('../../src/contentTypes')
-jest.unmock('../../src/sagas')
-jest.unmock('../../src/actions')
-jest.unmock('../../src/invariants')
+jest.disableAutomock()
 
 import { Request, RequestTypes } from '../../src/constants/ActionTypes'
 import { ContentTypes } from '../../src/contentTypes'
 import { fetch } from '../../src/sagas'
 
-import {
-  makeWpPostPreloaderFn,
-  makeWpQueryPreloaderFn
-} from '../../src/connect/preloaders'
+import BuiltInContentType from '../components/BuiltInContentType'
+import BadContentType from '../components/BadContentType'
+import CustomQuery from '../components/CustomQuery'
 
-const queryId = 'mockId'
-
-describe('Universal utilities', () => {
+describe('Preloaders', () => {
   describe('connectWpPost', () => {
-    const preload = makeWpPostPreloaderFn(
-      queryId,
-      ContentTypes.Post,
-      (props) => props.id
-    )
+    const result = BuiltInContentType.makePreloader({ params: { id: 16 } })
 
-    const result = preload({ id: 16 })
-
-    it('returns a function', () => {
-      expect(typeof preload).toEqual('function')
+    it('returns an array', () => {
+      expect(Array.isArray(result)).toEqual(true)
     })
 
     it('throws with bad content type', () => {
       expect(() => {
-        makeWpPostPreloaderFn(queryId, 'bad', () => {})()
+        BadContentType.makePreloader()
       }).toThrowError(/not recognised/)
     })
 
@@ -58,12 +40,10 @@ describe('Universal utilities', () => {
   })
 
   describe('connectWpQuery', () => {
-    const queryFn = jest.fn()
-    const preload = makeWpQueryPreloaderFn(queryId, queryFn)
-    const result = preload({ id: 16 })
+    const result = CustomQuery.makePreloader({ params: { id: 16 } })
 
-    it('returns a function', () => {
-      expect(typeof preload).toEqual('function')
+    it('returns an array', () => {
+      expect(Array.isArray(result)).toEqual(true)
     })
 
     it('returns an array with saga operation', () => {

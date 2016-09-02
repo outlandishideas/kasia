@@ -1,4 +1,3 @@
-/* eslint-env jasmine */
 /* global jest:false */
 
 jest.disableAutomock()
@@ -34,11 +33,11 @@ describe('registerContentType', () => {
   it('throws with bad options object', () => {
     expect(() => {
       registerContentType(mockWP, '')
-    }).toThrowError('Invalid content type object, see documentation.')
+    }).toThrowError('Invalid content type object. See documentation http://bit.ly/2bg268P.')
   })
 
   values(ContentTypes).forEach((builtInType) => {
-    it('throws an when name is ' + builtInType, () => {
+    it('throws when name is ' + builtInType, () => {
       const opts = {
         name: builtInType,
         plural: builtInType,

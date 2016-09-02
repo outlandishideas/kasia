@@ -1,6 +1,7 @@
 import invariant from 'invariant'
 
 const nodeWpApiGitHubUrl = 'http://bit.ly/2adfKKg'
+const kasiaGitHubUrl = 'http://bit.ly/2bg268P'
 
 export default {
   isString: (name, value) => invariant(
@@ -26,26 +27,26 @@ export default {
     'Expecting WP to be instance of `node-wpapi`. ' +
     `See ${nodeWpApiGitHubUrl} for docs.`
   ),
-  isIdentifier: (identifier) => invariant(
+  isIdentifierArg: (identifier) => invariant(
     typeof identifier === 'function' ||
     typeof identifier === 'string' ||
     typeof identifier === 'number',
     'Expecting identifier to be function/string/number, got "%s"',
     typeof identifier
   ),
-  isValidContentTypeObject: (obj = {}) => invariant(
+  isValidContentTypeObject: (obj) => invariant(
     typeof obj.name === 'string' &&
     typeof obj.plural === 'string' &&
     typeof obj.slug === 'string',
-    // TODO add in bit.ly link to docs
-    'Invalid content type object, see documentation.'
+    'Invalid content type object. ' +
+    `See documentation ${kasiaGitHubUrl}.`
   ),
   isValidContentType: (contentTypeOptions, name, componentName) => invariant(
     typeof contentTypeOptions !== 'undefined',
     'Content type "%s" is not recognised. ' +
     'Pass built-ins from `kasia/types`, e.g. Post. ' +
     'Pass the `name` of custom content types, e.g. "Book". ' +
-    'See the %s component.',
+    'Check the %s component.',
     name,
     componentName
   ),
@@ -59,5 +60,21 @@ export default {
     'The component "%s" is already wrapped by Kasia.',
     targetName
   ),
-  noWPInstance: (WP) => invariant(!WP, 'A WP instance is already set.')
+  noWPInstance: (WP) => invariant(
+    !WP,
+    'setWP called multiple times.'
+  ),
+  isIdentifierValue: (id) => invariant(
+    typeof id === 'string' || typeof id === 'number',
+    'The final identifier is invalid. ' +
+    'Expecting a string or number, got %s.',
+    typeof id
+  ),
+  hasWordpressObjectInStore: (store) => invariant(
+    Boolean(store.wordpress),
+    'No `wordpress` object on the store.' +
+    'Is your store configured correctly?' +
+    `See documentation ${kasiaGitHubUrl}`,
+    typeof store.wordpress
+  )
 }

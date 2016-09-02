@@ -1,7 +1,7 @@
 export const RequestTypes = {
   // Requesting a single entity from the WP API
   Post: 'Post',
-  // Requesting a arbitrary query against WP API
+  // Requesting arbitrary data from the WP API
   Query: 'Query'
 }
 
@@ -15,3 +15,6 @@ export const Request = {
   // Record the failure of a request on the store
   Fail: 'kasia/REQUEST_FAILED'
 }
+
+// Shift a query ID from the prepared query ID array
+export const ShiftPreparedQueryId = 'kasia/SHIFT_PREPARED_QUERY_ID'

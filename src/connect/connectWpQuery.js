@@ -3,16 +3,12 @@ import { connect } from 'react-redux'
 import isEqualWith from 'lodash.isequalwith'
 import merge from 'lodash.merge'
 
-import idGen from './idGen'
+import { fetch } from '../sagas'
+import { createQueryRequest, shiftPreparedQueryId } from '../actions'
 import invariants from '../invariants'
-import { createQueryRequest } from '../actions'
-import { makeWpQueryPreloaderFn } from './preloaders'
+import isNode from '../isNode'
 
-/**
- * IDs of queries created through the preloader.
- * @type {Array<Number>}
- */
-const queryIds = []
+const __IS_NODE__ = isNode()
 
 /**
  * Filter `entities` to contain only those whose ID is in `identifiers`.
@@ -20,7 +16,7 @@ const queryIds = []
  * @param {Array} identifiers IDs of the entities to pick
  * @returns {Object}
  */
-function pickEntities (entities, identifiers) {
+function findEntities (entities, identifiers) {
   identifiers = identifiers.map(String)
 
   return Object.keys(entities).reduce((reduced, entityTypeName) => {
@@ -68,18 +64,18 @@ function defaultPropsComparator (thisProps, nextProps) {
  *
  * Example, get all posts by an author:
  * ```js
- * connectWpQuery((wp) => wp.posts().embed().author('David Bowie').get())
+ * connectWpQuery((wpapi) => wpapi.posts().embed().author('David Bowie').get())
  * ```
  *
  * Example, get all pages:
  * ```js
- * connectWpQuery((wp) => wp.pages().embed().get())
+ * connectWpQuery((wpapi) => wpapi.pages().embed().get())
  * ```
  *
  * Example, get custom content type by slug (content type registered at init):
  * ```js
- * connectWpQuery((wp) => {
- *   return wp.news()
+ * connectWpQuery((wpapi) => {
+ *   return wpapi.news()
  *     .slug('gullible-removed-from-the-dictionary')
  *     .embed()
  *     .get()
@@ -88,9 +84,10 @@ function defaultPropsComparator (thisProps, nextProps) {
  *
  * Example, with custom props comparator:
  * ```js
- * connectWpQuery((wp) => wp.pages().embed().get(), (thisProps, nextProps) => {
- *   return thisProps.identifier() !== nextProps.identifier()
- * })
+ * connectWpQuery(
+ *   (wpapi, props) => wpapi.page().id(props.identifier()).embed().get(),
+ *   (thisProps, nextProps) => thisProps.identifier() !== nextProps.identifier()
+ * )
  * ```
  *
  * @params {Function} queryFn Function that returns a wpapi query
@@ -106,29 +103,66 @@ export default function connectWpQuery (queryFn, propsComparatorFn = defaultProp
 
     invariants.isNotWrapped(target, targetName)
 
-    const mapStateToProps = (state) => ({
-      wordpress: state.wordpress
-    })
+    const mapStateToProps = (state) => {
+      invariants.hasWordpressObjectInStore(state)
+      return { wordpress: state.wordpress }
+    }
 
     class KasiaIntermediateComponent extends Component {
       static __kasia = true
 
-      static makePreloader = () => {
-        const id = idGen()
-        queryIds.push(id)
-        return makeWpQueryPreloaderFn(id, queryFn)
+      static makePreloader = (renderProps) => {
+        const realQueryFn = (wpapi) => queryFn(wpapi, renderProps)
+        const action = createQueryRequest({ queryFn: realQueryFn, prepared: true })
+        return [fetch, action]
       }
 
       render () {
-        const props = merge({}, this.props, this.reconcileKasiaData())
+        const props = merge({}, this.props, this.reconcileWpData())
         return React.createElement(target, props)
+      }
+
+      componentWillMount () {
+        const { _preparedQueryIds } = this.props.wordpress
+
+        if (_preparedQueryIds.length) {
+          this.queryId = _preparedQueryIds[0]
+
+          if (!__IS_NODE__) {
+            this.props.dispatch(shiftPreparedQueryId())
+          }
+        } else {
+          this.queryId = null
+          this.dispatchRequestAction(this.props)
+        }
+      }
+
+      componentWillReceiveProps (nextProps) {
+        // Nullify `wordpress` on props objects so that they aren't compared otherwise
+        // the addition of a new query object each time will cause infinite dispatches
+        const thisProps = merge({}, this.props, { wordpress: null })
+        const _nextProps = merge({}, nextProps, { wordpress: null })
+
+        // Make a request for new data if the current props and next props are different
+        if (!propsComparatorFn(thisProps, _nextProps)) {
+          this.dispatchRequestAction(_nextProps)
+        }
+      }
+
+      // Dispatch a new data request action to fetch data according to the props
+      dispatchRequestAction (props) {
+        const wrappedQueryFn = (wpapi) => queryFn(wpapi, props)
+        const action = createQueryRequest({ queryFn: wrappedQueryFn })
+
+        this.queryId = props.wordpress._nextQueryId
+        this.props.dispatch(action)
       }
 
       /**
        * Build an object of properties containing entity and query data maintained by Kasia.
        * @returns {Object} Props object
        */
-      reconcileKasiaData () {
+      reconcileWpData () {
         const { queries, entities: _entities } = this.props.wordpress
         const query = queries[this.queryId]
 
@@ -141,34 +175,9 @@ export default function connectWpQuery (queryFn, propsComparatorFn = defaultProp
           }
         }
 
-        const entities = pickEntities(_entities, query.entities)
+        const entities = findEntities(_entities, query.entities)
 
         return { kasia: { query, entities } }
-      }
-
-      // Dispatch a new data request action to fetch data according to the props
-      dispatch (props) {
-        const wrappedQueryFn = (wpapi) => queryFn(wpapi, props)
-        const action = createQueryRequest(this.queryId, { queryFn: wrappedQueryFn })
-        this.props.dispatch(action)
-      }
-
-      componentWillMount () {
-        this.queryId = queryIds.length ? queryIds.shift() : idGen()
-        this.dispatch(this.props)
-      }
-
-      componentWillReceiveProps (_nextProps) {
-        // Nullify `wordpress` on props objects so that they aren't compared otherwise
-        // the addition of a new query object each time will cause infinite dispatches
-        const thisProps = merge({}, this.props, { wordpress: null })
-        const nextProps = merge({}, _nextProps, { wordpress: null })
-
-        // Make a request for new data if the current props and next props are different
-        if (!propsComparatorFn(thisProps, nextProps)) {
-          this.queryId = queryIds.length ? queryIds.shift() : idGen()
-          this.dispatch(nextProps)
-        }
       }
     }
 

@@ -80,13 +80,15 @@ export function resolveQueryFn (action) {
  * @param {Object} action Action object
  */
 export function * fetch (action) {
-  const { id } = action
+  const prepared = action.prepared
+
+  const id = yield effects.select((state) => state.wordpress._nextQueryId)
 
   try {
-    const result = yield effects.call(resolveQueryFn(action), getWP())
-    yield effects.put(completeRequest(id, result))
+    const data = yield effects.call(resolveQueryFn(action), getWP())
+    yield effects.put(completeRequest({ id, data, prepared }))
   } catch (err) {
-    yield effects.put(failRequest(id, err))
+    yield effects.put(failRequest({ id, err, prepared }))
   }
 }
 
