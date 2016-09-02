@@ -1,13 +1,21 @@
-# kasia
+<center>
+    <img src="https://github.com/sdgluck/werd/blob/master/assets/tophat.png" />
+</center>
 
-> A React Redux toolset for the WordPress API
+<p><h1 align="center">kasia</h1></p>
 
-Made with ❤ at [@outlandish](http://www.twitter.com/outlandish)
+<p align="center">A React Redux toolset for the WordPress API</p>
 
-<a href="http://badge.fury.io/js/kasia"><img alt="npm version" src="https://badge.fury.io/js/kasia.svg"></a>
-[![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg)](http://standardjs.com/)
-<a href="https://travis-ci.org/outlandishideas/kasia"><img alt="travis ci build" src="https://travis-ci.org/outlandishideas/kasia.svg""></a>
-<a href="https://coveralls.io/repos/github/outlandishideas/kasia/badge.svg?branch=master"><img alt="coverage" src="https://coveralls.io/repos/github/outlandishideas/kasia/badge.svg?branch=master"></a>
+<p align="center">Made with ❤ at <a href="http://www.twitter.com/outlandish">@outlandish</a></p>
+
+<center>
+    <a href="http://badge.fury.io/js/kasia"><img alt="npm version" src="https://badge.fury.io/js/kasia.svg"></a>
+    [![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg)](http://standardjs.com/)
+    <a href="https://travis-ci.org/outlandishideas/kasia"><img alt="travis ci build" src="https://travis-ci.org/outlandishideas/kasia.svg""></a>
+    <a href="https://coveralls.io/repos/github/outlandishideas/kasia/badge.svg?branch=master"><img alt="coverage" src="https://coveralls.io/repos/github/outlandishideas/kasia/badge.svg?branch=master"></a>
+</center>
+
+<hr/>
 
 Get data from WordPress and into components with ease...
 
