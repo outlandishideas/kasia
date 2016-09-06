@@ -72,8 +72,8 @@ export default {
   ),
   hasWordpressObjectInStore: (store) => invariant(
     Boolean(store.wordpress),
-    'No `wordpress` object on the store.' +
-    'Is your store configured correctly?' +
+    'No `wordpress` object on the store. ' +
+    'Is your store configured correctly? ' +
     `See documentation ${kasiaGitHubUrl}`,
     typeof store.wordpress
   )

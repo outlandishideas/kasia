@@ -1,4 +1,9 @@
-export const nextPreparedQueryId = (function () {
-  let id = 0
-  return () => id++
-})()
+let id = 0
+
+export function resetPreparedQueryId () {
+  id = 0
+}
+
+export function nextPreparedQueryId () {
+  return id++
+}
