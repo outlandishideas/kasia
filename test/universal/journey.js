@@ -95,7 +95,7 @@ describe('Universal journey', function () {
 
   it('that when run updates number of prepared queries', (done) => {
     return completeRequest(id, postJson1, true).then(() => {
-      expect(store.getState().wordpress._numPreparedQueries).toEqual(1)
+      expect(store.getState().wordpress.__kasia__.numPreparedQueries).toEqual(1)
       done()
     })
   })
@@ -106,7 +106,7 @@ describe('Universal journey', function () {
   })
 
   it('should not subtract from remaining number of prepared queries', () => {
-    expect(store.getState().wordpress._numPreparedQueries).toEqual(1)
+    expect(store.getState().wordpress.__kasia__.numPreparedQueries).toEqual(1)
   })
 
   // Client
@@ -123,7 +123,7 @@ describe('Universal journey', function () {
   })
 
   it('should subtract from the remaining number of prepared queries', () => {
-    expect(store.getState().wordpress._numPreparedQueries).toEqual(0)
+    expect(store.getState().wordpress.__kasia__.numPreparedQueries).toEqual(0)
   })
 
   it('should make a non-prepared query on props change', (done) => {
@@ -132,7 +132,7 @@ describe('Universal journey', function () {
 
       rendered.setProps({ params: { id: 1 } })
 
-      expect(state._numPreparedQueries).toEqual(0)
+      expect(state.__kasia__.numPreparedQueries).toEqual(0)
       expect(Object.keys(state.queries)).toContain(String(id))
 
       done()

@@ -89,13 +89,13 @@ export default function connectWpPost (contentType, id) {
       }
 
       componentWillMount () {
-        const { _numPreparedQueries } = this.props.wordpress
+        const { numPreparedQueries } = this.props.wordpress.__kasia__
 
         const _isNode = typeof this.props.__IS_NODE__ !== 'undefined'
           ? this.props.__IS_NODE__
           : __IS_NODE__
 
-        if (_numPreparedQueries) {
+        if (numPreparedQueries) {
           this.queryId = typeof this.props.__QUERY_ID__ !== 'undefined'
             ? this.props.__QUERY_ID__
             : nextPreparedQueryId()
@@ -132,7 +132,7 @@ export default function connectWpPost (contentType, id) {
         const identifier = getIdentifier(props)
         const action = createPostRequest({ contentType, identifier })
 
-        this.queryId = props.wordpress._nextQueryId
+        this.queryId = props.wordpress.__kasia__.nextQueryId
         this.props.dispatch(action)
       }
 

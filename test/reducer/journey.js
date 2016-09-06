@@ -27,8 +27,10 @@ function setup () {
 
   const initialState = {
     wordpress: {
-      _nextQueryId: 0,
-      _numPreparedQueries: 0,
+      __kasia__: {
+        nextQueryId: 0,
+        numPreparedQueries: 0
+      },
       queries: {},
       entities: {}
     }

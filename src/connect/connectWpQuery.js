@@ -124,13 +124,13 @@ export default function connectWpQuery (queryFn, propsComparatorFn = defaultProp
       }
 
       componentWillMount () {
-        const { _numPreparedQueries } = this.props.wordpress
+        const { numPreparedQueries } = this.props.wordpress.__kasia__
 
         const _isNode = typeof this.props.__IS_NODE__ !== 'undefined'
           ? this.props.__IS_NODE__
           : __IS_NODE__
 
-        if (_numPreparedQueries.length) {
+        if (numPreparedQueries) {
           this.queryId = nextPreparedQueryId()
 
           if (!_isNode) {
@@ -158,7 +158,7 @@ export default function connectWpQuery (queryFn, propsComparatorFn = defaultProp
         const wrappedQueryFn = (wpapi) => queryFn(wpapi, props)
         const action = createQueryRequest({ queryFn: wrappedQueryFn })
 
-        this.queryId = props.wordpress._nextQueryId
+        this.queryId = props.wordpress.__kasia__.nextQueryId
         this.props.dispatch(action)
       }
 

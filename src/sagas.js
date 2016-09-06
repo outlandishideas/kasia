@@ -82,7 +82,7 @@ export function resolveQueryFn (action) {
 export function * fetch (action) {
   const prepared = action.prepared
 
-  const id = yield effects.select((state) => state.wordpress._nextQueryId)
+  const id = yield effects.select((state) => state.wordpress.__kasia__.nextQueryId)
 
   try {
     const data = yield effects.call(resolveQueryFn(action), getWP())

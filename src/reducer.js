@@ -6,15 +6,17 @@ import { ContentTypesWithoutId, deriveContentType } from './contentTypes'
 import normalise from './normalise'
 
 function updateStateWithNextQueryId (state, action, stateUpdateFn) {
-  const queryId = state._nextQueryId
+  const queryId = state.__kasia__.nextQueryId
 
-  let _numPreparedQueries = action.prepared
-    ? state._numPreparedQueries + 1
-    : state._numPreparedQueries
+  let numPreparedQueries = action.prepared
+    ? state.__kasia__.numPreparedQueries + 1
+    : state.__kasia__.numPreparedQueries
 
   return merge({}, state, stateUpdateFn(queryId), {
-    _numPreparedQueries,
-    _nextQueryId: queryId + 1
+    __kasia__: {
+      numPreparedQueries,
+      nextQueryId: queryId + 1
+    }
   })
 }
 
@@ -75,15 +77,19 @@ export const failReducer = (state, action) => {
 // Remove the first element of the prepared query IDs array
 export const subtractPreparedQueries = (state) => {
   return merge({}, state, {
-    _numPreparedQueries: state._numPreparedQueries - 1
+    __kasia__: {
+      numPreparedQueries: state.__kasia__.numPreparedQueries - 1
+    }
   })
 }
 
 export const initialState = {
-  // The next query identifier
-  _nextQueryId: 0,
-  // Query identifiers that were created by queries made on the server
-  _numPreparedQueries: 0,
+  __kasia__: {
+    // The next query identifier
+    nextQueryId: 0,
+    // Query identifiers that were created by queries made on the server
+    numPreparedQueries: 0
+  },
   // Record query requests to the WP-API here
   queries: {},
   // Entities are normalised and stored here
