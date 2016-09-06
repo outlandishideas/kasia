@@ -37,7 +37,10 @@ const { kasiaReducer, kasiaSagas } = Kasia({
 ## Action creators
 
 ```js
-import actions from 'kasia-plugin-wp-api-menus/actions'
+import { 
+  fetchMenus, fetchMenu, 
+  fetchThemeLocations, fetchThemeLocation 
+} from 'kasia-plugin-wp-api-menus'
 ```
 
 Dispatch the returned action objects with `store.dispatch(<action>)`.

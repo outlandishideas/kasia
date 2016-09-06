@@ -3,6 +3,8 @@ import merge from 'lodash.merge'
 
 import ActionTypes from './constants/ActionTypes'
 
+export * from './actions'
+
 // The default wp-api-menus namespace in the WP-API.
 const defaultRoute = 'wp-api-menus/v2'
 
@@ -49,7 +51,7 @@ function fetch (WP, action) {
     case ActionTypes.REQUEST_LOCATION:
       return WP.locations().id(action.id).get()
     case ActionTypes.REQUEST_LOCATIONS:
-      return ActionTypes.locations().get()
+      return WP.locations().get()
     default:
       throw new Error(`Unknown request type "${action.request}".`)
   }
@@ -71,24 +73,24 @@ function makeSagas (WP) {
 }
 
 /**
+ * Orchestrate a request for wp-api-menus data.
+ * @param {Object} WP Instance of `wpapi`
+ * @param {Object} action Action object
+ */
+function * fetchResource (WP, action) {
+  const { id, type } = action
+  const data = yield effects.call(fetch, WP, action)
+  yield effects.put({ type: ActionTypes.RECEIVE_DATA, request: type, data, id })
+}
+
+/**
  * Make a preloader function that can be used to request data on the server.
  * @param {Object} WP Instance of `wpapi`
  * @param {Object} action Action object
  * @returns {Function} Function that returns a collection of saga operation definitions
  */
 export function makePreloader (WP, action) {
-  return () => [[fetchResource, WP, action]]
-}
-
-/**
- * Orchestrate a request for wp-api-menus data.
- * @param {Object} WP Instance of `wpapi`
- * @param {Object} action Action object
- */
-export function * fetchResource (WP, action) {
-  const { id, type } = action
-  const data = yield effects.call(fetch, WP, action)
-  yield effects.put({ type: ActionTypes.RECEIVE_DATA, request: type, data, id })
+  return () => fetchResource(WP, action)
 }
 
 /**
