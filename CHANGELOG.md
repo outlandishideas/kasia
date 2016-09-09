@@ -1,5 +1,10 @@
 # Kasia Changelog
 
+- __v3.1.0__ - _09/09/16_
+
+    - Additional preloader saga creators for loading WP data into the store when server-side rendering: 
+    `makeQueryPreloaderSaga` and `makePostPreloaderSaga`.
+
 - __v3.0.0__ - _31/08/16_
 
     - [BREAKING] Fix bug in Universal Application solution that prevented components picking 

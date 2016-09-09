@@ -46,7 +46,7 @@ export default {
     'Content type "%s" is not recognised. ' +
     'Pass built-ins from `kasia/types`, e.g. Post. ' +
     'Pass the `name` of custom content types, e.g. "Book". ' +
-    'Check the %s component.',
+    'Check %s.',
     name,
     componentName
   ),

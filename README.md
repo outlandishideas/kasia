@@ -317,10 +317,12 @@ import {
 
 Utility methods to help you when building your application.
 
-At the moment it just exports a function `makePreloaderSaga`, see [Universal Applications](#universal-applications) for more details.
-
 ```js
-import { makePreloaderSaga } from 'kasia/util'
+import { 
+  makePreloaderSaga, 
+  makeQueryPreloaderSaga,
+  makePostPreloaderSaga
+} from 'kasia/util'
 ```
 
 ## The Shape of Things
@@ -404,61 +406,47 @@ A plugin should:
 }
 ```
 
-See [kasia-plugin-wp-api-menus]() for an example implementation of a Kasia plugin.
+### Available plugins:
 
-## Universal Applications 
+- [`kasia-plugin-wp-api-menus`](https://github.com/outlandishideas/kasia-plugin-wp-api-menus)
+- [`kasia=plugin-wp-api-all-terms`](https://github.com/outlandishideas/kasia-plugin-wp-api-menus)
 
-### `makePreloaderSaga(components, renderProps) : Generator`
+## Universal Applications
+
+### Utilities
+
+#### `util/makePreloaderSaga(components, renderProps[, resetPreparedQueryCounter]) : Generator`
 
 Create a single saga operation that will preload all data for any Kasia components in `components`.
 
 - __components__ {Array} Array of components
 - __renderProps__ {Object} Render props object derived from the matched route
+- [__resetPreparedQueryCounter__] {Boolean}  _(optional)_ Reset internal prepared query counter (default: `true`)
 
 Returns a saga operation.
 
-A somewhat contrived example:
+#### `util/makeQueryPreloaderSaga(queryFn, renderProps[, resetPreparedQueryCounter]) : Generator`
 
-```js
-import { match } from 'react-router'
-import { makePreloaderSaga } from 'kasia/util'
+Create a single saga operation that will preload data for an arbitrary query against the WP API.
 
-// Our application's react-router routes
-import routes from './routes'
+- __queryFn__ {Function} Query function that accepts `wpapi` as argument
+- __renderProps__ {Object} Render props object
+- [__resetPreparedQueryCounter__] {Boolean}  _(optional)_ Reset internal prepared query counter (default: `true`)
 
-// Configures the redux store with saga middleware
-// and enhances it with the `runSaga` method
-import store from './store'
+Returns a saga operation.
 
-// Takes the components and render props from matched route, and
-// the store state and produces the complete HTML as a string
-import renderToString from './render'
+#### `util/makePostPreloaderSaga(contentType, id[, resetPreparedQueryCounter]) : Generator`
 
-// Produce a static webpage and send to the client for the given `route`
-export function preload (res, route) { 
-  return match({ routes, location: route })
-    .then((error, redirectLocation, renderProps) => {
-      if (error) {
-        res.sendStatus(500)
-        return
-      }
-        
-      if (redirectLocation) {
-        res.redirect(302, redirectLocation.pathname + redirectLocation.search)
-        return
-      }
-        
-      const preloader = makePreloaderSaga(renderProps.components, renderProps)
-        
-      return store
-        .runSaga(preloader).done
-        .then(() => renderToString(components, renderProps, store.getState()))
-        .then((document) => res.send(document))
-    })
-}
-```
+Create a single saga operation that will preload data for a single post from the WP API.
 
-### `ConnectedComponent.makePreloader(renderProps) : Array<Array>`
+- __contentType__ {String} The content type of the item to fetch
+- __id__ {String|Number|Function} ID of the post or a function to derive from `renderProps`
+- __renderProps__ {Object} Render props object
+- [__resetPreparedQueryCounter__] {Boolean} _(optional)_ Reset internal prepared query counter (default: `true`)
+
+Returns a saga operation.
+
+#### `ConnectedComponent.makePreloader(renderProps) : Array<Array>`
 
 Connected components expose a static method `makePreloader` that produces an array of saga operations
 to facilitate the request for entity data on the server ("preloaders").
@@ -479,6 +467,73 @@ Elements:
 - `sagaGenerator` {Function} Must be called with the `action`
 
 - `action` {Object} An action object containing information for the saga to fetch data
+
+### Example
+
+A somewhat contrived example using the available `kasia/util` methods (see below).
+
+```js
+import { match } from 'react-router'
+
+import { 
+  makePreloaderSaga,
+  makeQueryPreloaderSaga
+} from 'kasia/util'
+
+// Our application's react-router routes
+import routes from './routes'
+
+// Configures the redux store with saga middleware
+// and enhances it with the `runSaga` method
+import store from './store'
+
+// Takes the components and render props from matched route, and
+// the store state and produces the complete HTML as a string
+import renderToString from './render'
+
+// Collection of query functions that request data via `wpapi`
+import { categoriesQuery } from './queries'
+
+// Run all `sagas` until their completion
+function runSagas (store, sagas) {
+  return sagas.reduce((promise, saga) => {
+    return promise.then(() => store.runSaga(saga).done)
+  }, Promise.resolve())
+}
+
+// Produce a static webpage and send to the client for the given `route`
+export function preload (res, route) { 
+  return match({ routes, location: route })
+    .then((error, redirectLocation, renderProps) => {
+      if (error) {
+        res.sendStatus(500)
+        return
+      }
+        
+      if (redirectLocation) {
+        res.redirect(302, redirectLocation.pathname + redirectLocation.search)
+        return
+      }
+
+      // IMPORTANT
+      //
+      // Only the first saga operation created by Kasia 
+      // should reset the prepared query counter.
+      //
+      // Each preloader after the first should pass 
+      // `false` as the last argument.
+
+      const preloaders = [
+        makePreloaderSaga(renderProps.components, renderProps),
+        makeQueryPreloaderSaga(categoriesQuery, renderProps, false)
+      ]
+
+      return runSagas(preloaders)
+        .then(() => renderToString(components, renderProps, store.getState()))
+        .then((document) => res.send(document))
+    })
+}
+```
 
 ## Contributing
 
