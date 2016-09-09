@@ -1,6 +1,6 @@
 # Kasia Plugin WP-API All Terms
 
-> Adds support for the WP-API all terms plugin to Kasia
+> Adds support for the [WP-API all terms plugin](https://wordpress.org/plugins/wp-rest-api-all-terms/) to Kasia
 
 Made with ❤ at [@outlandish](http://www.twitter.com/outlandish)
 
