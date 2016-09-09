@@ -62,6 +62,18 @@ Terms will be available at `store.wordpress.terms`, for example:
 }
 ```
 
+## Universal Applications
+
+```js
+import { makePreloader } from 'kasia-plugin-wp-api-all-terms'
+```
+
+### `makePreloader(WP)`
+
+- __WP__ {Object} WP API instance
+
+Returns a single saga generator.
+
 ## Contributing
 
 All pull requests and issues welcome!
