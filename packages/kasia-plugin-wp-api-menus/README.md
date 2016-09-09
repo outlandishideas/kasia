@@ -86,4 +86,4 @@ If you're not sure how to contribute, check out Kent C. Dodds'
 
 ## Author & License
 
-`kasia` was created by [Outlandish](https://twitter.com/outlandish) and is released under the MIT license.
+`kasia-plugin-wp-api-menus` was created by [Outlandish](https://twitter.com/outlandish) and is released under the MIT license.
