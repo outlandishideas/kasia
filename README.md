@@ -409,7 +409,7 @@ A plugin should:
 ### Available plugins:
 
 - [`kasia-plugin-wp-api-menus`](https://github.com/outlandishideas/kasia-plugin-wp-api-menus)
-- [`kasia=plugin-wp-api-all-terms`](https://github.com/outlandishideas/kasia-plugin-wp-api-menus)
+- [`kasia=plugin-wp-api-all-terms`](https://github.com/outlandishideas/kasia-plugin-wp-api-all-terms)
 
 ## Universal Applications
 
