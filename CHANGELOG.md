@@ -1,5 +1,10 @@
 # Kasia Changelog
 
+- __v3.1.1__ - _19/09/16_
+
+    - Fix bug where `wordpress` object removed from props during comparison to determine if 
+    a request for new data should be made in `connectWpQuery`.
+
 - __v3.1.0__ - _09/09/16_
 
     - Additional preloader saga creators for loading WP data into the store when server-side rendering: 

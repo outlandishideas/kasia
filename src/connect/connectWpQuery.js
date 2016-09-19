@@ -45,14 +45,15 @@ function isPrimitive (value) {
 }
 
 /**
- * Only inspect primitives by default.
- * Returning `undefined` makes isEqualWith fallback to built-in comparator.
+ * Determines if new request for data should be made when props are received. Only
+ * inspect primitives by default. Returning `undefined` makes isEqualWith fallback
+ * to built-in comparator.
  * @param {Object} thisProps Current props object
  * @param {Object} nextProps Next props object
  * @returns {Boolean}
  */
 function defaultPropsComparator (thisProps, nextProps) {
-  return isEqualWith(thisProps, nextProps, (value) => {
+  return !isEqualWith(thisProps, nextProps, (value) => {
     return isPrimitive(value) ? undefined : true
   })
 }
@@ -148,8 +149,8 @@ export default function connectWpQuery (queryFn, propsComparatorFn = defaultProp
         const _nextProps = merge({}, nextProps, { wordpress: null })
 
         // Make a request for new data if the current props and next props are different
-        if (!propsComparatorFn(thisProps, _nextProps)) {
-          this.dispatchRequestAction(_nextProps)
+        if (propsComparatorFn(thisProps, _nextProps)) {
+          this.dispatchRequestAction(nextProps)
         }
       }
 
