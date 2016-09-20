@@ -1,5 +1,9 @@
 # Kasia Changelog
 
+- __v3.1.2__ - _20/09/16_
+
+    - Pass state as third argument to `connectWpQuery` query function.
+
 - __v3.1.1__ - _19/09/16_
 
     - Fix bug where `wordpress` object removed from props during comparison to determine if 

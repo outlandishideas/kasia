@@ -179,7 +179,7 @@ export default connectWpPost(Page, (props) => props.params.slug)(Post)
 
 Connect a component to the result of an arbitrary WP-API query.
 
-- __queryFn__ {Function} Function that accepts args `wpapi` and `props` and should return a WP-API query
+- __queryFn__ {Function} Function that accepts args `wpapi`, `props`, `state` and should return a WP-API query
 - __propsComparatorFn__ {Function} _(optional)_ Function that determines if new data should be requested by inspecting props
 
 Returns a connected component.
