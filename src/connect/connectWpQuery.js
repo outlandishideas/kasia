@@ -107,14 +107,14 @@ export default function connectWpQuery (queryFn, propsComparatorFn = defaultProp
 
     const mapStateToProps = (state) => {
       invariants.hasWordpressObjectInStore(state)
-      return { wordpress: state.wordpress }
+      return { state, wordpress: state.wordpress }
     }
 
     class KasiaIntermediateComponent extends Component {
       static __kasia = true
 
-      static makePreloader = (renderProps) => {
-        const realQueryFn = (wpapi) => queryFn(wpapi, renderProps)
+      static makePreloader = (renderProps, state) => {
+        const realQueryFn = (wpapi) => queryFn(wpapi, renderProps, state)
         const action = createQueryRequest({ queryFn: realQueryFn, prepared: true })
         return [fetch, action]
       }
@@ -156,7 +156,7 @@ export default function connectWpQuery (queryFn, propsComparatorFn = defaultProp
 
       // Dispatch a new data request action to fetch data according to the props
       dispatchRequestAction (props) {
-        const wrappedQueryFn = (wpapi) => queryFn(wpapi, props)
+        const wrappedQueryFn = (wpapi) => queryFn(wpapi, props, props.state)
         const action = createQueryRequest({ queryFn: wrappedQueryFn })
 
         this.queryId = props.wordpress.__kasia__.nextQueryId
