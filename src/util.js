@@ -24,10 +24,16 @@ function waitAll (sagas) {
  * Resets the libraries internal prepared query counter to zero.
  * @param {Array} components Array of components
  * @param {Object} renderProps Render props object
+ * @param {Object} [state] State object
  * @param {Boolean} [resetPreparedQueryCounter] Reset the prepared query counter
  * @returns {Function} A single saga operation
  */
-export function makePreloaderSaga (components, renderProps, resetPreparedQueryCounter = true) {
+export function makePreloaderSaga (
+  components,
+  renderProps,
+  state = null,
+  resetPreparedQueryCounter = true
+) {
   if (!Array.isArray(components) || !components.length) {
     throw new Error('Expecting components to be array with at least one element.')
   } else if (typeof renderProps !== 'object') {
@@ -40,7 +46,7 @@ export function makePreloaderSaga (components, renderProps, resetPreparedQueryCo
 
   const preloaders = components
     .filter(component => component && typeof component.makePreloader === 'function')
-    .map(component => component.makePreloader(renderProps))
+    .map(component => component.makePreloader(renderProps, state))
 
   return waitAll(preloaders)
 }
@@ -49,10 +55,16 @@ export function makePreloaderSaga (components, renderProps, resetPreparedQueryCo
  * Make a preloader saga for an arbitrary WP API query.
  * @param {Function} queryFn Query function that accepts `wpapi` API
  * @param {Object} renderProps Render props object
+ * @param {Boolean} [state] State object
  * @param {Boolean} [resetPreparedQueryCounter] Reset the prepared query counter
  * @returns {Function} A single saga operation
  */
-export function makeQueryPreloaderSaga (queryFn, renderProps, resetPreparedQueryCounter = true) {
+export function makeQueryPreloaderSaga (
+  queryFn,
+  renderProps,
+  state = null,
+  resetPreparedQueryCounter = true
+) {
   if (typeof queryFn !== 'function') {
     throw new Error('Expecting queryFn to be a function.')
   }
@@ -61,7 +73,7 @@ export function makeQueryPreloaderSaga (queryFn, renderProps, resetPreparedQuery
     resetPreparedQueryId()
   }
 
-  const realQueryFn = (wpapi) => queryFn(wpapi, renderProps)
+  const realQueryFn = (wpapi) => queryFn(wpapi, renderProps, state)
   const action = createQueryRequest({ queryFn: realQueryFn, prepared: true })
 
   return function * () {
@@ -77,7 +89,12 @@ export function makeQueryPreloaderSaga (queryFn, renderProps, resetPreparedQuery
  * @param {Boolean} [resetPreparedQueryCounter] Reset the prepared query counter
  * @returns {Function} A single saga operation
  */
-export function makePostPreloaderSaga (contentType, id, renderProps, resetPreparedQueryCounter = true) {
+export function makePostPreloaderSaga (
+  contentType,
+  id,
+  renderProps,
+  resetPreparedQueryCounter = true
+) {
   if (typeof contentType !== 'string') {
     throw new Error('Expecting contentType to be a string.')
   } else if (typeof id !== 'string' && typeof id !== 'number' && typeof id !== 'function') {

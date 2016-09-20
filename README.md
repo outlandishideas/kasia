@@ -435,18 +435,19 @@ Create a single saga operation that will preload data for an arbitrary query aga
 
 Returns a saga operation.
 
-#### `util/makePostPreloaderSaga(contentType, id[, resetPreparedQueryCounter]) : Generator`
+#### `util/makePostPreloaderSaga(contentType, id[, state, resetPreparedQueryCounter]) : Generator`
 
 Create a single saga operation that will preload data for a single post from the WP API.
 
 - __contentType__ {String} The content type of the item to fetch
 - __id__ {String|Number|Function} ID of the post or a function to derive from `renderProps`
 - __renderProps__ {Object} Render props object
+- [__state__] {Object} _(optional)_ State object (default: `null`)
 - [__resetPreparedQueryCounter__] {Boolean} _(optional)_ Reset internal prepared query counter (default: `true`)
 
 Returns a saga operation.
 
-#### `ConnectedComponent.makePreloader(renderProps) : Array<Array>`
+#### `ConnectedComponent.makePreloader(renderProps[, state]) : Array<Array>`
 
 Connected components expose a static method `makePreloader` that produces an array of saga operations
 to facilitate the request for entity data on the server ("preloaders").
@@ -454,6 +455,7 @@ to facilitate the request for entity data on the server ("preloaders").
 Create an array of preloader operations.
 
 - __renderProps__ {Object} Render props object derived from the matched route 
+- [__state__] {Object} _(optional)_ State object (default: `null`) 
 
 Returns an array of saga operations in the form:
 
