@@ -61,19 +61,16 @@ function setup () {
   }
 }
 
-function makeProps (store, id) {
-  return {
-    store,
-    params: { id }
-  }
+function makeProps (id) {
+  return { params: { id } }
 }
 
 describe('connectWpPost', () => {
   describe('with built-in content type', () => {
     const store = setup()
     const dispatch = store.dispatch
-    const props = makeProps(store, postJson.id)
-    const rendered = mount(<BuiltInContentType {...props} />)
+    const props = makeProps(postJson.id)
+    const rendered = mount(<BuiltInContentType {...props} />, { context: { store } })
 
     it('should wrap the component', () => {
       expect(BuiltInContentType.__kasia).toBe(true)
@@ -90,10 +87,10 @@ describe('connectWpPost', () => {
     })
 
     it('should update to new entity with changed props', () => {
-      const nextProps = makeProps(store, postJson.id + 1)
+      const nextProps = makeProps(postJson.id + 1)
+      const rendered = mount(<BuiltInContentType {...props} />, { context: { store } })
 
       rendered.setProps(nextProps)
-      rendered.update()
 
       expect(rendered.html()).toEqual('<div>new title</div>')
     })
@@ -101,8 +98,8 @@ describe('connectWpPost', () => {
 
   describe('with custom content type', () => {
     const store = setup()
-    const props = makeProps(store, bookJson.id)
-    const rendered = mount(<CustomContentType {...props} />)
+    const props = makeProps(bookJson.id)
+    const rendered = mount(<CustomContentType {...props} />, { context: { store } })
 
     it('should dispatch REQUEST_CREATE', () => {
       const action = store.dispatch.mock.calls[0][0]
@@ -117,11 +114,11 @@ describe('connectWpPost', () => {
 
   describe('with bad content type', () => {
     const store = setup()
-    const props = makeProps(store, postJson.id)
+    const props = makeProps(postJson.id)
 
     it('should throw with bad content type', () => {
       expect(() => {
-        mount(<BadContentTypeComponent {...props} />)
+        mount(<BadContentTypeComponent {...props} />, { context: { store } })
       }).toThrowError(/is not recognised/)
     })
   })

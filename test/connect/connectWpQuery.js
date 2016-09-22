@@ -63,8 +63,8 @@ function expectRequestCreateAction (props, actionIndex = 0) {
 
 describe('connectWpQuery', () => {
   describe('with primitive props', () => {
-    const { props } = setup(bookJson.id)
-    const rendered = mount(<CustomQuery {...props} />)
+    const { store, props } = setup(bookJson.id)
+    const rendered = mount(<CustomQuery {...props} />, { context: { store } })
 
     it('should wrap the component', () => {
       expect(CustomQuery.__kasia).toBe(true)
@@ -84,7 +84,7 @@ describe('connectWpQuery', () => {
 
     props.fn = () => {}
 
-    const rendered = mount(<CustomQuery {...props} />)
+    const rendered = mount(<CustomQuery {...props} />, { context: { store } })
 
     it('should dispatch REQUEST_CREATE', () => {
       expectRequestCreateAction(props)
@@ -102,7 +102,7 @@ describe('connectWpQuery', () => {
 
     props.fn = () => {}
 
-    const rendered = mount(<CustomPropsComparator {...props} />)
+    const rendered = mount(<CustomPropsComparator {...props} />, { context: { store } })
 
     it('should dispatch REQUEST_CREATE', () => {
       expectRequestCreateAction(props)

@@ -101,7 +101,7 @@ describe('Universal journey', function () {
   })
 
   it('should render the prepared query data on server', () => {
-    rendered = mount(<BuiltInContentType store={store} params={{ id: postJson1.id }} />)
+    rendered = mount(<BuiltInContentType params={{ id: postJson1.id }} />, { context: { store } })
     expect(rendered.html()).toEqual(`<div>${postJson1.title}</div>`)
   })
 
@@ -113,12 +113,9 @@ describe('Universal journey', function () {
 
   it('should render the prepared query data on client', () => {
     rendered = mount(
-      <BuiltInContentType
-        store={store} params={{ id: postJson1.id }}
-        __QUERY_ID__={0} __IS_NODE__={false}
-      />
+      <BuiltInContentType params={{ id: postJson1.id }} __QUERY_ID__={0} __IS_NODE__={false} />,
+      { context: { store } }
     )
-
     expect(rendered.html()).toEqual(`<div>${postJson1.title}</div>`)
   })
 

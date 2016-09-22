@@ -1,5 +1,12 @@
 # Kasia Changelog
 
+- __v3.1.5__ - _22/09/16_
+
+    - Replace use of redux's `connect` decorator with access to the store via `context`.
+    - Quick fix for failed queries sneaking through to data reconciliation stage in decorators.
+    TODO: implement more complete query error-handling solution.
+    ([#29](https://github.com/outlandishideas/kasia/issues/29))
+
 - __v3.1.2__ - _20/09/16_
 
     - Pass state as third argument to `connectWpQuery` query function.

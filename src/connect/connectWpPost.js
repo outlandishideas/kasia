@@ -1,5 +1,4 @@
 import React, { Component } from 'react'
-import { connect } from 'react-redux'
 import merge from 'lodash.merge'
 
 import { fetch } from '../sagas'
@@ -67,13 +66,12 @@ export default function connectWpPost (contentType, id) {
     invariants.isString('contentType', contentType)
     invariants.isIdentifierArg(id)
 
-    const mapStateToProps = (state) => {
-      invariants.hasWordpressObjectInStore(state)
-      return { wordpress: state.wordpress }
-    }
-
-    class KasiaIntermediateComponent extends Component {
+    return class KasiaIntermediateComponent extends Component {
       static __kasia = true
+
+      static contextTypes = {
+        store: React.PropTypes.object.isRequired
+      }
 
       static makePreloader = (renderProps) => {
         invariants.isValidContentType(getContentType(contentType), contentType, targetName)
@@ -89,9 +87,8 @@ export default function connectWpPost (contentType, id) {
       }
 
       componentWillMount () {
-        const { numPreparedQueries } = this.props.wordpress.__kasia__
-
-        const _isNode = typeof this.props.__IS_NODE__ !== 'undefined'
+        const { numPreparedQueries } = this.context.store.getState().wordpress.__kasia__
+        const isNode = typeof this.props.__IS_NODE__ !== 'undefined'
           ? this.props.__IS_NODE__
           : __IS_NODE__
 
@@ -100,8 +97,8 @@ export default function connectWpPost (contentType, id) {
             ? this.props.__QUERY_ID__
             : nextPreparedQueryId()
 
-          if (!_isNode) {
-            this.props.dispatch(subtractPreparedQueries())
+          if (!isNode) {
+            this.context.store.dispatch(subtractPreparedQueries())
           }
         } else {
           this.dispatchRequestAction(this.props)
@@ -132,8 +129,8 @@ export default function connectWpPost (contentType, id) {
         const identifier = getIdentifier(props)
         const action = createPostRequest({ contentType, identifier })
 
-        this.queryId = props.wordpress.__kasia__.nextQueryId
-        this.props.dispatch(action)
+        this.queryId = this.context.store.getState().wordpress.__kasia__.nextQueryId
+        this.context.store.dispatch(action)
       }
 
       /**
@@ -142,7 +139,7 @@ export default function connectWpPost (contentType, id) {
        * @returns {Object} Props object
        */
       reconcileWpData (props) {
-        const { queries } = props.wordpress
+        const { queries } = this.context.store.getState().wordpress
         const { plural, name } = getContentType(contentType)
         const query = queries[this.queryId]
 
@@ -155,7 +152,7 @@ export default function connectWpPost (contentType, id) {
           }
         }
 
-        const entityCollection = props.wordpress.entities[plural] || {}
+        const entityCollection = this.context.store.getState().wordpress.entities[plural] || {}
         const entityId = getIdentifier(props)
 
         return {
@@ -166,7 +163,5 @@ export default function connectWpPost (contentType, id) {
         }
       }
     }
-
-    return connect(mapStateToProps)(KasiaIntermediateComponent)
   }
 }

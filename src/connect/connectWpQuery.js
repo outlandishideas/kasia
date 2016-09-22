@@ -1,5 +1,4 @@
 import React, { Component } from 'react'
-import { connect } from 'react-redux'
 import isEqualWith from 'lodash.isequalwith'
 import merge from 'lodash.merge'
 
@@ -105,13 +104,12 @@ export default function connectWpQuery (queryFn, propsComparatorFn = defaultProp
 
     invariants.isNotWrapped(target, targetName)
 
-    const mapStateToProps = (state) => {
-      invariants.hasWordpressObjectInStore(state)
-      return { state, wordpress: state.wordpress }
-    }
-
-    class KasiaIntermediateComponent extends Component {
+    return class KasiaIntermediateComponent extends Component {
       static __kasia = true
+
+      static contextTypes = {
+        store: React.PropTypes.object.isRequired
+      }
 
       static makePreloader = (renderProps, state) => {
         const realQueryFn = (wpapi) => queryFn(wpapi, renderProps, state)
@@ -125,17 +123,16 @@ export default function connectWpQuery (queryFn, propsComparatorFn = defaultProp
       }
 
       componentWillMount () {
-        const { numPreparedQueries } = this.props.wordpress.__kasia__
-
-        const _isNode = typeof this.props.__IS_NODE__ !== 'undefined'
+        const { numPreparedQueries } = this.context.store.getState().wordpress.__kasia__
+        const isNode = typeof this.props.__IS_NODE__ !== 'undefined'
           ? this.props.__IS_NODE__
           : __IS_NODE__
 
         if (numPreparedQueries) {
           this.queryId = nextPreparedQueryId()
 
-          if (!_isNode) {
-            this.props.dispatch(subtractPreparedQueries())
+          if (!isNode) {
+            this.context.store.dispatch(subtractPreparedQueries())
           }
         } else {
           this.dispatchRequestAction(this.props)
@@ -143,24 +140,19 @@ export default function connectWpQuery (queryFn, propsComparatorFn = defaultProp
       }
 
       componentWillReceiveProps (nextProps) {
-        // Nullify `wordpress` on props objects so that they aren't compared otherwise
-        // the addition of a new query object each time will cause infinite dispatches
-        const thisProps = merge({}, this.props, { wordpress: null })
-        const _nextProps = merge({}, nextProps, { wordpress: null })
-
         // Make a request for new data if the current props and next props are different
-        if (propsComparatorFn(thisProps, _nextProps)) {
+        if (propsComparatorFn(this.props, nextProps)) {
           this.dispatchRequestAction(nextProps)
         }
       }
 
       // Dispatch a new data request action to fetch data according to the props
       dispatchRequestAction (props) {
-        const wrappedQueryFn = (wpapi) => queryFn(wpapi, props, props.state)
+        const wrappedQueryFn = (wpapi) => queryFn(wpapi, props, this.context.store.getState())
         const action = createQueryRequest({ queryFn: wrappedQueryFn })
 
-        this.queryId = props.wordpress.__kasia__.nextQueryId
-        this.props.dispatch(action)
+        this.queryId = this.context.store.getState().wordpress.__kasia__.nextQueryId
+        this.context.store.dispatch(action)
       }
 
       /**
@@ -168,7 +160,7 @@ export default function connectWpQuery (queryFn, propsComparatorFn = defaultProp
        * @returns {Object} Props object
        */
       reconcileWpData () {
-        const { queries, entities: _entities } = this.props.wordpress
+        const { queries, entities: _entities } = this.context.store.getState().wordpress
         const query = queries[this.queryId]
 
         if (!query) {
@@ -180,12 +172,12 @@ export default function connectWpQuery (queryFn, propsComparatorFn = defaultProp
           }
         }
 
-        const entities = findEntities(_entities, query.entities)
+        const entities = query.entities
+          ? findEntities(_entities, query.entities)
+          : {}
 
         return { kasia: { query, entities } }
       }
     }
-
-    return connect(mapStateToProps)(KasiaIntermediateComponent)
   }
 }
