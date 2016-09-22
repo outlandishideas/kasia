@@ -44,6 +44,7 @@ Check out the [Kasia boilerplate](https://github.com/outlandishideas/kasia-boile
 
 ## Glossary
 
+- [Notice](#notice)
 - [Requirements](#requirements)
 - [Install](#install)
 - [Import](#import)
@@ -175,12 +176,15 @@ export default class Page extends Component {
 export default connectWpPost(Page, (props) => props.params.slug)(Post)
 ```
 
-### `@connectWpQuery(queryFn[, propsComparatorFn]) : Component`
+### `@connectWpQuery(queryFn[, propsComparatorFn, options]) : Component`
 
 Connect a component to the result of an arbitrary WP-API query.
 
 - __queryFn__ {Function} Function that accepts args `wpapi`, `props`, `state` and should return a WP-API query
 - __propsComparatorFn__ {Function} _(optional)_ Function that determines if new data should be requested by inspecting props
+- [__options.displayName__] {String} _(optional)_ Display name of the component, useful if component is wrapped by other
+                                                  decorators which will disguise the actual `displayName`. Important if
+                                                  the component is used with prepared queries (server-side rendering).
 
 Returns a connected component.
 
@@ -415,27 +419,25 @@ A plugin should:
 
 ### Utilities
 
-#### `util/makePreloaderSaga(components, renderProps[, resetPreparedQueryCounter]) : Generator`
+#### `util/makePreloaderSaga(components, renderProps) : Generator`
 
 Create a single saga operation that will preload all data for any Kasia components in `components`.
 
 - __components__ {Array} Array of components
 - __renderProps__ {Object} Render props object derived from the matched route
-- [__resetPreparedQueryCounter__] {Boolean}  _(optional)_ Reset internal prepared query counter (default: `true`)
 
 Returns a saga operation.
 
-#### `util/makeQueryPreloaderSaga(queryFn, renderProps[, resetPreparedQueryCounter]) : Generator`
+#### `util/makeQueryPreloaderSaga(queryFn, renderProps) : Generator`
 
 Create a single saga operation that will preload data for an arbitrary query against the WP API.
 
 - __queryFn__ {Function} Query function that accepts `wpapi` as argument
 - __renderProps__ {Object} Render props object
-- [__resetPreparedQueryCounter__] {Boolean}  _(optional)_ Reset internal prepared query counter (default: `true`)
 
 Returns a saga operation.
 
-#### `util/makePostPreloaderSaga(contentType, id[, state, resetPreparedQueryCounter]) : Generator`
+#### `util/makePostPreloaderSaga(contentType, id[, state]) : Generator`
 
 Create a single saga operation that will preload data for a single post from the WP API.
 
@@ -443,7 +445,6 @@ Create a single saga operation that will preload data for a single post from the
 - __id__ {String|Number|Function} ID of the post or a function to derive from `renderProps`
 - __renderProps__ {Object} Render props object
 - [__state__] {Object} _(optional)_ State object (default: `null`)
-- [__resetPreparedQueryCounter__] {Boolean} _(optional)_ Reset internal prepared query counter (default: `true`)
 
 Returns a saga operation.
 
@@ -517,17 +518,9 @@ export function preload (res, route) {
         return
       }
 
-      // IMPORTANT
-      //
-      // Only the first saga operation created by Kasia 
-      // should reset the prepared query counter.
-      //
-      // Each preloader after the first should pass 
-      // `false` as the last argument.
-
       const preloaders = [
         makePreloaderSaga(renderProps.components, renderProps),
-        makeQueryPreloaderSaga(categoriesQuery, renderProps, false)
+        makeQueryPreloaderSaga(categoriesQuery, renderProps)
       ]
 
       return runSagas(preloaders)

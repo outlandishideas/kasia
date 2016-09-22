@@ -1,5 +1,17 @@
 # Kasia Changelog
 
+- __v3.2.0__ - _23/09/16_
+
+    - Implemented safer internal query reconciliation logic such that prepared queries 
+    target their components via their `displayName`.
+    - Added `options` object parameter to connect decorators, where you can specify explicitly the `displayName`
+    of the component if it is wrapped by other decorators.
+    - Fix bug where preloader saga creator utilities in `kasia/util` disrupt prepared query reconciliation
+    by incrementing prepared query count. (They do not have a corresponding component and so should not be
+    considered "prepared" queries.) 
+    - Fixed query errors not being added to query object (`error: "undefined"`). 
+    - Log warning about erroneous queries.
+
 - __v3.1.5__ - _22/09/16_
 
     - Replace use of redux's `connect` decorator with access to the store via `context`.

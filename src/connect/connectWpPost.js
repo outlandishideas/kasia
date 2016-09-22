@@ -4,7 +4,6 @@ import merge from 'lodash.merge'
 import { fetch } from '../sagas'
 import { getContentType } from '../contentTypes'
 import { createPostRequest, subtractPreparedQueries } from '../actions'
-import { nextPreparedQueryId } from './util'
 import invariants from '../invariants'
 import isNode from '../isNode'
 
@@ -48,13 +47,29 @@ function findEntity (entities, identifier) {
  * connectWordPress('News', (props) => props.params.slug)(Component)
  * ```
  *
- * @params {String} contentType The content type of the data to fetch from WP-API
- * @params {Function|String|Number} id The entity's ID or slug or a function that derives either from props
+ * @params {String} contentType Content type of the WP entity to fetch
+ * @params {Function|String|Number} id Entity's ID/slug/a function that derives either from props
+ * @params {String} [options.displayName] Display name of the component, useful if component is wrapped by other
+ *                                        decorators which will disguise the actual `displayName`. Important if
+ *                                        the component is used with prepared queries (server-side rendering).
  * @returns {Function} Decorated component
  */
-export default function connectWpPost (contentType, id) {
+export default function connectWpPost (
+  contentType,
+  id,
+  options = {
+    displayName: ''
+  }
+) {
+  invariants.isString('contentType', contentType)
+  invariants.isIdentifierArg(id)
+  invariants.isObject('options', options)
+  invariants.isString('options.displayName', options.displayName)
+
   return (target) => {
-    const targetName = target.displayName || target.name
+    const targetName = options.displayName ||
+      target.displayName ||
+      target.name
 
     const getIdentifier = (props) => {
       const realId = typeof id === 'function' ? id(props) : id
@@ -63,8 +78,6 @@ export default function connectWpPost (contentType, id) {
     }
 
     invariants.isNotWrapped(target, targetName)
-    invariants.isString('contentType', contentType)
-    invariants.isIdentifierArg(id)
 
     return class KasiaIntermediateComponent extends Component {
       static __kasia = true
@@ -75,41 +88,51 @@ export default function connectWpPost (contentType, id) {
 
       static makePreloader = (renderProps) => {
         invariants.isValidContentType(getContentType(contentType), contentType, targetName)
+
         const identifier = getIdentifier(renderProps)
-        const action = createPostRequest({ contentType, identifier, prepared: true })
+
+        const action = createPostRequest({
+          contentType,
+          identifier,
+          target: targetName
+        })
+
         return [fetch, action]
       }
 
       render () {
-        invariants.isValidContentType(getContentType(contentType), contentType, targetName)
         const props = merge({}, this.props, this.reconcileWpData(this.props))
         return React.createElement(target, props)
       }
 
       componentWillMount () {
-        const { numPreparedQueries } = this.context.store.getState().wordpress.__kasia__
+        invariants.isValidContentType(getContentType(contentType), contentType, targetName)
+
+        const state = this.context.store.getState().wordpress
+
         const isNode = typeof this.props.__IS_NODE__ !== 'undefined'
           ? this.props.__IS_NODE__
           : __IS_NODE__
 
-        if (numPreparedQueries) {
-          this.queryId = typeof this.props.__QUERY_ID__ !== 'undefined'
-            ? this.props.__QUERY_ID__
-            : nextPreparedQueryId()
+        if (state.__kasia__.numPreparedQueries) {
+          const query = Object
+            .values(state.queries)
+            .find((query) => query.target === targetName)
 
-          if (!isNode) {
-            this.context.store.dispatch(subtractPreparedQueries())
+          if (query) {
+            this.queryId = typeof this.props.__QUERY_ID__ !== 'undefined'
+              ? this.props.__QUERY_ID__
+              : query.id
+
+            if (!isNode) {
+              this.context.store.dispatch(subtractPreparedQueries())
+            }
           }
         } else {
           this.dispatchRequestAction(this.props)
         }
       }
 
-      /**
-       * Make a request for new data if the identifier has changed or
-       * an entity cannot be derived from the store using `nextProps`.
-       * @param {Object} nextProps
-       */
       componentWillReceiveProps (nextProps) {
         const { name } = getContentType(contentType)
         const nextBuiltProps = this.reconcileWpData(nextProps)
@@ -121,29 +144,23 @@ export default function connectWpPost (contentType, id) {
         }
       }
 
-      /**
-       * Dispatch a new request action to fetch data according to the props.
-       * @param {Object} props Props object
-       */
       dispatchRequestAction (props) {
         const identifier = getIdentifier(props)
         const action = createPostRequest({ contentType, identifier })
+        const state = this.context.store.getState()
 
-        this.queryId = this.context.store.getState().wordpress.__kasia__.nextQueryId
+        this.queryId = state.wordpress.__kasia__.nextQueryId
         this.context.store.dispatch(action)
       }
 
-      /**
-       * Build an object of properties containing entity and query data maintained by Kasia.
-       * @params {Object} props Props object to use for reconciliation
-       * @returns {Object} Props object
-       */
       reconcileWpData (props) {
-        const { queries } = this.context.store.getState().wordpress
         const { plural, name } = getContentType(contentType)
-        const query = queries[this.queryId]
+        const state = this.context.store.getState()
+        const query = state.wordpress.queries[this.queryId]
 
-        if (!query) {
+        if (!query || query.error) {
+          query && invariants.queryErrorFree(query, targetName)
+
           return {
             kasia: {
               query: { complete: false },
@@ -152,7 +169,7 @@ export default function connectWpPost (contentType, id) {
           }
         }
 
-        const entityCollection = this.context.store.getState().wordpress.entities[plural] || {}
+        const entityCollection = state.wordpress.entities[plural] || {}
         const entityId = getIdentifier(props)
 
         return {

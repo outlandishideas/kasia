@@ -8,7 +8,7 @@ import normalise from './normalise'
 function updateStateWithNextQueryId (state, action, stateUpdateFn) {
   const queryId = state.__kasia__.nextQueryId
 
-  let numPreparedQueries = action.prepared
+  const numPreparedQueries = action.target
     ? state.__kasia__.numPreparedQueries + 1
     : state.__kasia__.numPreparedQueries
 
@@ -51,6 +51,7 @@ export const completeReducer = (normaliseData) => (state, action) => {
         id: queryId,
         entities: pickEntityIds(data),
         paging: action.data._paging || null,
+        target: action.target || null,
         complete: true,
         OK: true
       }
@@ -66,6 +67,7 @@ export const failReducer = (state, action) => {
       [queryId]: {
         id: queryId,
         error: String(action.error),
+        target: action.target || null,
         complete: true,
         OK: false
       }

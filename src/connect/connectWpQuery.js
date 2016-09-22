@@ -4,7 +4,6 @@ import merge from 'lodash.merge'
 
 import { fetch } from '../sagas'
 import { createQueryRequest, subtractPreparedQueries } from '../actions'
-import { nextPreparedQueryId } from './util'
 import invariants from '../invariants'
 import isNode from '../isNode'
 
@@ -93,14 +92,29 @@ function defaultPropsComparator (thisProps, nextProps) {
  *
  * @params {Function} queryFn Function that returns a wpapi query
  * @params {Function} propsComparatorFn Function that determines if new data should be requested by inspecting props
+ * @params {String} [options.displayName] Display name of the component, useful if component is wrapped by other
+ *                                        decorators which will disguise the actual `displayName`. Important if
+ *                                        the component is used with prepared queries (server-side rendering).
  * @returns {Function} Decorated component
  */
-export default function connectWpQuery (queryFn, propsComparatorFn = defaultPropsComparator) {
+export default function connectWpQuery (
+  queryFn,
+  propsComparatorFn = defaultPropsComparator,
+  options = {
+    displayName: ''
+  }
+) {
+  propsComparatorFn = propsComparatorFn || defaultPropsComparator
+
   invariants.isFunction('queryFn', queryFn)
   invariants.isFunction('propsComparatorFn', propsComparatorFn)
+  invariants.isObject('options', options)
+  invariants.isString('options.displayName', options.displayName)
 
   return (target) => {
-    const targetName = target.displayName || target.name
+    const targetName = options.displayName ||
+      target.displayName ||
+      target.name
 
     invariants.isNotWrapped(target, targetName)
 
@@ -113,7 +127,12 @@ export default function connectWpQuery (queryFn, propsComparatorFn = defaultProp
 
       static makePreloader = (renderProps, state) => {
         const realQueryFn = (wpapi) => queryFn(wpapi, renderProps, state)
-        const action = createQueryRequest({ queryFn: realQueryFn, prepared: true })
+
+        const action = createQueryRequest({
+          queryFn: realQueryFn,
+          target: targetName
+        })
+
         return [fetch, action]
       }
 
@@ -123,16 +142,23 @@ export default function connectWpQuery (queryFn, propsComparatorFn = defaultProp
       }
 
       componentWillMount () {
-        const { numPreparedQueries } = this.context.store.getState().wordpress.__kasia__
+        const state = this.context.store.getState().wordpress
+
         const isNode = typeof this.props.__IS_NODE__ !== 'undefined'
           ? this.props.__IS_NODE__
           : __IS_NODE__
 
-        if (numPreparedQueries) {
-          this.queryId = nextPreparedQueryId()
+        if (state.__kasia__.numPreparedQueries) {
+          const query = Object
+            .values(state.queries)
+            .find((query) => query.target === targetName)
 
-          if (!isNode) {
-            this.context.store.dispatch(subtractPreparedQueries())
+          if (query) {
+            this.queryId = query.id
+
+            if (!isNode) {
+              this.context.store.dispatch(subtractPreparedQueries())
+            }
           }
         } else {
           this.dispatchRequestAction(this.props)
@@ -140,13 +166,11 @@ export default function connectWpQuery (queryFn, propsComparatorFn = defaultProp
       }
 
       componentWillReceiveProps (nextProps) {
-        // Make a request for new data if the current props and next props are different
         if (propsComparatorFn(this.props, nextProps)) {
           this.dispatchRequestAction(nextProps)
         }
       }
 
-      // Dispatch a new data request action to fetch data according to the props
       dispatchRequestAction (props) {
         const wrappedQueryFn = (wpapi) => queryFn(wpapi, props, this.context.store.getState())
         const action = createQueryRequest({ queryFn: wrappedQueryFn })
@@ -155,15 +179,13 @@ export default function connectWpQuery (queryFn, propsComparatorFn = defaultProp
         this.context.store.dispatch(action)
       }
 
-      /**
-       * Build an object of properties containing entity and query data maintained by Kasia.
-       * @returns {Object} Props object
-       */
       reconcileWpData () {
         const { queries, entities: _entities } = this.context.store.getState().wordpress
         const query = queries[this.queryId]
 
-        if (!query) {
+        if (!query || query.error) {
+          query && invariants.queryErrorFree(query, targetName)
+
           return {
             kasia: {
               query: { complete: false },

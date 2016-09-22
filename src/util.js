@@ -1,6 +1,5 @@
 import * as effects from 'redux-saga/effects'
 
-import { resetPreparedQueryId } from './connect/util'
 import { fetch } from './sagas'
 import { createPostRequest, createQueryRequest } from './actions'
 import { getContentType } from './contentTypes'
@@ -25,23 +24,13 @@ function waitAll (sagas) {
  * @param {Array} components Array of components
  * @param {Object} renderProps Render props object
  * @param {Object} [state] State object
- * @param {Boolean} [resetPreparedQueryCounter] Reset the prepared query counter
  * @returns {Function} A single saga operation
  */
-export function makePreloaderSaga (
-  components,
-  renderProps,
-  state = null,
-  resetPreparedQueryCounter = true
-) {
+export function makePreloaderSaga (components, renderProps, state = null) {
   if (!Array.isArray(components) || !components.length) {
     throw new Error('Expecting components to be array with at least one element.')
   } else if (typeof renderProps !== 'object') {
     throw new Error('Expecting renderProps to be an object.')
-  }
-
-  if (resetPreparedQueryCounter) {
-    resetPreparedQueryId()
   }
 
   const preloaders = components
@@ -56,25 +45,15 @@ export function makePreloaderSaga (
  * @param {Function} queryFn Query function that accepts `wpapi` API
  * @param {Object} renderProps Render props object
  * @param {Boolean} [state] State object
- * @param {Boolean} [resetPreparedQueryCounter] Reset the prepared query counter
  * @returns {Function} A single saga operation
  */
-export function makeQueryPreloaderSaga (
-  queryFn,
-  renderProps,
-  state = null,
-  resetPreparedQueryCounter = true
-) {
+export function makeQueryPreloaderSaga (queryFn, renderProps, state = null) {
   if (typeof queryFn !== 'function') {
     throw new Error('Expecting queryFn to be a function.')
   }
 
-  if (resetPreparedQueryCounter) {
-    resetPreparedQueryId()
-  }
-
   const realQueryFn = (wpapi) => queryFn(wpapi, renderProps, state)
-  const action = createQueryRequest({ queryFn: realQueryFn, prepared: true })
+  const action = createQueryRequest({ queryFn: realQueryFn })
 
   return function * () {
     yield effects.fork(fetch, action)
@@ -86,27 +65,17 @@ export function makeQueryPreloaderSaga (
  * @param {String} contentType Post content type
  * @param {String|Number|Function} id Post identifier
  * @param {Object} renderProps Render props object
- * @param {Boolean} [resetPreparedQueryCounter] Reset the prepared query counter
  * @returns {Function} A single saga operation
  */
-export function makePostPreloaderSaga (
-  contentType,
-  id,
-  renderProps,
-  resetPreparedQueryCounter = true
-) {
+export function makePostPreloaderSaga (contentType, id, renderProps) {
   if (typeof contentType !== 'string') {
     throw new Error('Expecting contentType to be a string.')
   } else if (typeof id !== 'string' && typeof id !== 'number' && typeof id !== 'function') {
     throw new Error('Expecting identifier to be a string, number, or function.')
   }
 
-  if (resetPreparedQueryCounter) {
-    resetPreparedQueryId()
-  }
-
   const identifier = typeof id === 'function' ? id(renderProps) : id
-  const action = createPostRequest({ contentType, identifier, prepared: true })
+  const action = createPostRequest({ contentType, identifier })
 
   invariants.isValidContentType(getContentType(contentType), contentType, 'call to makePostPreloaderSaga')
   invariants.isIdentifierValue(identifier)

@@ -22,6 +22,12 @@ export default {
     name,
     typeof value
   ),
+  isObject: (name, value) => invariant(
+    typeof value === 'object',
+    'Expecting %s to be object, got %s',
+    name,
+    typeof value
+  ),
   isWpApiInstance: (value = {}) => invariant(
     typeof value.registerRoute === 'function',
     'Expecting WP to be instance of `node-wpapi`. ' +
@@ -31,7 +37,7 @@ export default {
     typeof identifier === 'function' ||
     typeof identifier === 'string' ||
     typeof identifier === 'number',
-    'Expecting identifier to be function/string/number, got "%s"',
+    'Expecting id given to connectWpPost to be function/string/number, got "%s"',
     typeof identifier
   ),
   isValidContentTypeObject: (obj) => invariant(
@@ -76,5 +82,14 @@ export default {
     'Is your store configured correctly? ' +
     `See documentation ${kasiaGitHubUrl}`,
     typeof store.wordpress
+  ),
+  queryErrorFree: (query, targetName) => invariant(
+    query && !query.error,
+    'Ignoring query %s. ' +
+    'Error: "%s". ' +
+    'Check connectWp* decorator for %s.',
+    query.id,
+    query.error,
+    targetName
   )
 }

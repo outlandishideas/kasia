@@ -84,7 +84,8 @@ describe('Reducer journey', () => {
       id,
       complete: true,
       OK: false,
-      error: 'Error: Request failed'
+      error: 'Error: Request failed',
+      target: null
     })
   })
 })

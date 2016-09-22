@@ -45,7 +45,7 @@ function fixtures () {
     expectedAction: {
       contentType: ContentTypes.Post,
       identifier: 0,
-      prepared: true,
+      target: 'BuiltInContentType',
       request: RequestTypes.Post,
       type: Request.Create
     },
@@ -68,9 +68,9 @@ describe('Universal journey', function () {
 
   let id = 0
 
-  function completeRequest (id, data, prepared = false) {
+  function completeRequest (id, data, target = null) {
     return sagaMiddleware.run(function * () {
-      yield effects.put(_completeRequest({ id, data, prepared }))
+      yield effects.put(_completeRequest({ id, data, target }))
     }).done
   }
 
@@ -94,7 +94,7 @@ describe('Universal journey', function () {
   })
 
   it('that when run updates number of prepared queries', (done) => {
-    return completeRequest(id, postJson1, true).then(() => {
+    return completeRequest(id, postJson1, 'BuiltInContentType').then(() => {
       expect(store.getState().wordpress.__kasia__.numPreparedQueries).toEqual(1)
       done()
     })
