@@ -1,5 +1,9 @@
 # Kasia Plugin WP API Menus
 
+- __v3.0.1__ - _22/09/16_
+
+    - Add `prepared` property to preloader action object.
+
 - __v3.0.0__ - _05/08/16_
 
     - [BREAKING] Updated for Kasia v3.

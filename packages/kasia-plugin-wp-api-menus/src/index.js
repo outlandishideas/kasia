@@ -90,7 +90,10 @@ function * fetchResource (WP, action) {
  * @returns {Function} Function that returns a collection of saga operation definitions
  */
 export function makePreloader (WP, action) {
-  return () => fetchResource(WP, action)
+  return () => fetchResource(
+    WP,
+    Object.assign({}, action, { prepared: true })
+  )
 }
 
 /**
