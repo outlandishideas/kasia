@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="UTF-8">
+    <title>Kasia by outlandishideas</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
+  </head>
+  <body>
+    <section class="page-header">
+      <h1 class="project-name">Kasia</h1>
+      <h2 class="project-tagline">:tophat: A React Redux toolset for the WordPress API</h2>
+      <a href="https://github.com/outlandishideas/kasia" class="btn">View on GitHub</a>
+      <a href="https://github.com/outlandishideas/kasia/zipball/master" class="btn">Download .zip</a>
+      <a href="https://github.com/outlandishideas/kasia/tarball/master" class="btn">Download .tar.gz</a>
+    </section>
+
+    <section class="main-content">
+      <p align="center">
+    <img src="https://raw.githubusercontent.com/outlandishideas/kasia/master/assets/tophat.png">
+</p>
+
+<p></p><h1 align="center">
+<a id="kasia" class="anchor" href="#kasia" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>kasia</h1>
+
+<p align="center">A React Redux toolset for the WordPress API</p>
+
+<p align="center">Made with ❤ at <a href="http://www.twitter.com/outlandish">@outlandish</a></p>
+
+<p align="center">
+    <a href="http://badge.fury.io/js/kasia"><img alt="npm version" src="https://badge.fury.io/js/kasia.svg"></a>
+    <a href="http://standardjs.com/"><img src="https://img.shields.io/badge/code%20style-standard-brightgreen.svg"></a>
+    <a href="https://travis-ci.org/outlandishideas/kasia"><img alt="travis ci build" src="https://travis-ci.org/outlandishideas/kasia.svg"></a>
+    <a href="https://coveralls.io/repos/github/outlandishideas/kasia/badge.svg?branch=master"><img alt="coverage" src="https://coveralls.io/repos/github/outlandishideas/kasia/badge.svg?branch=master"></a>
+</p>
+
+<hr>
+
+<p>Get data from WordPress and into components with ease...</p>
+
+<div class="highlight highlight-source-js"><pre><span class="pl-c">// e.g. Get a Post by its slug</span>
+@<span class="pl-en">connectWpPost</span>(Post, <span class="pl-s"><span class="pl-pds">'</span>spongebob-squarepants<span class="pl-pds">'</span></span>)
+<span class="pl-k">function</span> <span class="pl-en">SpongebobSquarepants</span> (<span class="pl-smi">props</span>) {
+  <span class="pl-k">const</span> { post<span class="pl-k">:</span> <span class="pl-c1">spongebob</span> } <span class="pl-k">=</span> <span class="pl-smi">props</span>.<span class="pl-smi">kasia</span>
+
+  <span class="pl-k">return</span> spongebob
+    <span class="pl-k">?</span> <span class="pl-k">&lt;</span>h1<span class="pl-k">&gt;</span>{<span class="pl-smi">spongebob</span>.<span class="pl-c1">title</span>}<span class="pl-k">&lt;</span><span class="pl-k">/</span>h1<span class="pl-k">&gt;</span> <span class="pl-c">//=&gt; Spongebob Squarepants</span>
+    <span class="pl-k">:</span> <span class="pl-k">&lt;</span>span<span class="pl-k">&gt;</span>Loading<span class="pl-k">...</span><span class="pl-k">&lt;</span><span class="pl-k">/</span>span<span class="pl-k">&gt;</span>
+}</pre></div>
+
+<h2>
+<a id="features" class="anchor" href="#features" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Features</h2>
+
+<ul>
+<li>Declaratively connect React components to data from WordPress.</li>
+<li>Uses <a href="https://github.com/WP-API/node-wpapi"><code>node-wpapi</code></a> internally in order to facilitate complex queries.</li>
+<li>Register and consume Custom Content Types with ease.</li>
+<li>All WP data is normalised at <code>store.wordpress</code>, e.g. <code>store.wordpress.pages</code>.</li>
+<li>Support for universal applications.</li>
+<li>Support for plugins, e.g. <a href="https://github.com/outlandishideas/kasia-plugin-wp-api-menus"><code>wp-api-menus</code></a>.</li>
+</ul>
+
+<p>Check out the <a href="https://github.com/outlandishideas/kasia-boilerplate">Kasia boilerplate</a>!</p>
+
+<h2>
+<a id="glossary" class="anchor" href="#glossary" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Glossary</h2>
+
+<ul>
+<li><a href="#notice">Notice</a></li>
+<li><a href="#requirements">Requirements</a></li>
+<li><a href="#install">Install</a></li>
+<li><a href="#import">Import</a></li>
+<li><a href="#configure"><strong>Configure</strong></a></li>
+<li><a href="#usage"><strong>Usage</strong></a></li>
+<li><a href="#exports">Exports</a></li>
+<li><a href="#the-shape-of-things">The Shape of Things</a></li>
+<li><a href="#plugins">Plugins</a></li>
+<li><a href="#universal-applications">Universal Applications</a></li>
+<li><a href="#author-&amp;-license">Author &amp; License</a></li>
+</ul>
+
+<h2>
+<a id="requirements" class="anchor" href="#requirements" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Requirements</h2>
+
+<p>Kasia suits applications that are built using these technologies:</p>
+
+<ul>
+<li>React</li>
+<li>Redux</li>
+<li>Redux Sagas (&gt;= 0.10.0)</li>
+<li>WordPress</li>
+<li><a href="http://v2.wp-api.org/">WP-API plugin</a></li>
+<li><a href="https://github.com/WP-API/node-wpapi"><code>node-wpapi</code></a></li>
+</ul>
+
+<h2>
+<a id="install" class="anchor" href="#install" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Install</h2>
+
+<p><code>npm install kasia --save</code></p>
+
+<h2>
+<a id="import" class="anchor" href="#import" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Import</h2>
+
+<div class="highlight highlight-source-js"><pre><span class="pl-c">// ES2015</span>
+<span class="pl-k">import</span> <span class="pl-smi">Kasia</span> <span class="pl-k">from</span> <span class="pl-s"><span class="pl-pds">'</span>kasia<span class="pl-pds">'</span></span></pre></div>
+
+<div class="highlight highlight-source-js"><pre><span class="pl-c">// CommonJS</span>
+<span class="pl-k">var</span> Kasia <span class="pl-k">=</span> <span class="pl-c1">require</span>(<span class="pl-s"><span class="pl-pds">'</span>kasia<span class="pl-pds">'</span></span>)</pre></div>
+
+<h2>
+<a id="configure" class="anchor" href="#configure" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Configure</h2>
+
+<p>Configure Kasia in three steps:</p>
+
+<ol>
+<li><p>Initialise Kasia with an instance of <code>node-wpapi</code>.</p></li>
+<li><p>Spread the Kasia reducer when creating the redux root reducer.</p></li>
+<li><p>Run the Kasia sagas after creating the redux-saga middleware.</p></li>
+</ol>
+
+<p>A slimline example...</p>
+
+<div class="highlight highlight-source-js"><pre><span class="pl-k">import</span> { <span class="pl-smi">combineReducers</span>, <span class="pl-smi">createStore</span>, <span class="pl-smi">applyMiddleware</span> } <span class="pl-k">from</span> <span class="pl-s"><span class="pl-pds">'</span>redux<span class="pl-pds">'</span></span>
+<span class="pl-k">import</span> <span class="pl-smi">createSagaMiddleware</span> <span class="pl-k">from</span> <span class="pl-s"><span class="pl-pds">'</span>redux-saga<span class="pl-pds">'</span></span>
+<span class="pl-k">import</span> <span class="pl-smi">Kasia</span> <span class="pl-k">from</span> <span class="pl-s"><span class="pl-pds">'</span>kasia<span class="pl-pds">'</span></span>
+<span class="pl-k">import</span> <span class="pl-smi">wpapi</span> <span class="pl-k">from</span> <span class="pl-s"><span class="pl-pds">'</span>wpapi<span class="pl-pds">'</span></span>
+
+<span class="pl-k">const</span> <span class="pl-c1">WP</span> <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-en">wpapi</span>({ endpoint<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">'</span>http://wordpress/wp-json<span class="pl-pds">'</span></span> })
+
+<span class="pl-k">const</span> { <span class="pl-c1">kasiaReducer</span>, <span class="pl-c1">kasiaSagas</span> } <span class="pl-k">=</span> <span class="pl-en">Kasia</span>({ <span class="pl-c1">WP</span> })
+
+<span class="pl-k">const</span> <span class="pl-c1">rootSaga</span> <span class="pl-k">=</span> <span class="pl-k">function</span> <span class="pl-k">*</span> () {
+  <span class="pl-k">yield</span> [<span class="pl-k">...</span>kasiaSagas]
+}
+
+<span class="pl-k">const</span> <span class="pl-c1">rootReducer</span> <span class="pl-k">=</span> <span class="pl-en">combineReducers</span>({
+  <span class="pl-k">...</span>kasiaReducer
+})
+
+<span class="pl-k">const</span> <span class="pl-c1">sagaMiddleware</span> <span class="pl-k">=</span> <span class="pl-en">createSagaMiddleware</span>()
+
+<span class="pl-k">export</span> <span class="pl-v">default</span> <span class="pl-k">function</span> <span class="pl-en">configureStore</span> (<span class="pl-smi">initialState</span>) {
+  <span class="pl-k">const</span> <span class="pl-c1">store</span> <span class="pl-k">=</span> <span class="pl-en">createStore</span>(
+    rootReducer,
+    initialState,
+    <span class="pl-en">applyMiddleware</span>(sagaMiddleware)
+  )
+
+  <span class="pl-smi">sagaMiddleware</span>.<span class="pl-en">run</span>(rootSaga)
+
+  <span class="pl-k">return</span> store
+}</pre></div>
+
+<h2>
+<a id="usage" class="anchor" href="#usage" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Usage</h2>
+
+<p>Things to keep in mind:</p>
+
+<ul>
+<li>A component will make a request for data 1) when it mounts and 2) if its props change. For <code>connectWpPost</code> a change
+in props will trigger Kasia to try and find entity data for the new identifier in the store. If it is found, no request
+is made.</li>
+<li>Content data should be parsed before being rendered as it may contain encoded HTML entities.</li>
+<li>In arbitrary queries with <code>connectWpQuery</code>, we suggest that you always call the <code>embed</code> method on the
+query chain, otherwise embedded content data will be omitted from the response.</li>
+<li>Paging data for the request made on behalf of the component is available at <code>this.props.kasia.query.paging</code>.</li>
+<li>The examples given assume the use of <a href="https://github.com/loganfsmyth/babel-plugin-transform-decorators-legacy">decorators.</a>
+However decorator support is not necessary. See the end of each example for the alternative Higher Order Component approach.</li>
+</ul>
+
+<h3>
+<a id="connectwppostcontenttype-identifier--component" class="anchor" href="#connectwppostcontenttype-identifier--component" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a><code>@connectWpPost(contentType, identifier) : Component</code>
+</h3>
+
+<p>Connect a component to a single entity in WordPress, e.g. Post, Page, or custom content type. </p>
+
+<ul>
+<li>
+<strong>contentType</strong> {String} The content type to fetch</li>
+<li>
+<strong>identifier</strong> {String|Number|Function} ID of the entity to fetch or function that derives it from <code>props</code>
+</li>
+</ul>
+
+<p>Returns a connected component.</p>
+
+<p>Example, using identifier derived from route parameter on <code>props</code>:</p>
+
+<div class="highlight highlight-source-js"><pre><span class="pl-k">import</span> <span class="pl-smi">React</span>, { <span class="pl-smi">Component</span> } <span class="pl-k">from</span> <span class="pl-s"><span class="pl-pds">'</span>react<span class="pl-pds">'</span></span>
+<span class="pl-k">import</span> { <span class="pl-smi">Route</span> } <span class="pl-k">from</span> <span class="pl-s"><span class="pl-pds">'</span>react-router<span class="pl-pds">'</span></span>
+<span class="pl-k">import</span> { <span class="pl-smi">connectWpPost</span> } <span class="pl-k">from</span> <span class="pl-s"><span class="pl-pds">'</span>kasia/connect<span class="pl-pds">'</span></span>
+<span class="pl-k">import</span> { <span class="pl-smi">Page</span> } <span class="pl-k">from</span> <span class="pl-s"><span class="pl-pds">'</span>kasia/types<span class="pl-pds">'</span></span>
+
+@<span class="pl-en">connectWpPost</span>(Page, (<span class="pl-smi">props</span>) <span class="pl-k">=&gt;</span> <span class="pl-smi">props</span>.<span class="pl-smi">params</span>.<span class="pl-smi">slug</span>)
+<span class="pl-k">export</span> <span class="pl-v">default</span> <span class="pl-k">class</span> <span class="pl-en">Page</span> <span class="pl-k">extends</span> <span class="pl-e">Component</span> {
+  <span class="pl-en">render</span> () {
+    <span class="pl-k">const</span> { <span class="pl-c1">query</span>, <span class="pl-c1">page</span> } <span class="pl-k">=</span> <span class="pl-v">this</span>.<span class="pl-smi">props</span>.<span class="pl-smi">kasia</span>
+
+    <span class="pl-k">if</span> (<span class="pl-k">!</span><span class="pl-smi">query</span>.<span class="pl-c1">complete</span>) {
+      <span class="pl-k">return</span> <span class="pl-k">&lt;</span>span<span class="pl-k">&gt;</span>Loading<span class="pl-k">...</span><span class="pl-k">&lt;</span><span class="pl-k">/</span>span<span class="pl-k">&gt;</span>
+    }
+
+    <span class="pl-k">return</span> <span class="pl-k">&lt;</span>h1<span class="pl-k">&gt;</span>{<span class="pl-smi">page</span>.<span class="pl-c1">title</span>}<span class="pl-k">&lt;</span><span class="pl-k">/</span>h1<span class="pl-k">&gt;</span>
+  }
+}
+
+<span class="pl-c">// Without decorator support</span>
+<span class="pl-k">export</span> <span class="pl-v">default</span> <span class="pl-smi">connectWpPost</span>(Page, (<span class="pl-smi">props</span>) <span class="pl-k">=&gt;</span> <span class="pl-smi">props</span>.<span class="pl-smi">params</span>.<span class="pl-smi">slug</span>)(Post)</pre></div>
+
+<h3>
+<a id="connectwpqueryqueryfn-propscomparatorfn-options--component" class="anchor" href="#connectwpqueryqueryfn-propscomparatorfn-options--component" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a><code>@connectWpQuery(queryFn[, propsComparatorFn, options]) : Component</code>
+</h3>
+
+<p>Connect a component to the result of an arbitrary WP-API query.</p>
+
+<ul>
+<li>
+<strong>queryFn</strong> {Function} Function that accepts args <code>wpapi</code>, <code>props</code>, <code>state</code> and should return a WP-API query</li>
+<li>
+<strong>propsComparatorFn</strong> {Function} <em>(optional)</em> Function that determines if new data should be requested by inspecting props</li>
+<li>[<strong>options.displayName</strong>] {String} <em>(optional)</em> Display name of the component, useful if component is wrapped by other
+                                              decorators which will disguise the actual <code>displayName</code>. Important if
+                                              the component is used with prepared queries (server-side rendering).</li>
+</ul>
+
+<p>Returns a connected component.</p>
+
+<p>By default the component will request new data via the given <code>queryFn</code> if the <code>propsComparatorFn</code> returns true.
+The default property comparison behaviour is to diff primitive values on the props objects.</p>
+
+<p>Entities returned from the query will be placed on <code>this.props.kasia.entities</code> under the same
+normalised structure as described in <a href="#the-shape-of-things">The Shape of Things</a>.</p>
+
+<p>Example, fetching the most recent "News" entities:</p>
+
+<div class="highlight highlight-source-js"><pre><span class="pl-k">import</span> <span class="pl-smi">React</span>, { <span class="pl-smi">Component</span> } <span class="pl-k">from</span> <span class="pl-s"><span class="pl-pds">'</span>react<span class="pl-pds">'</span></span>
+<span class="pl-k">import</span> { <span class="pl-smi">Route</span> } <span class="pl-k">from</span> <span class="pl-s"><span class="pl-pds">'</span>react-router<span class="pl-pds">'</span></span>
+<span class="pl-k">import</span> { <span class="pl-smi">connectWpPost</span> } <span class="pl-k">from</span> <span class="pl-s"><span class="pl-pds">'</span>kasia/connect<span class="pl-pds">'</span></span>
+
+<span class="pl-c">// Note the invocation of `embed` in the query chain</span>
+@<span class="pl-en">connectWpQuery</span>((<span class="pl-smi">wpapi</span>, <span class="pl-smi">props</span>) <span class="pl-k">=&gt;</span> {
+  <span class="pl-k">return</span> <span class="pl-smi">wpapi</span>.<span class="pl-en">news</span>().<span class="pl-en">month</span>(<span class="pl-smi">props</span>.<span class="pl-smi">month</span>).<span class="pl-en">embed</span>().<span class="pl-c1">get</span>()
+})
+<span class="pl-k">export</span> <span class="pl-v">default</span> <span class="pl-k">class</span> <span class="pl-en">RecentNews</span> <span class="pl-k">extends</span> <span class="pl-e">Component</span> {
+  <span class="pl-en">render</span> () {
+    <span class="pl-k">const</span> {
+      <span class="pl-c1">query</span>,
+      entities<span class="pl-k">:</span> { <span class="pl-c1">news</span> }
+    } <span class="pl-k">=</span> <span class="pl-v">this</span>.<span class="pl-smi">props</span>.<span class="pl-smi">kasia</span>
+
+    <span class="pl-k">if</span> (<span class="pl-k">!</span><span class="pl-smi">query</span>.<span class="pl-c1">complete</span>) {
+      <span class="pl-k">return</span> <span class="pl-k">&lt;</span>span<span class="pl-k">&gt;</span>Loading<span class="pl-k">...</span><span class="pl-k">&lt;</span><span class="pl-k">/</span>span<span class="pl-k">&gt;</span>
+    }
+
+    <span class="pl-k">return</span> (
+      <span class="pl-k">&lt;</span>div<span class="pl-k">&gt;</span>
+        <span class="pl-k">&lt;</span>h1<span class="pl-k">&gt;</span>Recent News Headlines<span class="pl-k">&lt;</span><span class="pl-k">/</span>h1<span class="pl-k">&gt;</span>
+        {<span class="pl-c1">Object</span>.<span class="pl-c1">keys</span>(news).<span class="pl-en">map</span>((<span class="pl-smi">key</span>) <span class="pl-k">=&gt;</span>
+          <span class="pl-k">&lt;</span>h2<span class="pl-k">&gt;</span>{news[key].<span class="pl-c1">title</span>}<span class="pl-k">&lt;</span><span class="pl-k">/</span>h2<span class="pl-k">&gt;</span>)}
+      <span class="pl-k">&lt;</span><span class="pl-k">/</span>div<span class="pl-k">&gt;</span>
+    )
+  }
+}
+
+<span class="pl-c">// Without decorator support</span>
+<span class="pl-k">export</span> <span class="pl-v">default</span> <span class="pl-smi">connectWpQuery</span>((<span class="pl-smi">wpapi</span>) <span class="pl-k">=&gt;</span> {
+  <span class="pl-k">return</span> <span class="pl-smi">wpapi</span>.<span class="pl-en">news</span>().<span class="pl-en">embed</span>().<span class="pl-c1">get</span>()
+})(Post)</pre></div>
+
+<h3>
+<a id="kasiaoptions--object" class="anchor" href="#kasiaoptions--object" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a><code>Kasia(options) : Object</code>
+</h3>
+
+<p>Configure Kasia.</p>
+
+<ul>
+<li>
+<strong>options</strong> {Object} Options object</li>
+</ul>
+
+<p>Returns an object containing the Kasia reducer and sagas.</p>
+
+<div class="highlight highlight-source-js"><pre><span class="pl-k">const</span> { <span class="pl-c1">kasiaReducer</span>, <span class="pl-c1">kasiaSagas</span> } <span class="pl-k">=</span> <span class="pl-en">Kasia</span>({
+  WP<span class="pl-k">:</span> <span class="pl-k">new</span> <span class="pl-en">wpapi</span>({ endpoint<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">'</span>http://wordpress/wp-json<span class="pl-pds">'</span></span> })
+})</pre></div>
+
+<p>The <code>options</code> object accepts:</p>
+
+<ul>
+<li>
+<p><code>WP</code> {wpapi}</p>
+
+<p>An instance of <code>node-wpapi</code>.</p>
+</li>
+<li>
+<p><code>keyEntitiesBy</code> {String} <em>(optional)</em> (default <code>'id'</code>)</p>
+
+<p>Property of entities used to key them in the store</p>
+</li>
+<li>
+<p><code>contentTypes</code> {Array} <em>(optional)</em></p>
+
+<p>Array of custom content type definitions</p>
+
+<div class="highlight highlight-source-js"><pre><span class="pl-c">// Example custom content type definition</span>
+contentTypes<span class="pl-k">:</span> [{
+  name<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">'</span>book<span class="pl-pds">'</span></span>,
+  plural<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">'</span>books<span class="pl-pds">'</span></span>,
+  slug<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">'</span>books<span class="pl-pds">'</span></span>,
+  route, <span class="pl-c">// optional, default="/{plural}/(?P&lt;id&gt;)"</span>
+  namespace, <span class="pl-c">// optional, default="wp/v2"</span>
+  methodName <span class="pl-c">// optional, default={plural}</span>
+}]</pre></div>
+</li>
+<li>
+<p><code>plugins</code> {Array} <em>(optional)</em></p>
+
+<p>Array of Kasia plugins.</p>
+
+<div class="highlight highlight-source-js"><pre><span class="pl-k">import</span> <span class="pl-smi">KasiaWpApiMenusPlugin</span> <span class="pl-k">from</span> <span class="pl-s"><span class="pl-pds">'</span>kasia-plugin-wp-api-menus<span class="pl-pds">'</span></span>
+
+<span class="pl-c">// Example passing in plugin</span>
+plugins<span class="pl-k">:</span> [
+    [KasiaWpApiMenusPlugin, { route<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">'</span>menus<span class="pl-pds">'</span></span> }], <span class="pl-c">// with configuration</span>
+    KasiaWpApiMenusPlugin, <span class="pl-c">// without configuration</span>
+]</pre></div>
+</li>
+</ul>
+
+<h2>
+<a id="exports" class="anchor" href="#exports" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Exports</h2>
+
+<h3>
+<a id="kasia-1" class="anchor" href="#kasia-1" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a><code>kasia</code>
+</h3>
+
+<p>The Kasia configurator.</p>
+
+<div class="highlight highlight-source-js"><pre><span class="pl-k">import</span> <span class="pl-smi">Kasia</span> <span class="pl-k">from</span> <span class="pl-s"><span class="pl-pds">'</span>kasia<span class="pl-pds">'</span></span></pre></div>
+
+<h3>
+<a id="kasiaconnect" class="anchor" href="#kasiaconnect" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a><code>kasia/connect</code>
+</h3>
+
+<p>The connect decorators.</p>
+
+<div class="highlight highlight-source-js"><pre><span class="pl-k">import</span> { <span class="pl-smi">connectWpPost</span>, <span class="pl-smi">connectWpQuery</span> } <span class="pl-k">from</span> <span class="pl-s"><span class="pl-pds">'</span>kasia/connect<span class="pl-pds">'</span></span></pre></div>
+
+<h3>
+<a id="kasiatypes" class="anchor" href="#kasiatypes" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a><code>kasia/types</code>
+</h3>
+
+<p>The built-in WordPress content types that can be passed to <code>connectWpPost</code> to define what content type
+a request should be made for.</p>
+
+<div class="highlight highlight-source-js"><pre><span class="pl-k">import</span> {
+  <span class="pl-smi">Category</span>, <span class="pl-smi">Comment</span>, <span class="pl-smi">Media</span>, <span class="pl-smi">Page</span>,
+  <span class="pl-smi">Post</span>, <span class="pl-smi">PostStatus</span>, <span class="pl-smi">PostType</span>,
+  <span class="pl-smi">PostRevision</span>, <span class="pl-smi">Tag</span>, <span class="pl-smi">Taxonomy</span>, <span class="pl-smi">User</span>
+} <span class="pl-k">from</span> <span class="pl-s"><span class="pl-pds">'</span>kasia/types<span class="pl-pds">'</span></span></pre></div>
+
+<h3>
+<a id="kasiautil" class="anchor" href="#kasiautil" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a><code>kasia/util</code>
+</h3>
+
+<p>Utility methods to help you when building your application.</p>
+
+<div class="highlight highlight-source-js"><pre><span class="pl-k">import</span> { 
+  <span class="pl-smi">makePreloaderSaga</span>, 
+  <span class="pl-smi">makeQueryPreloaderSaga</span>,
+  <span class="pl-smi">makePostPreloaderSaga</span>
+} <span class="pl-k">from</span> <span class="pl-s"><span class="pl-pds">'</span>kasia/util<span class="pl-pds">'</span></span></pre></div>
+
+<h2>
+<a id="the-shape-of-things" class="anchor" href="#the-shape-of-things" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>The Shape of Things</h2>
+
+<p>Kasia restructures the <a href="https://www.youtube.com/watch?v=Zn2JFlteeJ0">shape of things</a> returned from the WP-API.</p>
+
+<p>The changes made to the data are all effects available in the
+<a href="https://github.com/outlandishideas/wp-api-response-modify"><code>wp-api-response-modify</code></a> library.</p>
+
+<h3>
+<a id="why" class="anchor" href="#why" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Why?</h3>
+
+<p>The JSON returned from WP-API contains such things as objects with a single property (e.g. objects with <code>rendered</code>), 
+meta data property names prefixed with an underscore (e.g. <code>_links</code>), and</p>
+
+<h3>
+<a id="what-changes-should-i-be-aware-of" class="anchor" href="#what-changes-should-i-be-aware-of" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>What changes should I be aware of?</h3>
+
+<ul>
+<li>
+<p>Queries initiated by <code>connectWpPost</code> will always request embedded data.</p>
+
+<p>The primary reason for this is to reduce the number of requests made to the WP-API as it is very common
+to not only want content data, but also any metadata such as authors.</p>
+</li>
+<li>
+<p>All property names are camel-cased.</p>
+
+<div class="highlight highlight-source-js"><pre><span class="pl-s"><span class="pl-pds">"</span>featured_media<span class="pl-pds">"</span></span> <span class="pl-k">=&gt;</span> <span class="pl-s"><span class="pl-pds">"</span>featuredMedia<span class="pl-pds">"</span></span></pre></div>
+</li>
+<li>
+<p>Links are removed.</p>
+
+<div class="highlight highlight-source-js"><pre>{ title<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">'</span>Wow what an amazing title!<span class="pl-pds">'</span></span>, _links<span class="pl-k">:</span> {}, <span class="pl-k">...</span> }
+<span class="pl-c">// becomes...</span>
+{ title<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">'</span>Wow what an amazing  title!<span class="pl-pds">'</span></span>, <span class="pl-k">...</span> }</pre></div>
+</li>
+<li>
+<p>Objects that have a single property <code>'rendered'</code> are flattened.</p>
+
+<div class="highlight highlight-source-js"><pre>{ content<span class="pl-k">:</span> { rendered<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">'</span>&lt;h1&gt;Hello, World!&lt;/h1&gt;<span class="pl-pds">'</span></span> }, <span class="pl-k">...</span> }
+<span class="pl-c">// becomes...</span>
+{ content<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">'</span>&lt;h1&gt;Hello, World!&lt;/h1&gt;<span class="pl-pds">'</span></span>, <span class="pl-k">...</span> }</pre></div>
+</li>
+<li>
+<p>Content types are normalised using <a href="https://github.com/paularmstrong/normalizr"><code>normalizr</code></a>.
+This means that any embedded content data is made available on the store within its respective content type collection.
+For example:</p>
+
+<div class="highlight highlight-source-js"><pre>{
+  posts<span class="pl-k">:</span> {},
+  users<span class="pl-k">:</span> {},
+  pages<span class="pl-k">:</span> {},
+  news<span class="pl-k">:</span> {}, <span class="pl-c">// custom content type</span>
+  <span class="pl-k">...</span>
+}</pre></div>
+</li>
+</ul>
+
+<h2>
+<a id="plugins" class="anchor" href="#plugins" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Plugins</h2>
+
+<p>Kasia exposes a simple API for third-party plugins.</p>
+
+<p>A plugin should:</p>
+
+<ul>
+<li>
+<p>be a function that accepts these arguments:</p>
+
+<ul>
+<li>
+<strong>WP</strong> {wpapi} An instance of <code>wpapi</code>
+</li>
+<li>
+<strong>pluginOptions</strong> {Object} The user's options for the plugin</li>
+<li>
+<strong>kasiaOptions</strong> {Object} The user's options for Kasia</li>
+</ul>
+</li>
+<li><p>return an object containing <code>reducers</code> (Object) and <code>sagas</code> (Array).</p></li>
+<li><p>use the <code>'kasia/'</code> action type prefix.</p></li>
+</ul>
+
+<div class="highlight highlight-source-js"><pre><span class="pl-c">// Example definition returned by a plugin</span>
+{
+  reducer<span class="pl-k">:</span> {
+    <span class="pl-s"><span class="pl-pds">'</span><span class="pl-en">kasia/SET_DATA</span><span class="pl-pds">'</span></span><span class="pl-k">:</span> <span class="pl-k">function</span> <span class="pl-en">setDataReducer</span> () {}
+    <span class="pl-s"><span class="pl-pds">'</span><span class="pl-en">kasia/REMOVE_DATA</span><span class="pl-pds">'</span></span><span class="pl-k">:</span> <span class="pl-k">function</span> <span class="pl-en">removeDataReducer</span> () {}
+  },
+  sagas<span class="pl-k">:</span> [<span class="pl-k">function</span> <span class="pl-k">*</span> <span class="pl-en">fetchDataSaga</span> () {}]
+}</pre></div>
+
+<h3>
+<a id="available-plugins" class="anchor" href="#available-plugins" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Available plugins:</h3>
+
+<ul>
+<li><a href="https://github.com/outlandishideas/kasia-plugin-wp-api-menus"><code>kasia-plugin-wp-api-menus</code></a></li>
+<li><a href="https://github.com/outlandishideas/kasia-plugin-wp-api-all-terms"><code>kasia-plugin-wp-api-all-terms</code></a></li>
+</ul>
+
+<h2>
+<a id="universal-applications" class="anchor" href="#universal-applications" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Universal Applications</h2>
+
+<h3>
+<a id="utilities" class="anchor" href="#utilities" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Utilities</h3>
+
+<h4>
+<a id="utilmakepreloadersagacomponents-renderprops--generator" class="anchor" href="#utilmakepreloadersagacomponents-renderprops--generator" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a><code>util/makePreloaderSaga(components, renderProps) : Generator</code>
+</h4>
+
+<p>Create a single saga operation that will preload all data for any Kasia components in <code>components</code>.</p>
+
+<ul>
+<li>
+<strong>components</strong> {Array} Array of components</li>
+<li>
+<strong>renderProps</strong> {Object} Render props object derived from the matched route</li>
+</ul>
+
+<p>Returns a saga operation.</p>
+
+<h4>
+<a id="utilmakequerypreloadersagaqueryfn-renderprops--generator" class="anchor" href="#utilmakequerypreloadersagaqueryfn-renderprops--generator" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a><code>util/makeQueryPreloaderSaga(queryFn, renderProps) : Generator</code>
+</h4>
+
+<p>Create a single saga operation that will preload data for an arbitrary query against the WP API.</p>
+
+<ul>
+<li>
+<strong>queryFn</strong> {Function} Query function that accepts <code>wpapi</code> as argument</li>
+<li>
+<strong>renderProps</strong> {Object} Render props object</li>
+</ul>
+
+<p>Returns a saga operation.</p>
+
+<h4>
+<a id="utilmakepostpreloadersagacontenttype-id-state--generator" class="anchor" href="#utilmakepostpreloadersagacontenttype-id-state--generator" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a><code>util/makePostPreloaderSaga(contentType, id[, state]) : Generator</code>
+</h4>
+
+<p>Create a single saga operation that will preload data for a single post from the WP API.</p>
+
+<ul>
+<li>
+<strong>contentType</strong> {String} The content type of the item to fetch</li>
+<li>
+<strong>id</strong> {String|Number|Function} ID of the post or a function to derive from <code>renderProps</code>
+</li>
+<li>
+<strong>renderProps</strong> {Object} Render props object</li>
+<li>[<strong>state</strong>] {Object} <em>(optional)</em> State object (default: <code>null</code>)</li>
+</ul>
+
+<p>Returns a saga operation.</p>
+
+<h4>
+<a id="connectedcomponentmakepreloaderrenderprops-state--arrayarray" class="anchor" href="#connectedcomponentmakepreloaderrenderprops-state--arrayarray" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a><code>ConnectedComponent.makePreloader(renderProps[, state]) : Array&lt;Array&gt;</code>
+</h4>
+
+<p>Connected components expose a static method <code>makePreloader</code> that produces an array of saga operations
+to facilitate the request for entity data on the server ("preloaders").</p>
+
+<p>Create an array of preloader operations.</p>
+
+<ul>
+<li>
+<strong>renderProps</strong> {Object} Render props object derived from the matched route </li>
+<li>[<strong>state</strong>] {Object} <em>(optional)</em> State object (default: <code>null</code>) </li>
+</ul>
+
+<p>Returns an array of saga operations in the form:</p>
+
+<div class="highlight highlight-source-js"><pre><span class="pl-c">// Saga operations</span>
+[ [sagaGeneratorFn, action] ]</pre></div>
+
+<p>Elements:</p>
+
+<ul>
+<li><p><code>sagaGenerator</code> {Function} Must be called with the <code>action</code></p></li>
+<li><p><code>action</code> {Object} An action object containing information for the saga to fetch data</p></li>
+</ul>
+
+<h3>
+<a id="example" class="anchor" href="#example" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Example</h3>
+
+<p>A somewhat contrived example using the available <code>kasia/util</code> methods (see below).</p>
+
+<div class="highlight highlight-source-js"><pre><span class="pl-k">import</span> { <span class="pl-smi">match</span> } <span class="pl-k">from</span> <span class="pl-s"><span class="pl-pds">'</span>react-router<span class="pl-pds">'</span></span>
+
+<span class="pl-k">import</span> { 
+  <span class="pl-smi">makePreloaderSaga</span>,
+  <span class="pl-smi">makeQueryPreloaderSaga</span>
+} <span class="pl-k">from</span> <span class="pl-s"><span class="pl-pds">'</span>kasia/util<span class="pl-pds">'</span></span>
+
+<span class="pl-c">// Our application's react-router routes</span>
+<span class="pl-k">import</span> <span class="pl-smi">routes</span> <span class="pl-k">from</span> <span class="pl-s"><span class="pl-pds">'</span>./routes<span class="pl-pds">'</span></span>
+
+<span class="pl-c">// Configures the redux store with saga middleware</span>
+<span class="pl-c">// and enhances it with the `runSaga` method</span>
+<span class="pl-k">import</span> <span class="pl-smi">store</span> <span class="pl-k">from</span> <span class="pl-s"><span class="pl-pds">'</span>./store<span class="pl-pds">'</span></span>
+
+<span class="pl-c">// Takes the components and render props from matched route, and</span>
+<span class="pl-c">// the store state and produces the complete HTML as a string</span>
+<span class="pl-k">import</span> <span class="pl-smi">renderToString</span> <span class="pl-k">from</span> <span class="pl-s"><span class="pl-pds">'</span>./render<span class="pl-pds">'</span></span>
+
+<span class="pl-c">// Collection of query functions that request data via `wpapi`</span>
+<span class="pl-k">import</span> { <span class="pl-smi">categoriesQuery</span> } <span class="pl-k">from</span> <span class="pl-s"><span class="pl-pds">'</span>./queries<span class="pl-pds">'</span></span>
+
+<span class="pl-c">// Run all `sagas` until their completion</span>
+<span class="pl-k">function</span> <span class="pl-en">runSagas</span> (<span class="pl-smi">store</span>, <span class="pl-smi">sagas</span>) {
+  <span class="pl-k">return</span> <span class="pl-smi">sagas</span>.<span class="pl-en">reduce</span>((<span class="pl-smi">promise</span>, <span class="pl-smi">saga</span>) <span class="pl-k">=&gt;</span> {
+    <span class="pl-k">return</span> <span class="pl-smi">promise</span>.<span class="pl-en">then</span>(() <span class="pl-k">=&gt;</span> <span class="pl-smi">store</span>.<span class="pl-en">runSaga</span>(saga).<span class="pl-smi">done</span>)
+  }, <span class="pl-c1">Promise</span>.<span class="pl-en">resolve</span>())
+}
+
+<span class="pl-c">// Produce a static webpage and send to the client for the given `route`</span>
+<span class="pl-k">export</span> <span class="pl-k">function</span> <span class="pl-en">preload</span> (<span class="pl-smi">res</span>, <span class="pl-smi">route</span>) { 
+  <span class="pl-k">return</span> <span class="pl-en">match</span>({ routes, location<span class="pl-k">:</span> route })
+    .<span class="pl-en">then</span>((<span class="pl-smi">error</span>, <span class="pl-smi">redirectLocation</span>, <span class="pl-smi">renderProps</span>) <span class="pl-k">=&gt;</span> {
+      <span class="pl-k">if</span> (error) {
+        <span class="pl-smi">res</span>.<span class="pl-en">sendStatus</span>(<span class="pl-c1">500</span>)
+        <span class="pl-k">return</span>
+      }
+
+      <span class="pl-k">if</span> (redirectLocation) {
+        <span class="pl-smi">res</span>.<span class="pl-en">redirect</span>(<span class="pl-c1">302</span>, <span class="pl-smi">redirectLocation</span>.<span class="pl-c1">pathname</span> <span class="pl-k">+</span> <span class="pl-smi">redirectLocation</span>.<span class="pl-smi">search</span>)
+        <span class="pl-k">return</span>
+      }
+
+      <span class="pl-k">const</span> <span class="pl-c1">preloaders</span> <span class="pl-k">=</span> [
+        <span class="pl-en">makeQueryPreloaderSaga</span>(categoriesQuery, renderProps),
+        <span class="pl-en">makePreloaderSaga</span>(<span class="pl-smi">renderProps</span>.<span class="pl-c1">components</span>, renderProps)
+      ]
+
+      <span class="pl-k">return</span> <span class="pl-en">runSagas</span>(preloaders)
+        .<span class="pl-en">then</span>(() <span class="pl-k">=&gt;</span> <span class="pl-en">renderToString</span>(components, renderProps, <span class="pl-smi">store</span>.<span class="pl-en">getState</span>()))
+        .<span class="pl-en">then</span>((<span class="pl-c1">document</span>) <span class="pl-k">=&gt;</span> <span class="pl-smi">res</span>.<span class="pl-c1">send</span>(<span class="pl-c1">document</span>))
+    })
+}</pre></div>
+
+<h2>
+<a id="contributing" class="anchor" href="#contributing" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Contributing</h2>
+
+<p>All pull requests and issues welcome! </p>
+
+<ul>
+<li>When submitting an issue please provide adequate steps to reproduce the problem.</li>
+<li>PRs must be made using the <code>standard</code> code style.</li>
+<li>PRs must update the version of the library according to <a href="http://semver.org/">semantic versioning</a>.</li>
+</ul>
+
+<p>If you're not sure how to contribute, check out Kent C. Dodds'
+<a href="https://egghead.io/lessons/javascript-identifying-how-to-contribute-to-an-open-source-project-on-github">great video tutorials on egghead.io</a>!</p>
+
+<h2>
+<a id="author--license" class="anchor" href="#author--license" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Author &amp; License</h2>
+
+<p><code>kasia</code> was created by <a href="https://twitter.com/outlandish">Outlandish</a> and is released under the MIT license.</p>
+
+      <footer class="site-footer">
+        <span class="site-footer-owner"><a href="https://github.com/outlandishideas/kasia">Kasia</a> is maintained by <a href="https://github.com/outlandishideas">outlandishideas</a>.</span>
+
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
+      </footer>
+
+    </section>
+
+  
+  </body>
+</html>
