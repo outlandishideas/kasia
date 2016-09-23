@@ -8,10 +8,7 @@ export const fetchTerms = () =>
   ({ type: REQUEST_TERMS })
 
 export function makePreloader (WP) {
-  return () => fetchResource(
-    WP,
-    Object.assign({}, fetchTerms(), { prepared: true })
-  )
+  return () => fetchResource(WP, fetchTerms())
 }
 
 function fetch (WP, action) {
