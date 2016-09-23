@@ -413,7 +413,7 @@ A plugin should:
 ### Available plugins:
 
 - [`kasia-plugin-wp-api-menus`](https://github.com/outlandishideas/kasia-plugin-wp-api-menus)
-- [`kasia=plugin-wp-api-all-terms`](https://github.com/outlandishideas/kasia-plugin-wp-api-all-terms)
+- [`kasia-plugin-wp-api-all-terms`](https://github.com/outlandishideas/kasia-plugin-wp-api-all-terms)
 
 ## Universal Applications
 
@@ -519,8 +519,8 @@ export function preload (res, route) {
       }
 
       const preloaders = [
-        makePreloaderSaga(renderProps.components, renderProps),
-        makeQueryPreloaderSaga(categoriesQuery, renderProps)
+        makeQueryPreloaderSaga(categoriesQuery, renderProps),
+        makePreloaderSaga(renderProps.components, renderProps)
       ]
 
       return runSagas(preloaders)
