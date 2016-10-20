@@ -69,7 +69,13 @@ Kasia suits applications that are built using these technologies:
 
 ## Install
 
-`npm install kasia --save`
+```sh
+npm install kasia --save
+```
+
+```sh
+yarn add kasia
+```
 
 ## Import
 
