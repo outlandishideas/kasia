@@ -1,4 +1,4 @@
-import invariants from './invariants'
+import invariants from './util/invariants'
 
 let WP = null
 

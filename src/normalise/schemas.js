@@ -1,6 +1,6 @@
 import { Schema, arrayOf } from 'normalizr'
 
-import { ContentTypes, ContentTypesPlural as plural } from '../contentTypes'
+import { ContentTypes, ContentTypesPlural as plural } from '../util/contentTypes'
 
 /**
  * Schema object cache, populated in `makeSchemas`

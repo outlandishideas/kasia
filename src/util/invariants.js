@@ -83,8 +83,8 @@ export default {
     `See documentation ${kasiaGitHubUrl}`,
     typeof store.wordpress
   ),
-  queryErrorFree: (query, targetName) => invariant(
-    query && !query.error,
+  queryHasError: (query, targetName) => invariant(
+    query && query.error,
     'Ignoring query %s. ' +
     'Error: "%s". ' +
     'Check connectWp* decorator for %s.',

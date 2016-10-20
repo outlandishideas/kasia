@@ -3,25 +3,8 @@
 jest.unmock('../../src/sagas')
 jest.unmock('../../src/wpapi')
 
-import { chain, derivedQueryFn } from '../../src/sagas'
+import { derivedQueryFn } from '../../src/sagas'
 import { setWP } from '../../src/wpapi'
-
-describe('chain', () => {
-  const mockApi = {
-    feedOnce: () => ({
-      feedTwice: (result) => result
-    })
-  }
-
-  it('correctly chains method calls', () => {
-    const result = chain(mockApi, [
-      ['feedOnce'],
-      ['feedTwice', 'result']
-    ])
-
-    expect(result).toEqual('result')
-  })
-})
 
 describe('derivedQuery', () => {
   const fn = derivedQueryFn('posts', 16)

@@ -3,7 +3,7 @@ import merge from 'lodash.merge'
 import modifyResponse from 'wp-api-response-modify'
 
 import { makeSchemas, createSchema } from './schemas'
-import { deriveContentType } from '../contentTypes'
+import { deriveContentType } from '../util/contentTypes'
 
 /**
  * Split a response from the WP-API into its constituent entities.

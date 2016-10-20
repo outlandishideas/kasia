@@ -1,23 +1,12 @@
 import * as effects from 'redux-saga/effects'
 import { camelize } from 'humps'
+import chain from 'make-chain-fn'
 
-import { getWP } from './wpapi'
-import { getContentType } from './contentTypes'
+import { getWP } from '../wpapi'
+import { getContentType } from '../util/contentTypes'
 import { completeRequest, failRequest } from './actions'
-import { Request, RequestTypes } from './constants/ActionTypes'
-
-/**
- * Chain call methods beginning with `fn`.
- * @param {Object} obj The object to invoke calls on
- * @param {Object} calls The methods and their args to call
- */
-export function chain (obj, calls) {
-  return calls.reduce((result, call) => {
-    const args = call[1]
-    const methodName = call[0]
-    return args ? result[methodName](args) : result[methodName]()
-  }, obj)
-}
+import ActionTypes from '../constants/ActionTypes'
+import OperationTypes from '../constants/OperationTypes'
 
 /**
  * Create a function that dynamically calls the necessary wpapi
@@ -61,11 +50,11 @@ export function resolveQueryFn (action) {
 
   let realQueryFn
 
-  if (action.request === RequestTypes.Post) {
+  if (OperationTypes.Post === action.request) {
     const options = getContentType(contentType)
     const methodName = camelize(options.plural)
     realQueryFn = derivedQueryFn(methodName, identifier)
-  } else if (action.request === RequestTypes.Query) {
+  } else if (OperationTypes.Query === action.request) {
     realQueryFn = queryFn
   } else {
     throw new Error(`Unknown request type "${action.request}".`)
@@ -82,19 +71,17 @@ export function resolveQueryFn (action) {
 export function * fetch (action) {
   const target = action.target
 
-  const id = yield effects.select((state) => state.wordpress.__kasia__.nextQueryId)
-
   try {
     const data = yield effects.call(resolveQueryFn(action), getWP())
-    yield effects.put(completeRequest({ id, data, target }))
+    yield effects.put(completeRequest({ data, target }))
   } catch (error) {
-    yield effects.put(failRequest({ id, error, target }))
+    yield effects.put(failRequest({ error, target }))
   }
 }
 
 export function * watchRequests () {
   while (true) {
-    const action = yield effects.take(Request.Create)
+    const action = yield effects.take(ActionTypes.RequestCreate)
     yield effects.fork(fetch, action)
   }
 }

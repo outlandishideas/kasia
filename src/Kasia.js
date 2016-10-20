@@ -1,11 +1,11 @@
 import merge from 'lodash.merge'
 import * as effects from 'redux-saga/effects'
 
-import invariants from './invariants'
-import makeReducer from './reducer'
+import invariants from './util/invariants'
+import makeReducer from './redux/reducer'
 import { setWP } from './wpapi'
-import { watchRequests } from './sagas'
-import { registerContentType } from './contentTypes'
+import { watchRequests } from './redux/sagas'
+import { registerContentType } from './util/contentTypes'
 
 /**
  * Components of the toolset that are extensible via plugins.
