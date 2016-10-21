@@ -2,7 +2,7 @@ import { fork } from 'redux-saga/effects'
 
 import { fetch } from '../redux/sagas'
 import { createPostRequest } from '../redux/actions'
-import { getContentType } from '../util/contentTypes'
+import contentTypes from '../util/contentTypes'
 import invariants from '../util/invariants'
 
 /**
@@ -22,7 +22,7 @@ export function makePostPreloaderSaga (contentType, id, renderProps) {
   const identifier = typeof id === 'function' ? id(renderProps) : id
   const action = createPostRequest({ contentType, identifier })
 
-  invariants.isValidContentType(getContentType(contentType), contentType, 'call to makePostPreloaderSaga')
+  invariants.isValidContentType(contentTypes.get(contentType), contentType, 'call to makePostPreloaderSaga')
   invariants.isIdentifierValue(identifier)
 
   return function * () {

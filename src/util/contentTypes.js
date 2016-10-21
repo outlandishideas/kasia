@@ -6,6 +6,10 @@ import { camelize } from 'humps'
 import { ContentTypes, ContentTypesPlural } from '../constants/ContentTypes'
 import invariants from './invariants'
 
+const contentTypes = {}
+
+export default contentTypes
+
 // Pre-populate cache with built-in content type options
 const optionsCache = Object.keys(ContentTypes).reduce((cache, key) => {
   const name = ContentTypes[key]
@@ -26,7 +30,7 @@ const optionsCache = Object.keys(ContentTypes).reduce((cache, key) => {
  * @param {Object} contentType Content type options object
  * @returns {Object}
  */
-export function registerContentType (WP, contentType) {
+contentTypes.regiser = function contentTypes_register (WP, contentType) {
   invariants.isValidContentTypeObject(contentType)
   invariants.isNewContentType(getContentTypes(), contentType)
 
@@ -48,7 +52,7 @@ export function registerContentType (WP, contentType) {
  * @param {String} contentType The name of the content type
  * @returns {Object}
  */
-export function getContentType (contentType) {
+contentTypes.get = function contentTypes_get (contentType) {
   return optionsCache[contentType]
 }
 
@@ -56,7 +60,7 @@ export function getContentType (contentType) {
  * Get all registered content types and their options.
  * @returns {Object}
  */
-export function getContentTypes () {
+contentTypes.getAll = function contentTypes_getAll () {
   return optionsCache
 }
 
@@ -66,7 +70,7 @@ export function getContentTypes () {
  * @param {Object} entity
  * @returns {String} The content type
  */
-export function deriveContentType (entity) {
+contentTypes.derive = function contentTypes_derive (entity) {
   if (typeof entity.type !== 'undefined') {
     if (entity.type === 'comment') {
       return ContentTypes.Comment

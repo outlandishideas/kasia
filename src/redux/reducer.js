@@ -2,7 +2,7 @@ import merge from 'lodash.merge'
 import pickToArray from 'pick-to-array'
 
 import { ContentTypesWithoutId } from '../constants/ContentTypes'
-import { deriveContentType } from '../util/contentTypes'
+import contentTypes from '../util/contentTypes'
 import ActionTypes from '../constants/ActionTypes'
 import normalise from '../normalise'
 
@@ -23,7 +23,7 @@ export function pickEntityIds (data) {
 
   // Accommodate content types that do not have an `id` property
   data.forEach((entity) => {
-    const type = deriveContentType(entity)
+    const type = contentTypes.derive(entity)
     if (ContentTypesWithoutId[type]) {
       entityIdentifiers.push(...pickToArray(entity, 'slug'))
     }

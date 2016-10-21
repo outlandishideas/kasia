@@ -3,8 +3,8 @@ import { camelize } from 'humps'
 import chainCall from 'chain-call'
 
 import { getWP } from '../wpapi'
-import { getContentType } from '../util/contentTypes'
 import { completeRequest, failRequest } from './actions'
+import contentTypes from '../util/contentTypes'
 import ActionTypes from '../constants/ActionTypes'
 import OperationTypes from '../constants/OperationTypes'
 
@@ -51,7 +51,7 @@ export function makeQueryFn (action) {
   let realQueryFn
 
   if (OperationTypes.Post === action.request) {
-    const options = getContentType(contentType)
+    const options = contentTypes.get(contentType)
     const methodName = camelize(options.plural)
     realQueryFn = deriveQueryFn(methodName, identifier)
   } else if (OperationTypes.Query === action.request) {
@@ -69,7 +69,7 @@ export function makeQueryFn (action) {
  * @param {Object} action Action object
  */
 export function * fetch (action) {
-  const target = action.target
+  const { target } = action
 
   try {
     const data = yield effects.call(makeQueryFn(action), getWP())

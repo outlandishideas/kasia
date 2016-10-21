@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import merge from 'lodash.merge'
 
 import { createPostRequest, createQueryRequest } from '../redux/actions'
-import { getContentType } from '../util/contentTypes'
+import contentTypes from '../util/contentTypes'
 import OperationTypes from '../constants/OperationTypes'
 import invariants from '../util/invariants'
 import UTIL from './util'
@@ -62,7 +62,7 @@ function connect (operation, config, options) {
       componentWillMount () {
         if (OperationTypes.Post === operation) {
           const contentType = config.contentType
-          invariants.isValidContentType(getContentType(contentType), contentType, displayName)
+          invariants.isValidContentType(contentTypes.get(contentType), contentType, displayName)
         }
 
         const state = this._getState().wordpress
@@ -86,7 +86,7 @@ function connect (operation, config, options) {
 
         if (OperationTypes.Post === operation) {
           const { id, contentType } = config
-          const typeConfig = getContentType(contentType)
+          const typeConfig = contentTypes.get(contentType)
           const nextBuiltProps = this._reconcileWpData(nextProps)
 
           shouldDispatch = (

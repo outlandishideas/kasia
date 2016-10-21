@@ -3,7 +3,7 @@ import merge from 'lodash.merge'
 import modifyResponse from 'wp-api-response-modify'
 
 import { makeSchemas, createSchema } from './schemas'
-import { deriveContentType } from '../util/contentTypes'
+import contentTypes from '../util/contentTypes'
 
 /**
  * Split a response from the WP-API into its constituent entities.
@@ -16,7 +16,7 @@ export default function normalise (data, idAttribute) {
 
   return data.reduce((entities, rawEntity) => {
     const entity = modifyResponse(rawEntity)
-    const type = deriveContentType(entity)
+    const type = contentTypes.derive(entity)
 
     const contentTypeSchema = schemas[type]
       // Built-in content type or previously registered custom content type

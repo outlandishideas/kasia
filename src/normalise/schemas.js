@@ -1,6 +1,6 @@
 import { Schema, arrayOf } from 'normalizr'
 
-import { ContentTypes, ContentTypesPlural as plural } from '../util/contentTypes'
+import { ContentTypes, ContentTypesPlural } from '../constants/ContentTypes'
 
 /**
  * Schema object cache, populated in `makeSchemas`
@@ -57,19 +57,19 @@ export function makeSchemas (idAttribute) {
   lastIdAttribute = idAttribute
 
   // Content types with `id` properties
-  categorySchema = new Schema(plural[ContentTypes.Category], { idAttribute })
-  commentSchema = new Schema(plural[ContentTypes.Comment], { idAttribute })
-  mediaSchema = new Schema(plural[ContentTypes.Media], { idAttribute })
-  pageSchema = new Schema(plural[ContentTypes.Page], { idAttribute })
-  postSchema = new Schema(plural[ContentTypes.Post], { idAttribute })
-  revisionSchema = new Schema(plural[ContentTypes.PostRevision], { idAttribute })
-  tagSchema = new Schema(plural[ContentTypes.Tag], { idAttribute })
-  userSchema = new Schema(plural[ContentTypes.User], { idAttribute })
+  categorySchema = new Schema(ContentTypesPlural[ContentTypes.Category], { idAttribute })
+  commentSchema = new Schema(ContentTypesPlural[ContentTypes.Comment], { idAttribute })
+  mediaSchema = new Schema(ContentTypesPlural[ContentTypes.Media], { idAttribute })
+  pageSchema = new Schema(ContentTypesPlural[ContentTypes.Page], { idAttribute })
+  postSchema = new Schema(ContentTypesPlural[ContentTypes.Post], { idAttribute })
+  revisionSchema = new Schema(ContentTypesPlural[ContentTypes.PostRevision], { idAttribute })
+  tagSchema = new Schema(ContentTypesPlural[ContentTypes.Tag], { idAttribute })
+  userSchema = new Schema(ContentTypesPlural[ContentTypes.User], { idAttribute })
 
   // Content types without `id` properties
-  postTypeSchema = new Schema(plural[ContentTypes.PostType], { idAttribute: 'slug' })
-  postStatusSchema = new Schema(plural[ContentTypes.PostStatus], { idAttribute: 'slug' })
-  taxonomySchema = new Schema(plural[ContentTypes.Taxonomy], { idAttribute: 'slug' })
+  postTypeSchema = new Schema(ContentTypesPlural[ContentTypes.PostType], { idAttribute: 'slug' })
+  postStatusSchema = new Schema(ContentTypesPlural[ContentTypes.PostStatus], { idAttribute: 'slug' })
+  taxonomySchema = new Schema(ContentTypesPlural[ContentTypes.Taxonomy], { idAttribute: 'slug' })
 
   mediaSchema.define({
     author: userSchema,

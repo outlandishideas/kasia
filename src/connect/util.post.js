@@ -1,6 +1,6 @@
 import { createPostRequest } from '../redux/actions'
-import { getContentType } from '../util/contentTypes'
 import { fetch } from '../redux/sagas'
+import contentTypes from '../util/contentTypes'
 import invariants from '../util/invariants'
 
 /**
@@ -26,7 +26,7 @@ export function findEntity (entities, identifier) {
 }
 
 export function makePropsData (state, { contentType, id }) {
-  const { plural, name } = getContentType(contentType)
+  const { plural, name } = contentTypes.get(contentType)
   const entityCollection = state.wordpress.entities[plural]
 
   return {
@@ -42,7 +42,7 @@ export function getIdentifier (id, props) {
 
 export function makePreloader (contentType) {
   return (displayName) => (renderProps) => {
-    invariants.isValidContentType(getContentType(contentType), contentType, displayName)
+    invariants.isValidContentType(contentTypes.get(contentType), contentType, displayName)
 
     const action = createPostRequest({
       contentType,

@@ -3,15 +3,15 @@ import * as effects from 'redux-saga/effects'
 
 import invariants from './util/invariants'
 import makeReducer from './redux/reducer'
+import contentTypes from './util/contentTypes'
 import { setWP } from './wpapi'
 import { watchRequests } from './redux/sagas'
-import { registerContentType } from './util/contentTypes'
 
 /**
  * Components of the toolset that are extensible via plugins.
  * @type {Object}
  */
-const componentsBase = {
+const COMPONENTS_BASE = {
   sagas: [watchRequests],
   reducers: {}
 }
@@ -53,9 +53,9 @@ export default function Kasia (opts = {}) {
       sagas: plugins.sagas.concat(plugin.sagas),
       reducers: merge({}, plugins.reducers, plugin.reducers)
     }
-  }, componentsBase)
+  }, COMPONENTS_BASE)
 
-  contentTypes.forEach((contentType) => registerContentType(WP, contentType))
+  contentTypes.forEach((contentType) => contentTypes.register(WP, contentType))
 
   return {
     kasiaReducer: makeReducer({ keyEntitiesBy }, plugins),
