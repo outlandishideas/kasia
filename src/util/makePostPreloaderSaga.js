@@ -1,7 +1,7 @@
-import * as effects from 'redux-saga/effects'
+import { fork } from 'redux-saga/effects'
 
 import { fetch } from '../redux/sagas'
-import { createPostRequest, createQueryRequest } from '../redux/actions'
+import { createPostRequest } from '../redux/actions'
 import { getContentType } from '../util/contentTypes'
 import invariants from '../util/invariants'
 
@@ -26,6 +26,6 @@ export function makePostPreloaderSaga (contentType, id, renderProps) {
   invariants.isIdentifierValue(identifier)
 
   return function * () {
-    yield effects.fork(fetch, action)
+    yield fork(fetch, action)
   }
 }

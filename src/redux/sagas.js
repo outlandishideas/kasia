@@ -1,6 +1,6 @@
 import * as effects from 'redux-saga/effects'
 import { camelize } from 'humps'
-import chain from 'make-chain-fn'
+import chainCall from 'chain-call'
 
 import { getWP } from '../wpapi'
 import { getContentType } from '../util/contentTypes'
@@ -27,15 +27,15 @@ import OperationTypes from '../constants/OperationTypes'
  * @param {String|Number} identifier The identifier's id or slug
  * @returns {Function} A function to make a request to the WP-API
  */
-export function derivedQueryFn (contentTypeMethodName, identifier) {
-  return () => chain(getWP(), [
+export function deriveQueryFn (contentTypeMethodName, identifier) {
+  return () => chainCall(getWP(), [
     // Call the content type method
-    [contentTypeMethodName, null],
+    [contentTypeMethodName],
     // Call the identifier method
     [typeof identifier === 'string' ? 'slug' : 'id', identifier],
-    // Call 'embed' in order that embedded data is in the response
+    // Call `embed` in order that embedded data is in the response
     ['embed'],
-    // Call `then` in order to invoke query and return a Promise
+    // Call `then` to invoke the query for data
     ['then', (response) => response]
   ])
 }
@@ -45,7 +45,7 @@ export function derivedQueryFn (contentTypeMethodName, identifier) {
  * @param {Object} action
  * @returns {Function}
  */
-export function resolveQueryFn (action) {
+export function makeQueryFn (action) {
   const { contentType, identifier, queryFn } = action
 
   let realQueryFn
@@ -53,7 +53,7 @@ export function resolveQueryFn (action) {
   if (OperationTypes.Post === action.request) {
     const options = getContentType(contentType)
     const methodName = camelize(options.plural)
-    realQueryFn = derivedQueryFn(methodName, identifier)
+    realQueryFn = deriveQueryFn(methodName, identifier)
   } else if (OperationTypes.Query === action.request) {
     realQueryFn = queryFn
   } else {
@@ -72,7 +72,7 @@ export function * fetch (action) {
   const target = action.target
 
   try {
-    const data = yield effects.call(resolveQueryFn(action), getWP())
+    const data = yield effects.call(makeQueryFn(action), getWP())
     yield effects.put(completeRequest({ data, target }))
   } catch (error) {
     yield effects.put(failRequest({ error, target }))

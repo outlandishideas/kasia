@@ -6,6 +6,13 @@ import { deriveContentType } from '../util/contentTypes'
 import ActionTypes from '../constants/ActionTypes'
 import normalise from '../normalise'
 
+export const INITIAL_STATE = {
+  // Record query requests to the WP-API here
+  queries: {},
+  // Entities are normalised and stored here
+  entities: {}
+}
+
 /**
  * Pick all entity identifiers from a raw WP-API response.
  * @param {Object} data Raw WP-API JSON
@@ -60,13 +67,6 @@ export const failReducer = (state, action) => ({
   }
 })
 
-export const initialState = {
-  // Record query requests to the WP-API here
-  queries: {},
-  // Entities are normalised and stored here
-  entities: {}
-}
-
 /**
  * Make the reducer for Kasia.
  * @param {Object} options Options object
@@ -84,7 +84,7 @@ export default function makeReducer (options, plugins) {
   })
 
   return {
-    wordpress: function kasiaReducer (state = initialState, action) {
+    wordpress: function kasiaReducer (state = INITIAL_STATE, action) {
       const [ actionNamespace ] = action.type.split('/')
 
       if (actionNamespace === 'kasia' && action.type in reducer) {

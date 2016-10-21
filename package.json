@@ -34,6 +34,7 @@
   },
   "homepage": "https://github.com/outlandishideas/kasia#readme",
   "dependencies": {
+    "chain-call": "0.0.1",
     "humps": "^1.0.0",
     "invariant": "^2.2.1",
     "lodash.find": "^4.3.0",

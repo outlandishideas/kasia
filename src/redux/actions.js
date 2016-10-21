@@ -37,12 +37,3 @@ export const completeRequest = ({ id, data, target = false }) =>
  */
 export const failRequest = ({ id, error, target = false }) =>
   ({ type: ActionTypes.RequestFail, id, error, target })
-
-export const fetchPost = (contentType, identifier) =>
-  createPostRequest({ contentType, identifier })
-
-export const fetchQuery = (queryFn) =>
-  createQueryRequest({ queryFn })
-
-export const wpQuery = (queryFn) =>
-  createQueryRequest({ queryFn })

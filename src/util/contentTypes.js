@@ -6,17 +6,16 @@ import { camelize } from 'humps'
 import { ContentTypes, ContentTypesPlural } from '../constants/ContentTypes'
 import invariants from './invariants'
 
-// Create the options object for a built-in content type
-const makeBuiltInContentTypeOptions = (name) => ({
-  name,
-  plural: ContentTypesPlural[name],
-  slug: ContentTypesPlural[name]
-})
-
 // Pre-populate cache with built-in content type options
 const optionsCache = Object.keys(ContentTypes).reduce((cache, key) => {
   const name = ContentTypes[key]
-  cache[name] = makeBuiltInContentTypeOptions(name)
+
+  cache[name] = {
+    name,
+    plural: ContentTypesPlural[name],
+    slug: ContentTypesPlural[name]
+  }
+
   return cache
 }, {})
 

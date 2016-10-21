@@ -1,3 +1,5 @@
+import { fork } from 'redux-saga/effects'
+
 import { fetch } from '../redux/sagas'
 import { createQueryRequest } from '../redux/actions'
 
@@ -17,6 +19,6 @@ export default function makeQueryPreloaderSaga (queryFn, renderProps, state = nu
   const action = createQueryRequest({ queryFn: realQueryFn })
 
   return function * () {
-    yield effects.fork(fetch, action)
+    yield fork(fetch, action)
   }
 }

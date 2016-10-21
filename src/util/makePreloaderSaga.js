@@ -1,4 +1,4 @@
-import waitAll from './waitAll'
+import { runSagas } from 'redux-saga-util'
 
 /**
  * Make a preloader saga for all Kasia components within the `components` array.
@@ -19,5 +19,5 @@ export default function makePreloaderSaga (components, renderProps, state = null
     .filter(component => component && typeof component.makePreloader === 'function')
     .map(component => component.makePreloader(renderProps, state))
 
-  return waitAll(preloaders)
+  return runSagas(preloaders)
 }

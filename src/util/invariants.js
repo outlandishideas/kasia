@@ -1,7 +1,7 @@
 import invariant from 'invariant'
 
-const nodeWpApiGitHubUrl = 'http://bit.ly/2adfKKg'
-const kasiaGitHubUrl = 'http://bit.ly/2bg268P'
+const NODE_WPAPI_GITHUB_URL = 'http://bit.ly/2adfKKg'
+const KASIA_URL = 'http://kasia.io'
 
 export default {
   isString: (name, value) => invariant(
@@ -31,7 +31,7 @@ export default {
   isWpApiInstance: (value = {}) => invariant(
     typeof value.registerRoute === 'function',
     'Expecting WP to be instance of `node-wpapi`. ' +
-    `See ${nodeWpApiGitHubUrl} for docs.`
+    `See ${NODE_WPAPI_GITHUB_URL} for docs.`
   ),
   isIdentifierArg: (identifier) => invariant(
     typeof identifier === 'function' ||
@@ -45,7 +45,7 @@ export default {
     typeof obj.plural === 'string' &&
     typeof obj.slug === 'string',
     'Invalid content type object. ' +
-    `See documentation ${kasiaGitHubUrl}.`
+    `See documentation ${KASIA_URL}.`
   ),
   isValidContentType: (contentTypeOptions, name, componentName) => invariant(
     typeof contentTypeOptions !== 'undefined',
@@ -80,7 +80,7 @@ export default {
     Boolean(store.wordpress),
     'No `wordpress` object on the store. ' +
     'Is your store configured correctly? ' +
-    `See documentation ${kasiaGitHubUrl}`,
+    `See documentation ${KASIA_URL}`,
     typeof store.wordpress
   ),
   queryHasError: (query, targetName) => invariant(

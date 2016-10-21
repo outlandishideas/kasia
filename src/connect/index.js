@@ -36,6 +36,10 @@ let queryId = 0
 function connect (operation, config, options) {
   const util = UTIL[operation]
 
+  if (!util) {
+    throw new Error(`Unrecognised operation type "${operation}".`)
+  }
+
   return (target) => {
     const displayName = options.displayName || target.displayName || target.name
 
@@ -84,10 +88,13 @@ function connect (operation, config, options) {
           const { id, contentType } = config
           const typeConfig = getContentType(contentType)
           const nextBuiltProps = this._reconcileWpData(nextProps)
-          const cannotDeriveEntityFromNextProps = !nextBuiltProps.kasia[typeConfig.name]
-          const changedIdentifier = util.getIdentifier(id, nextProps) !== util.getIdentifier(id, this.props)
 
-          shouldDispatch = changedIdentifier && cannotDeriveEntityFromNextProps
+          shouldDispatch = (
+            // changed identifier
+            !nextBuiltProps.kasia[typeConfig.name] &&
+            // cannot derive entity from existing props
+            util.getIdentifier(id, nextProps) !== util.getIdentifier(id, this.props)
+          )
         } else if (OperationTypes.Query === operation) {
           shouldDispatch = config.shouldUpdate(this.props, nextProps)
         }
@@ -106,7 +113,7 @@ function connect (operation, config, options) {
       }
 
       _requestWpData (props) {
-        let action = false
+        let action = null
 
         if (OperationTypes.Post === operation) {
           const identifier = this.getIdentifier(props)
