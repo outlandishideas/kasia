@@ -3,73 +3,39 @@
 jest.disableAutomock()
 
 import React from 'react'
-import modifyResponse from 'wp-api-response-modify'
-import merge from 'lodash.merge'
 import { mount } from 'enzyme'
 
-import postJson from '../fixtures/wp-api-responses/post'
-import bookJson from '../fixtures/wp-api-responses/book'
+import postJson from '../mocks/fixtures/wp-api-responses/post'
+import bookJson from '../mocks/fixtures/wp-api-responses/book'
+import state_multipleEntities from '../mocks/states/multipleEntities'
+import wpapi from '../mocks/wpapi'
 
-import { Request, RequestTypes } from '../../src/constants/ActionTypes'
-import { getContentType, registerContentType } from '../../src/contentTypes'
-import { initialState } from '../../src/reducer'
+import ActionTypes from '../../src/constants/ActionTypes'
+import OperationTypes from '../../src/constants/OperationTypes'
+import contentTypes from '../../src/util/contentTypes'
 
-import BuiltInContentType from '../components/BuiltInContentType'
-import CustomContentType from '../components/CustomContentType'
-import BadContentTypeComponent from '../components/BadContentType'
+import BuiltInContentType from '../mocks/components/BuiltInContentType'
+import CustomContentType from '../mocks/components/CustomContentType'
+import BadContentTypeComponent from '../mocks/components/BadContentType'
+
+contentTypes.register(wpapi, {
+  name: 'book',
+  plural: 'books',
+  slug: 'books'
+})
 
 function setup () {
   const dispatch = jest.fn()
-
   const subscribe = () => {}
-
-  const getState = () => ({
-    wordpress: merge(initialState, {
-      queries: {
-        '0': { complete: true, OK: true, entities: [postJson.id] },
-        '1': { complete: true, OK: true, entities: [postJson.id + 1] },
-        '2': { complete: true, OK: true, entities: [bookJson.id] }
-      },
-      entities: {
-        posts: {
-          [String(postJson.id)]: modifyResponse(postJson),
-          [String(postJson.id + 1)]: merge({}, modifyResponse(postJson), { title: 'new title' })
-        },
-        books: {
-          [String(bookJson.id)]: modifyResponse(bookJson)
-        }
-      }
-    })
-  })
-
-  const mockWP = {
-    registerRoute: jest.fn()
-  }
-
-  if (!getContentType('book')) {
-    registerContentType(mockWP, {
-      name: 'book',
-      plural: 'books',
-      slug: 'books'
-    })
-  }
-
-  return {
-    dispatch,
-    getState,
-    subscribe
-  }
-}
-
-function makeProps (id) {
-  return { params: { id } }
+  const getState = () => state_multipleEntities
+  return { dispatch, getState, subscribe }
 }
 
 describe('connectWpPost', () => {
   describe('with built-in content type', () => {
     const store = setup()
     const dispatch = store.dispatch
-    const props = makeProps(postJson.id)
+    const props = { params: { id: postJson.id } }
     const rendered = mount(<BuiltInContentType {...props} />, { context: { store } })
 
     it('should wrap the component', () => {
@@ -78,8 +44,8 @@ describe('connectWpPost', () => {
 
     it('should dispatch REQUEST_CREATE', () => {
       const action = dispatch.mock.calls[0][0]
-      expect(action.type).toEqual(Request.Create)
-      expect(action.request).toEqual(RequestTypes.Post)
+      expect(action.type).toEqual(ActionTypes.RequestCreate)
+      expect(action.request).toEqual(OperationTypes.Post)
     })
 
     it('should render post title', () => {
@@ -87,7 +53,7 @@ describe('connectWpPost', () => {
     })
 
     it('should update to new entity with changed props', () => {
-      const nextProps = makeProps(postJson.id + 1)
+      const nextProps = { params: { id: postJson.id + 1 } }
       const rendered = mount(<BuiltInContentType {...props} />, { context: { store } })
 
       rendered.setProps(nextProps)
@@ -98,13 +64,13 @@ describe('connectWpPost', () => {
 
   describe('with custom content type', () => {
     const store = setup()
-    const props = makeProps(bookJson.id)
+    const props = { params: { id: bookJson.id } }
     const rendered = mount(<CustomContentType {...props} />, { context: { store } })
 
     it('should dispatch REQUEST_CREATE', () => {
       const action = store.dispatch.mock.calls[0][0]
-      expect(action.type).toEqual(Request.Create)
-      expect(action.request).toEqual(RequestTypes.Post)
+      expect(action.type).toEqual(ActionTypes.RequestCreate)
+      expect(action.request).toEqual(OperationTypes.Post)
     })
 
     it('should render book title', () => {
@@ -114,7 +80,7 @@ describe('connectWpPost', () => {
 
   describe('with bad content type', () => {
     const store = setup()
-    const props = makeProps(postJson.id)
+    const props = { params: { id: postJson.id } }
 
     it('should throw with bad content type', () => {
       expect(() => {

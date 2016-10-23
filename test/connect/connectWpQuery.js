@@ -3,62 +3,31 @@
 jest.disableAutomock()
 
 import React from 'react'
-import modifyResponse from 'wp-api-response-modify'
-import merge from 'lodash.merge'
 import { mount } from 'enzyme'
 
-import bookJson from '../fixtures/wp-api-responses/book'
+import bookJson from '../mocks/fixtures/wp-api-responses/book'
 
-import { Request, RequestTypes } from '../../src/constants/ActionTypes'
-import { initialState } from '../../src/reducer'
+import state_multipleBooks from '../mocks/states/multipleBooks'
+import ActionTypes from '../../src/constants/ActionTypes'
+import OperationTypes from '../../src/constants/OperationTypes'
 
-import CustomQuery from '../components/CustomQuery'
-import CustomPropsComparator from '../components/CustomPropsComparator'
+import CustomQuery from '../mocks/components/CustomQuery'
+import CustomPropsComparator from '../mocks/components/CustomPropsComparator'
 
-function setup (entityId) {
+function setup () {
   const dispatch = jest.fn()
-
   const subscribe = () => {}
-
-  const getState = () => ({
-    wordpress: merge(initialState, {
-      queries: {
-        0: {
-          complete: true,
-          OK: true,
-          entities: [entityId]
-        }
-      },
-      entities: {
-        books: {
-          [String(bookJson.id)]: modifyResponse(bookJson),
-          [String(bookJson.id + 1)]: merge({},
-            modifyResponse(bookJson),
-            { id: bookJson.id + 1, slug: 'new-slug' })
-        }
-      }
-    })
-  })
-
-  const store = {
-    dispatch,
-    getState,
-    subscribe
-  }
-
-  const props = {
-    store,
-    params: { id: entityId }
-  }
-
+  const getState = () => state_multipleBooks
+  const store = { dispatch, getState, subscribe }
+  const props = { store, params: { id: bookJson.id } }
   return { store, props }
 }
 
-function expectRequestCreateAction (props, actionIndex = 0) {
+function expectRequestCreateAction (props) {
   const dispatch = props.store.dispatch
-  const action = dispatch.mock.calls[actionIndex][0]
-  expect(action.type).toEqual(Request.Create)
-  expect(action.request).toEqual(RequestTypes.Query)
+  const action = dispatch.mock.calls[0][0]
+  expect(action.type).toEqual(ActionTypes.RequestCreate)
+  expect(action.request).toEqual(OperationTypes.Query)
 }
 
 describe('connectWpQuery', () => {

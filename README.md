@@ -182,15 +182,12 @@ export default class Page extends Component {
 export default connectWpPost(Page, (props) => props.params.slug)(Post)
 ```
 
-### `@connectWpQuery(queryFn[, propsComparatorFn, options]) : Component`
+### `@connectWpQuery(queryFn[, propsComparatorFn]) : Component`
 
 Connect a component to the result of an arbitrary WP-API query.
 
 - __queryFn__ {Function} Function that accepts args `wpapi`, `props`, `state` and should return a WP-API query
 - __propsComparatorFn__ {Function} _(optional)_ Function that determines if new data should be requested by inspecting props
-- [__options.displayName__] {String} _(optional)_ Display name of the component, useful if component is wrapped by other
-                                                  decorators which will disguise the actual `displayName`. Important if
-                                                  the component is used with prepared queries (server-side rendering).
 
 Returns a connected component.
 
@@ -344,8 +341,8 @@ The changes made to the data are all effects available in the
 
 ### Why?
 
-The JSON returned from WP-API contains such things as objects with a single property (e.g. objects with `rendered`), 
-meta data property names prefixed with an underscore (e.g. `_links`), and
+The JSON returned from WP-API contains such things as objects with a single property (e.g. objects with `rendered`),
+and meta data property names prefixed with an underscore (e.g. `_links`).
 
 ### What changes should I be aware of?
 

@@ -1,7 +1,11 @@
-import isEqualWith from 'lodash.isequalwith'
-
 import { createQueryRequest } from '../redux/actions'
 import { fetch } from '../redux/sagas'
+
+export function makePropsData (state, query) {
+  const { entities: stateEntities } = state.wordpress
+  const data = findEntities(stateEntities, query.entities)
+  return { data }
+}
 
 /**
  * Filter `entities` to contain only those whose ID is in `identifiers`.
@@ -26,42 +30,9 @@ export function findEntities (entities, identifiers) {
   }, {})
 }
 
-/**
- * Determine if a value is a primitive. (http://bit.ly/2bf3FYJ)
- * @param {*} value Value to inspect
- * @returns {Boolean} Whether value is primitive
- */
-function isPrimitive (value) {
-  const type = typeof value
-  return value == null || (type !== 'object' && type !== 'function')
-}
-
-/**
- * Determines if new request for data should be made when props are received. Only
- * inspect primitives by default. Returning `undefined` makes isEqualWith fallback
- * to built-in comparator.
- * @param {Object} thisProps Current props object
- * @param {Object} nextProps Next props object
- * @returns {Boolean}
- */
-export function shouldUpdate (thisProps, nextProps) {
-  return !isEqualWith(thisProps, nextProps, (value) => {
-    return isPrimitive(value) ? undefined : true
-  })
-}
-
 export function makePreloader (queryFn) {
   return (displayName) => (renderProps, state) =>  {
-    return [fetch, createQueryRequest({
-      queryFn: (wpapi) => queryFn(wpapi, renderProps, state),
-      target: displayName
-    })]
+    const realQueryFn = (wpapi) => queryFn(wpapi, renderProps, state)
+    return [fetch, createQueryRequest({ queryFn: realQueryFn })]
   }
-}
-
-export function makePropsData (state, query) {
-  const { entities: stateEntities } = state.wordpress
-  const entities = findEntities(stateEntities, query.entities)
-
-  return { entities }
 }

@@ -5,19 +5,16 @@ jest.disableAutomock()
 import merge from 'lodash.merge'
 
 import normalise from '../src/normalise'
+import ContentTypes from '../src/constants/ContentTypes'
 
-import {
-  ContentTypes,
-  registerContentType,
-  getContentType
-} from '../src/contentTypes'
+import contentTypes from '../src/util/contentTypes'
 
 function setup () {
   const mockWP = {
     registerRoute: jest.fn()
   }
 
-  registerContentType(mockWP, {
+  contentTypes.register(mockWP, {
     name: 'book',
     plural: 'books',
     slug: 'books'
@@ -108,7 +105,7 @@ describe('Normaliser', () => {
 
   Object.keys(tests).forEach((contentType) => {
     describe('Normalise ' + contentType, () => {
-      const { plural } = getContentType(contentType)
+      const { plural } = contentTypes.get(contentType)
       const { first, second, multiple } = fixtures(contentType)
       const { collections, testKeyBySlug, testKeyById } = tests[contentType]
 

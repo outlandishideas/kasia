@@ -28,6 +28,12 @@ export default {
     name,
     typeof value
   ),
+  isBoolean: (name, value) => invariant(
+    typeof value === 'object',
+    'Expecting %s to be boolean, got %s',
+    name,
+    typeof value
+  ),
   isWpApiInstance: (value = {}) => invariant(
     typeof value.registerRoute === 'function',
     'Expecting WP to be instance of `node-wpapi`. ' +
@@ -61,10 +67,10 @@ export default {
     'Content type with name "%s" already exists.',
     contentType.name
   ),
-  isNotWrapped: (target = () => {}, targetName) => invariant(
+  isNotWrapped: (target = () => {}, displayName) => invariant(
     !target.__kasia,
     'The component "%s" is already wrapped by Kasia.',
-    targetName
+    displayName
   ),
   noWPInstance: (WP) => invariant(
     !WP,
@@ -83,13 +89,13 @@ export default {
     `See documentation ${KASIA_URL}`,
     typeof store.wordpress
   ),
-  queryHasError: (query, targetName) => invariant(
+  queryHasError: (query, displayName) => invariant(
     query && query.error,
     'Ignoring query %s. ' +
     'Error: "%s". ' +
     'Check connectWp* decorator for %s.',
     query.id,
     query.error,
-    targetName
+    displayName
   )
 }

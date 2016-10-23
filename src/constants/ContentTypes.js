@@ -18,7 +18,7 @@ export const ContentTypes = {
 
 /**
  * Plural names of the built-in content types. These are used in determining the
- * node-wpapi method to call when fetching a content type's respective data.
+ * wpapi method to call when fetching a content type's respective data.
  * @type {Object}
  */
 export const ContentTypesPlural = {

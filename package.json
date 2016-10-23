@@ -38,7 +38,6 @@
     "humps": "^1.0.0",
     "invariant": "^2.2.1",
     "lodash.find": "^4.3.0",
-    "lodash.isequalwith": "^4.3.1",
     "lodash.merge": "^4.3.5",
     "normalizr": "^2.0.1",
     "pick-to-array": "^1.0.0",
@@ -83,8 +82,7 @@
     ],
     "testPathIgnorePatterns": [
       "/node_modules/",
-      "/fixtures/",
-      "/components/"
+      "/mocks/"
     ]
   },
   "standard": {

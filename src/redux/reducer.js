@@ -1,9 +1,7 @@
 import merge from 'lodash.merge'
-import pickToArray from 'pick-to-array'
 
-import { ContentTypesWithoutId } from '../constants/ContentTypes'
-import contentTypes from '../util/contentTypes'
 import ActionTypes from '../constants/ActionTypes'
+import pickEntityIds from '../util/pickEntityIds'
 import normalise from '../normalise'
 
 export const INITIAL_STATE = {
@@ -13,59 +11,46 @@ export const INITIAL_STATE = {
   entities: {}
 }
 
-/**
- * Pick all entity identifiers from a raw WP-API response.
- * @param {Object} data Raw WP-API JSON
- * @returns {Array} Entity identifiers
- */
-export function pickEntityIds (data) {
-  const entityIdentifiers = pickToArray(data, 'id')
-
-  // Accommodate content types that do not have an `id` property
-  data.forEach((entity) => {
-    const type = contentTypes.derive(entity)
-    if (ContentTypesWithoutId[type]) {
-      entityIdentifiers.push(...pickToArray(entity, 'slug'))
-    }
-  })
-
-  return entityIdentifiers
-}
-
 // COMPLETE
 // Place entity on the store; update query record
-export const completeReducer = (normaliseData) => (state, action) => {
-  const data = [].concat(action.data)
-  const queryId = action.id
-
-  return ({
-    entities: normaliseData(data),
-    queries: {
-      [queryId]: {
-        id: queryId,
-        entities: pickEntityIds(data),
-        paging: action.data._paging || null,
-        prepared: action.prepared,
-        complete: true,
-        OK: true
+export const completeReducer = (normalise) => {
+  return (state, action) => merge({}, state, ({
+    wordpress: {
+      entities: {
+        ...state.entities,
+        ...normalise(action.data)
+      },
+      queries: {
+        [action.id]: {
+          id: action.id,
+          entities: pickEntityIds(action.data),
+          paging: action.data._paging || null,
+          prepared: action.prepared,
+          complete: true,
+          OK: true
+        }
       }
     }
-  })
+  }))
 }
 
 // FAIL
 // Update query record only
-export const failReducer = (state, action) => ({
-  queries: {
-    [action.id]: {
-      id: action.id,
-      error: String(action.error),
-      prepare: action.prepared,
-      complete: true,
-      OK: false
+export const failReducer = (state, action) => {
+  return merge({}, state, {
+    wordpress: {
+      queries: {
+        [action.id]: {
+          id: action.id,
+          error: String(action.error),
+          prepare: action.prepared,
+          complete: true,
+          OK: false
+        }
+      }
     }
-  }
-})
+  })
+}
 
 /**
  * Make the reducer for Kasia.

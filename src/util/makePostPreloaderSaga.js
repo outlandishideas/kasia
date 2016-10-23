@@ -14,9 +14,9 @@ import invariants from '../util/invariants'
  */
 export function makePostPreloaderSaga (contentType, id, renderProps) {
   if (typeof contentType !== 'string') {
-    throw new Error('Expecting contentType to be a string.')
+    throw new Error(`Expecting contentType to be a string, got "${typeof contentType}".`)
   } else if (typeof id !== 'string' && typeof id !== 'number' && typeof id !== 'function') {
-    throw new Error('Expecting identifier to be a string, number, or function.')
+    throw new Error(`Expecting id to be a string, number, or function, got "${typeof id}"`)
   }
 
   const identifier = typeof id === 'function' ? id(renderProps) : id

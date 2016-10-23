@@ -2,24 +2,18 @@
 
 jest.disableAutomock()
 
-import { mount } from 'enzyme'
 import React from 'react'
 import createSagaMiddleware from 'redux-saga'
 import * as effects from 'redux-saga/effects'
-
-import {
-  createStore,
-  applyMiddleware,
-  compose,
-  combineReducers
-} from 'redux'
+import { createStore, applyMiddleware, compose, combineReducers } from 'redux'
+import { mount } from 'enzyme'
 
 import { Request, RequestTypes } from '../../src/constants/ActionTypes'
-import { fetch } from '../../src/sagas'
-import { ContentTypes } from '../../src/contentTypes'
-import { completeRequest as _completeRequest } from '../../src/actions'
-import makeReducer from '../../src/reducer'
-import BuiltInContentType from '../components/BuiltInContentType'
+import { fetch } from '../../src/redux/sagas'
+import { completeRequest as _completeRequest } from '../../src/redux/actions'
+import makeReducer from '../../src/redux/reducer'
+import ContentTypes from '../../src/constants/ContentTypes'
+import BuiltInContentType from '../mocks/components/BuiltInContentType'
 
 function setup () {
   const renderProps = { params: { id: 0 } }

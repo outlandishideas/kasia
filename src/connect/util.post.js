@@ -3,6 +3,12 @@ import { fetch } from '../redux/sagas'
 import contentTypes from '../util/contentTypes'
 import invariants from '../util/invariants'
 
+export function makePropsData (state, { contentType, id }) {
+  const { plural, name } = contentTypes.get(contentType)
+  const entityCollection = state.wordpress.entities[plural]
+  return { [name]: findEntity(entityCollection, id) }
+}
+
 /**
  * Find an entity in `entities` with the given `identifier`.
  * @param {Object} entities Entity collection
@@ -18,26 +24,9 @@ export function findEntity (entities, identifier) {
     return entities[identifier]
   }
 
-  const id = Object.keys(entities).find((key) => {
+  return Object.keys(entities).find((key) => {
     return entities[key].slug === identifier
-  })
-
-  return id ? entities[id] : null
-}
-
-export function makePropsData (state, { contentType, id }) {
-  const { plural, name } = contentTypes.get(contentType)
-  const entityCollection = state.wordpress.entities[plural]
-
-  return {
-    [name]: findEntity(entityCollection, id)
-  }
-}
-
-export function getIdentifier (id, props) {
-  const realId = typeof id === 'function' ? id(props) : id
-  invariants.isIdentifierValue(realId)
-  return realId
+  }) || null
 }
 
 export function makePreloader (contentType) {
@@ -46,10 +35,27 @@ export function makePreloader (contentType) {
 
     const action = createPostRequest({
       contentType,
-      identifier: getIdentifier(renderProps),
-      target: displayName
+      identifier: identifier(renderProps),
     })
 
     return [fetch, action]
   }
+}
+
+export function identifier (id, props) {
+  const realId = typeof id === 'function' ? id(props) : id
+  invariants.isIdentifierValue(realId)
+  return realId
+}
+
+export function shouldUpdate (id, contentType, thisProps, nextProps, buildProps) {
+  const typeConfig = contentTypes.get(contentType)
+  const nextBuiltProps = buildProps(nextProps)
+
+  return (
+    // changed identifier
+    !nextBuiltProps.kasia[typeConfig.name] &&
+    // cannot derive entity from existing props
+    identifier(id, nextProps) !== identifier(id, thisProps)
+  )
 }

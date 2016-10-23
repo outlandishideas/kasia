@@ -5,14 +5,9 @@ jest.disableAutomock()
 import * as effects from 'redux-saga/effects'
 
 import { setWP } from '../../src/wpapi'
-import { fetch } from '../../src/sagas'
-import { ContentTypes } from '../../src/contentTypes'
-
-import {
-  completeRequest,
-  createPostRequest,
-  createQueryRequest
-} from '../../src/actions'
+import { fetch } from '../../src/redux/sagas'
+import ContentTypes from '../../src/constants/ContentTypes'
+import { completeRequest, createPostRequest, createQueryRequest } from '../../src/redux/actions'
 
 function setup () {
   const mockResult = 'mockResult'

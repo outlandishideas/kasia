@@ -3,12 +3,12 @@
 jest.disableAutomock()
 
 import { Request, RequestTypes } from '../../src/constants/ActionTypes'
-import { ContentTypes } from '../../src/contentTypes'
-import { fetch } from '../../src/sagas'
+import { fetch } from '../../src/redux/sagas'
+import ContentTypes from '../../src/constants/ContentTypes'
 
-import BuiltInContentType from '../components/BuiltInContentType'
-import BadContentType from '../components/BadContentType'
-import CustomQuery from '../components/CustomQuery'
+import BuiltInContentType from '../mocks/components/BuiltInContentType'
+import BadContentType from '../mocks/components/BadContentType'
+import CustomQuery from '../mocks/components/CustomQuery'
 
 describe('Preloaders', () => {
   describe('connectWpPost', () => {

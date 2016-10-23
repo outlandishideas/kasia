@@ -4,7 +4,7 @@ jest.disableAutomock()
 
 import WP from 'wpapi'
 
-import Kasia from '../src/index'
+import Kasia from '../src/Kasia'
 
 describe('Kasia', () => {
   const wpapi = new WP({ endpoint: 'http://localhost' })
@@ -35,10 +35,5 @@ describe('Kasia', () => {
     expect(() => {
       Kasia({ WP: wpapi, contentTypes: '' })
     }).toThrowError(/Expecting contentTypes to be array/)
-    Kasia({ WP: wpapi, contentTypes: [{
-      name: 'news',
-      plural: 'news',
-      slug: 'news'
-    }] })
   })
 })

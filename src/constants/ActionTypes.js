@@ -1,6 +1,7 @@
 export default {
   // Initiate a request to the WP API
-  RequestCreate: 'kasia/REQUEST_CREATE',
+  RequestCreatePost: 'kasia/REQUEST_CREATE_POST',
+  RequestCreateQuery: 'kasia/REQUEST_CREATE_QUERY',
   // Place a record of a request on the store
   RequestPut: 'kasia/REQUEST_PUT',
   // Place the result of a request on the store

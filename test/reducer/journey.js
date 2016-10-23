@@ -3,39 +3,22 @@
 jest.disableAutomock()
 
 import { combineReducers, createStore } from 'redux'
-import WP from 'wpapi'
+import WPapi from 'wpapi'
 import modify from 'wp-api-response-modify'
 
-import postJson from './../fixtures/wp-api-responses/post'
-import Kasia from '../../src/index'
-import normalise from '../../src/normalise'
-import { ContentTypes } from '../../src/contentTypes'
+import postJson from '../mocks/fixtures/wp-api-responses/post'
+import initialState from '../mocks/states/initial'
 
-import {
-  createPostRequest,
-  completeRequest,
-  failRequest
-} from '../../src/actions'
+import Kasia from '../../src/Kasia'
+import normalise from '../../src/normalise'
+import ContentTypes from '../../src/constants/ContentTypes'
+import { createPostRequest, completeRequest, failRequest } from '../../src/redux/actions'
 
 function setup () {
-  const { kasiaReducer } = Kasia({
-    WP: new WP({ endpoint: '123' })
-  })
-
+  const WP = new WPapi({ endpoint: '123' })
+  const { kasiaReducer } = Kasia({ WP })
   const rootReducer = combineReducers(kasiaReducer)
   const store = createStore(rootReducer)
-
-  const initialState = {
-    wordpress: {
-      __kasia__: {
-        nextQueryId: 0,
-        numPreparedQueries: 0
-      },
-      queries: {},
-      entities: {}
-    }
-  }
-
   return { store, initialState }
 }
 
@@ -52,36 +35,36 @@ describe('Reducer journey', () => {
   })
 
   it('can REQUEST_CREATE', () => {
-    const action = createPostRequest({
+    store.dispatch(createPostRequest({
       contentType: ContentTypes.Post,
       identifier: 16
-    })
-
-    store.dispatch(action)
+    }))
   })
 
   it('can REQUEST_COMPLETE', () => {
-    const id = 0
     const entities = normalise([modify(postJson)], 'id')
 
-    store.dispatch(completeRequest({ id, data: postJson }))
+    store.dispatch(completeRequest({
+      id: 0,
+      data: postJson
+    }))
 
     expect(store.getState().wordpress.entities).toEqual(entities)
   })
 
   it('can REQUEST_FAIL', () => {
-    const id = 1
-
-    const action = createPostRequest({
+    store.dispatch(createPostRequest({
       contentType: ContentTypes.Post,
       identifier: 16
-    })
+    }))
 
-    store.dispatch(action)
-    store.dispatch(failRequest({ id, error: new Error('Request failed') }))
+    store.dispatch(failRequest({
+      id: 1,
+      error: new Error('Request failed')
+    }))
 
     expect(store.getState().wordpress.queries[1]).toEqual({
-      id,
+      id: 1,
       complete: true,
       OK: false,
       error: 'Error: Request failed',

@@ -3,20 +3,21 @@
 jest.unmock('../../src/sagas')
 jest.unmock('../../src/wpapi')
 
-import { derivedQueryFn } from '../../src/sagas'
+import { derivedQueryFn } from '../../src/redux/sagas'
 import { setWP } from '../../src/wpapi'
 
 describe('derivedQuery', () => {
-  const fn = derivedQueryFn('posts', 16)
+  const id = 16
+  const fn = derivedQueryFn('posts', id)
 
   let success = false
 
   setWP({
     posts: () => ({
-      id: () => ({
+      id: (id) => ({
         embed: () => ({
           then: () => {
-            success = true
+            success = id
           }
         })
       })
@@ -29,6 +30,6 @@ describe('derivedQuery', () => {
 
   it('calls chain with correct method name and identifier', () => {
     fn()
-    expect(success).toEqual(true)
+    expect(success).toEqual(id)
   })
 })

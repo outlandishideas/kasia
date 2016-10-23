@@ -4,30 +4,18 @@ jest.disableAutomock()
 
 import merge from 'lodash.merge'
 
-import postJson from '../fixtures/wp-api-responses/post'
+import postJson from '../mocks/fixtures/wp-api-responses/post'
 
-import {
-  initialState,
-  completeReducer,
-  failReducer
-} from '../../src/reducer'
+import { INITIAL_STATE, completeReducer, failReducer } from '../../src/redux/reducer'
 
 describe('Reducers', () => {
   const id = '0'
 
   describe('completeAction', () => {
     const reducer = completeReducer((data) => data)
+    const store = reducer(INITIAL_STATE, { id, data: postJson })
 
-    let store
-
-    it('returns a function', () => {
-      expect(typeof reducer).toEqual('function')
-    })
-
-    it('returns a new object', () => {
-      const old = {}
-      store = reducer(initialState, { id, data: postJson })
-      expect(store === old).toEqual(false)
+    it('returns an object', () => {
       expect(typeof store).toEqual('object')
     })
 
@@ -57,7 +45,7 @@ describe('Reducers', () => {
     }
 
     it('returns a new object', () => {
-      const newStore = failReducer(merge(initialState, store), { id, error })
+      const newStore = failReducer(merge(INITIAL_STATE, store), { id, error })
       expect(newStore === store).toEqual(false)
       store = newStore
     })

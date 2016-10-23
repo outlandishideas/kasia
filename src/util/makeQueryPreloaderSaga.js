@@ -12,7 +12,9 @@ import { createQueryRequest } from '../redux/actions'
  */
 export default function makeQueryPreloaderSaga (queryFn, renderProps, state = null) {
   if (typeof queryFn !== 'function') {
-    throw new Error('Expecting queryFn to be a function.')
+    throw new Error(`Expecting queryFn to be a function, got "${queryFn}"`)
+  } else if (typeof renderProps !== 'object') {
+    throw new Error(`Expecting renderProps to be an object, got "${typeof renderProps}".`)
   }
 
   const realQueryFn = (wpapi) => queryFn(wpapi, renderProps, state)

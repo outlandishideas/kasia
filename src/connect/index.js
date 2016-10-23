@@ -5,17 +5,12 @@ import { createPostRequest, createQueryRequest } from '../redux/actions'
 import contentTypes from '../util/contentTypes'
 import OperationTypes from '../constants/OperationTypes'
 import invariants from '../util/invariants'
-import UTIL from './util'
-
-// Default connectWp* user options
-const DEFAULT_OPTIONS = {
-  displayName: ''
-}
+import utils from './util'
 
 // Default `props.kasia` obj when a query failed, is incomplete, or does not exist
 const EMPTY_QUERY_OBJ = {
   query: { complete: false },
-  entities: {}
+  data: null
 }
 
 // Intermediate component context types
@@ -30,25 +25,30 @@ let queryId = 0
  * Build a connectWp* decorator.
  * @param {String} operation
  * @param {Object} config Internal configuration
- * @param {Object} options User options
  * @returns {Function} connectWp* decorator
  */
-function connect (operation, config, options) {
-  const util = UTIL[operation]
+function connect (operation, config) {
+  const util = utils[operation]
 
   if (!util) {
     throw new Error(`Unrecognised operation type "${operation}".`)
   }
 
+  const {
+    makePreloader, shouldUpdate,
+    contentType, // connectWpPost* decorator only
+    queryFn // connectWpQuery* decorator only
+  } = config
+
   return (target) => {
-    const displayName = options.displayName || target.displayName || target.name
+    const displayName = target.displayName || target.name
 
     invariants.isNotWrapped(target, displayName)
 
     return class KasiaIntermediateComponent extends Component {
-      static __kasia = true
+      static __kasia = operation
       static contextTypes = CONTEXT_TYPES
-      static makePreloader = config.makePreloader(displayName)
+      static makePreloader = makePreloader(displayName)
 
       // ---
       // LIFECYCLE
@@ -61,20 +61,17 @@ function connect (operation, config, options) {
 
       componentWillMount () {
         if (OperationTypes.Post === operation) {
-          const contentType = config.contentType
           invariants.isValidContentType(contentTypes.get(contentType), contentType, displayName)
         }
 
         const state = this._getState().wordpress
 
         const query = Object.values(state.queries).find((query) => {
-          return query.prepared &&
-            query.id === queryId++ &&
-            query.type === operation &&
-            query.target === displayName
+          return query.prepared && query.id === queryId && query.type === operation
         })
 
         if (query) {
+          queryId = queryId + 1
           this.queryId = query.id
         } else {
           this._requestWpData(this.props)
@@ -82,26 +79,8 @@ function connect (operation, config, options) {
       }
 
       componentWillReceiveProps (nextProps) {
-        let shouldDispatch = false
-
-        if (OperationTypes.Post === operation) {
-          const { id, contentType } = config
-          const typeConfig = contentTypes.get(contentType)
-          const nextBuiltProps = this._reconcileWpData(nextProps)
-
-          shouldDispatch = (
-            // changed identifier
-            !nextBuiltProps.kasia[typeConfig.name] &&
-            // cannot derive entity from existing props
-            util.getIdentifier(id, nextProps) !== util.getIdentifier(id, this.props)
-          )
-        } else if (OperationTypes.Query === operation) {
-          shouldDispatch = config.shouldUpdate(this.props, nextProps)
-        }
-
-        if (shouldDispatch) {
-          this._requestWpData(nextProps)
-        }
+        const shouldUpdate = shouldUpdate(this.props, nextProps, this._reconcileWpData.bind(this))
+        if (shouldUpdate) this._requestWpData(nextProps)
       }
 
       // ---
@@ -116,10 +95,10 @@ function connect (operation, config, options) {
         let action = null
 
         if (OperationTypes.Post === operation) {
-          const identifier = this.getIdentifier(props)
-          action = createPostRequest({ identifier, contentType: config.contentType })
+          const identifier = util.identifier(props)
+          action = createPostRequest({ identifier, contentType })
         } else if (OperationTypes.Query === operation) {
-          const wrappedQueryFn = (wpapi) => config.queryFn(wpapi, props, this._getState())
+          const wrappedQueryFn = (wpapi) => queryFn(wpapi, props, this._getState())
           action = createQueryRequest({ queryFn: wrappedQueryFn })
         }
 
@@ -134,9 +113,7 @@ function connect (operation, config, options) {
         const queryIsOk = query && !query.error
 
         if (queryIsOk) {
-          const state = this._getState()
-          const entityData = util.makePropsData(state, query, config)
-
+          const entityData = util.makePropsData(this._getState(), query, config)
           return { query, ...entityData }
         }
 
@@ -172,28 +149,21 @@ function connect (operation, config, options) {
  *
  * @params {String} contentType Content type of the WP entity to fetch
  * @params {Function|String|Number} id Entity's ID/slug/a function that derives either from props
- * @params {String} [options.displayName] Display name of the component, useful if component is wrapped by other
- *                                        decorators which will disguise the actual `displayName`. Important if
- *                                        the component is used with prepared queries (server-side rendering).
  * @returns {Function} Decorated component
  */
 export function connectWpPost (
   contentType,
-  id,
-  options = DEFAULT_OPTIONS
+  id
 ) {
   invariants.isString('contentType', contentType)
   invariants.isIdentifierArg(id)
-  invariants.isObject('options', options)
-  invariants.isString('options.displayName', options.displayName)
 
-  const config = {
+  return connect(OperationTypes.Post, {
     contentType,
     id,
-    makePreloader: UTIL.Post.makePreloader(contentType)
-  }
-
-  return connect(OperationTypes.Post, config, options)
+    shouldUpdate: utils.Post.shouldUpdate.bind(null, id, contentType),
+    makePreloader: utils.Post.makePreloader(contentType)
+  })
 }
 
 /**
@@ -204,12 +174,12 @@ export function connectWpPost (
  *
  * Example, get all posts by an author:
  * ```js
- * connectWpQuery((wpapi) => wpapi.posts().embed().author('David Bowie').get())
+ * connectWpQuery((wpapi) => wpapi.posts().embed().author('David Bowie'))
  * ```
  *
  * Example, get all pages:
  * ```js
- * connectWpQuery((wpapi) => wpapi.pages().embed().get())
+ * connectWpQuery((wpapi) => wpapi.pages().embed()
  * ```
  *
  * Example, get custom content type by slug (content type registered at init):
@@ -218,7 +188,6 @@ export function connectWpPost (
  *   return wpapi.news()
  *     .slug('gullible-removed-from-the-dictionary')
  *     .embed()
- *     .get()
  * })
  * ```
  *
@@ -231,27 +200,22 @@ export function connectWpPost (
  * ```
  *
  * @params {Function} queryFn Function that returns a wpapi query
- * @params {Function} shouldUpdate Function that determines if new data should be requested by inspecting props
- * @params {String} [options.displayName] Display name of the component, useful if component is wrapped by other
- *                                        decorators which will disguise the actual `displayName`. Important if
- *                                        the component is used with prepared queries (server-side rendering).
+ * @params {Function} shouldUpdate Inspect props to determine if new data request is made
+ * @params {Function} [preserveQueryReturn] Whether return value of `queryFn` should be preserved
  * @returns {Function} Decorated component
  */
 export function connectWpQuery (
   queryFn,
-  shouldUpdate = UTIL.Query.defaultShouldUpdate,
-  options = DEFAULT_OPTIONS
+  shouldUpdate,
+  preserveQueryReturn = false
 ) {
   invariants.isFunction('queryFn', queryFn)
   invariants.isFunction('shouldUpdate', shouldUpdate)
-  invariants.isObject('options', options)
-  invariants.isString('options.displayName', options.displayName)
+  invariants.isBoolean('preserveQueryReturn', preserveQueryReturn)
 
-  const config = {
+  return connect(OperationTypes.Query, {
     queryFn,
     shouldUpdate,
-    makePreloader: UTIL.Query.makePreloader(queryFn)
-  }
-
-  return connect(OperationTypes.Query, config, options)
+    makePreloader: utils.Query.makePreloader(queryFn)
+  })
 }

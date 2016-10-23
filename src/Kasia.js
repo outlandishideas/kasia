@@ -18,7 +18,7 @@ const COMPONENTS_BASE = {
 
 /**
  * Configure Kasia.
- * @param {WP} opts.WP Instance of node-wpapi
+ * @param {WP} opts.WP Instance of wpapi
  * @param {String} [opts.keyEntitiesBy] Property used to key entities in the store
  * @param {Array} [opts.plugins] Kasia plugins
  * @param {Array} [opts.contentTypes] Custom content type definition objects
