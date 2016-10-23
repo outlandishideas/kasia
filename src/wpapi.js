@@ -1,11 +1,11 @@
-import invariants from './util/invariants'
+let WP
 
-let WP = null
+export default function getWP () {
+  if (!WP) throw new Error('WP not set')
+  return WP
+}
 
-export default WP
-
-// Set an internal reference to the wpapi instance
 export function setWP (_WP) {
-  invariants.noWPInstance(WP)
+  if (WP) throw new Error('WP already set')
   WP = _WP
 }

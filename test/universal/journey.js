@@ -8,11 +8,11 @@ import * as effects from 'redux-saga/effects'
 import { createStore, applyMiddleware, compose, combineReducers } from 'redux'
 import { mount } from 'enzyme'
 
-import { Request, RequestTypes } from '../../src/constants/ActionTypes'
+import { ContentTypes } from '../../src/constants/ContentTypes'
 import { fetch } from '../../src/redux/sagas'
 import { completeRequest as _completeRequest } from '../../src/redux/actions'
+import ActionTypes from '../../src/constants/ActionTypes'
 import makeReducer from '../../src/redux/reducer'
-import ContentTypes from '../../src/constants/ContentTypes'
 import BuiltInContentType from '../mocks/components/BuiltInContentType'
 
 function setup () {
@@ -40,8 +40,7 @@ function fixtures () {
       contentType: ContentTypes.Post,
       identifier: 0,
       target: 'BuiltInContentType',
-      request: RequestTypes.Post,
-      type: Request.Create
+      type: ActionTypes.RequestCreatePost
     },
     postJson1: {
       id: 0,

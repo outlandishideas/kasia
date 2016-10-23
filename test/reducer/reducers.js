@@ -33,7 +33,7 @@ describe('Reducers', () => {
   })
 
   describe('failAction', () => {
-    const error = 'Wuh-oh!'
+    const error = new Error('Wuh-oh!')
 
     let store = {
       queries: {
@@ -51,7 +51,7 @@ describe('Reducers', () => {
     })
 
     it('set error in the query object', () => {
-      expect(store.queries[id].error).toEqual(error)
+      expect(store.queries[id].error).toEqual(error.message)
     })
 
     it('sets complete to true in query object', () => {

@@ -7,18 +7,21 @@ import { mount } from 'enzyme'
 
 import postJson from '../mocks/fixtures/wp-api-responses/post'
 import bookJson from '../mocks/fixtures/wp-api-responses/book'
-import state_multipleEntities from '../mocks/states/multipleEntities'
-import wpapi from '../mocks/wpapi'
+import stateMultipleEntities from '../mocks/states/multipleEntities'
 
 import ActionTypes from '../../src/constants/ActionTypes'
 import OperationTypes from '../../src/constants/OperationTypes'
-import contentTypes from '../../src/util/contentTypes'
+import contentTypesManager from '../../src/util/contentTypesManager'
 
-import BuiltInContentType from '../mocks/components/BuiltInContentType'
-import CustomContentType from '../mocks/components/CustomContentType'
-import BadContentTypeComponent from '../mocks/components/BadContentType'
+import _BuiltInType from '../mocks/components/BuiltInContentType'
+import _CustomType from '../mocks/components/CustomContentType'
+import _BadContentType from '../mocks/components/BadContentType'
 
-contentTypes.register(wpapi, {
+const BuiltInType = (props, store) => mount(<_BuiltInType {...props} />, { context: { store } })
+const CustomType = (props, store) => mount(<_CustomType {...props} />, { context: { store } })
+const BadContentType = (props, store) => mount(<_BadContentType {...props} />, { context: { store } })
+
+contentTypesManager.register({
   name: 'book',
   plural: 'books',
   slug: 'books'
@@ -27,7 +30,7 @@ contentTypes.register(wpapi, {
 function setup () {
   const dispatch = jest.fn()
   const subscribe = () => {}
-  const getState = () => state_multipleEntities
+  const getState = () => stateMultipleEntities
   return { dispatch, getState, subscribe }
 }
 
@@ -36,10 +39,10 @@ describe('connectWpPost', () => {
     const store = setup()
     const dispatch = store.dispatch
     const props = { params: { id: postJson.id } }
-    const rendered = mount(<BuiltInContentType {...props} />, { context: { store } })
+    const rendered = BuiltInType(props, store)
 
     it('should wrap the component', () => {
-      expect(BuiltInContentType.__kasia).toBe(true)
+      expect(rendered.__kasia).toBe(true)
     })
 
     it('should dispatch REQUEST_CREATE', () => {
@@ -54,10 +57,7 @@ describe('connectWpPost', () => {
 
     it('should update to new entity with changed props', () => {
       const nextProps = { params: { id: postJson.id + 1 } }
-      const rendered = mount(<BuiltInContentType {...props} />, { context: { store } })
-
-      rendered.setProps(nextProps)
-
+      const rendered = BuiltInType(props, store).setProps(nextProps)
       expect(rendered.html()).toEqual('<div>new title</div>')
     })
   })
@@ -65,7 +65,7 @@ describe('connectWpPost', () => {
   describe('with custom content type', () => {
     const store = setup()
     const props = { params: { id: bookJson.id } }
-    const rendered = mount(<CustomContentType {...props} />, { context: { store } })
+    const rendered = CustomType(props, store)
 
     it('should dispatch REQUEST_CREATE', () => {
       const action = store.dispatch.mock.calls[0][0]
@@ -82,10 +82,8 @@ describe('connectWpPost', () => {
     const store = setup()
     const props = { params: { id: postJson.id } }
 
-    it('should throw with bad content type', () => {
-      expect(() => {
-        mount(<BadContentTypeComponent {...props} />, { context: { store } })
-      }).toThrowError(/is not recognised/)
+    it('should throw "content type is not recognised" error', () => {
+      expect(() => BadContentType(props, store)).toThrowError(/is not recognised/)
     })
   })
 })

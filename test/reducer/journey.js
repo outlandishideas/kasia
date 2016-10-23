@@ -3,7 +3,7 @@
 jest.disableAutomock()
 
 import { combineReducers, createStore } from 'redux'
-import WPapi from 'wpapi'
+import Wpapi from 'wpapi'
 import modify from 'wp-api-response-modify'
 
 import postJson from '../mocks/fixtures/wp-api-responses/post'
@@ -15,7 +15,7 @@ import ContentTypes from '../../src/constants/ContentTypes'
 import { createPostRequest, completeRequest, failRequest } from '../../src/redux/actions'
 
 function setup () {
-  const WP = new WPapi({ endpoint: '123' })
+  const WP = new Wpapi({ endpoint: '123' })
   const { kasiaReducer } = Kasia({ WP })
   const rootReducer = combineReducers(kasiaReducer)
   const store = createStore(rootReducer)

@@ -2,22 +2,18 @@
 
 jest.disableAutomock()
 
-import * as effects from 'redux-saga/effects'
+import { put, call } from 'redux-saga/effects'
 
-import { setWP } from '../../src/wpapi'
+import '../mocks/WP'
+import getWP from '../../src/wpapi'
 import { fetch } from '../../src/redux/sagas'
-import ContentTypes from '../../src/constants/ContentTypes'
 import { completeRequest, createPostRequest, createQueryRequest } from '../../src/redux/actions'
+import { ContentTypes } from '../../src/constants/ContentTypes'
 
 function setup () {
   const mockResult = 'mockResult'
-  const WP = jest.fn()
-  const queryFn = jest.fn()
-
-  queryFn.mockReturnValue(mockResult)
-
-  setWP(WP)
-
+  const WP = getWP()
+  const queryFn = jest.fn(() => mockResult)
   return { WP, queryFn, mockResult }
 }
 
@@ -42,8 +38,9 @@ describe('Sagas', () => {
     generator.next(queryId)
 
     it('yields a put with completeRequest action', () => {
-      expect(generator.next(mockResult).value)
-        .toEqual(effects.put(completeRequest({ id: queryId, data: mockResult })))
+      const actual = generator.next(mockResult).value
+      const expected = put(completeRequest({ id: queryId, data: mockResult }))
+      expect(actual).toEqual(expected)
     })
   })
 
@@ -56,12 +53,15 @@ describe('Sagas', () => {
     generator.next()
 
     it('yields a call to correctly resolved queryFn', () => {
-      expect(generator.next(queryId).value).toEqual(effects.call(queryFn, WP))
+      const actual = generator.next(queryId).value
+      const expected = call(queryFn, WP)
+      expect(actual).toEqual(expected)
     })
 
     it('puts a completeRequest action with result', () => {
-      expect(generator.next(mockResult).value)
-        .toEqual(effects.put(completeRequest({ id: queryId, data: mockResult })))
+      const actual = generator.next(mockResult).value
+      const expected = put(completeRequest({ id: queryId, data: mockResult }))
+      expect(actual).toEqual(expected)
     })
   })
 })

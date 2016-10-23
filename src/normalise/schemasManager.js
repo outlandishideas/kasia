@@ -2,25 +2,30 @@ import { Schema, arrayOf } from 'normalizr'
 
 import { ContentTypes, ContentTypesPlural } from '../constants/ContentTypes'
 
+const schemasManager = {}
+
+export default schemasManager
+
 /**
- * Schema object cache, populated in `makeSchemas`
+ * Schema object cache, populated in `makeSchemas`.
  * @type {Object}
  */
 let schemas
 
 /**
- * Individual schema definitions, defined like this so we can reference one from another
+ * Individual schema definitions, defined like this so we can reference one from another.
  * @tpe {Schema}
  */
 let categorySchema, mediaSchema, pageSchema, postSchema, revisionSchema, tagSchema, userSchema,
   commentSchema, postTypeSchema, postStatusSchema, taxonomySchema
 
 /**
- * The last value passed as the `idAttribute` on calling `makeSchemas`.
- * This is here so that it is possible to clear and re-populate the schema cache during tests.
- * @type {String}
+ * Get the schema object cache.
+ * @returns {Object} Schema object cache
  */
-let lastIdAttribute
+schemasManager.getSchemas = function schemasManagerGetSchemas () {
+  return schemas
+}
 
 /**
  * Create a custom schema definition (for custom content types).
@@ -28,7 +33,7 @@ let lastIdAttribute
  * @param {String} idAttribute The key of an entity used to identify it
  * @returns {Schema} Schema instance
  */
-export function createSchema (name, idAttribute) {
+schemasManager.createSchema = function schemasManagerCreateSchema (name, idAttribute) {
   if (!schemas) {
     throw new Error('createSchema called before schema cache populated, call makeSchemas first.')
   }
@@ -49,12 +54,8 @@ export function createSchema (name, idAttribute) {
  * @param {String} idAttribute The key of an entity used to identify it
  * @returns {Object} Schema cache
  */
-export function makeSchemas (idAttribute) {
-  if (schemas && lastIdAttribute === idAttribute) {
-    return schemas
-  }
-
-  lastIdAttribute = idAttribute
+schemasManager.init = function schemasManagerInit (idAttribute) {
+  if (schemas) return schemas
 
   // Content types with `id` properties
   categorySchema = new Schema(ContentTypesPlural[ContentTypes.Category], { idAttribute })

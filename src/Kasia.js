@@ -1,9 +1,8 @@
-import merge from 'lodash.merge'
 import * as effects from 'redux-saga/effects'
 
 import invariants from './util/invariants'
 import makeReducer from './redux/reducer'
-import contentTypes from './util/contentTypes'
+import contentTypesManager from './util/contentTypesManager'
 import { setWP } from './wpapi'
 import { watchRequests } from './redux/sagas'
 
@@ -19,28 +18,28 @@ const COMPONENTS_BASE = {
 /**
  * Configure Kasia.
  * @param {WP} opts.WP Instance of wpapi
- * @param {String} [opts.keyEntitiesBy] Property used to key entities in the store
+ * @param {String} [opts.index] Property used to key entities in the store
  * @param {Array} [opts.plugins] Kasia plugins
  * @param {Array} [opts.contentTypes] Custom content type definition objects
  * @returns {Object} Kasia reducer
  */
 export default function Kasia (opts = {}) {
   const {
-    WP = {},
-    keyEntitiesBy = 'id',
+    WP = false,
+    index = 'id',
     plugins: _plugins = [],
     contentTypes = []
   } = opts
 
   invariants.isWpApiInstance(WP)
-  invariants.isString('keyEntitiesBy', keyEntitiesBy)
+  invariants.isString('index', index)
   invariants.isArray('plugins', _plugins)
   invariants.isArray('contentTypes', contentTypes)
 
   setWP(WP)
 
   const plugins = _plugins.reduce((plugins, _plugin, i) => {
-    invariants.isFunction(
+    invariants.isPlugin(
       'plugin at index ' + i,
       _plugin instanceof Array ? _plugin[0] : _plugin
     )
@@ -50,15 +49,15 @@ export default function Kasia (opts = {}) {
       : _plugin(WP, {}, opts)
 
     return {
-      sagas: plugins.sagas.concat(plugin.sagas),
-      reducers: merge({}, plugins.reducers, plugin.reducers)
+      sagas: [].concat(plugins.sagas, plugin.sagas),
+      reducers: Object.assign({}, plugins.reducers, plugin.reducers)
     }
   }, COMPONENTS_BASE)
 
-  contentTypes.forEach((contentType) => contentTypes.register(WP, contentType))
+  contentTypes.forEach(contentTypesManager.register)
 
   return {
-    kasiaReducer: makeReducer({ keyEntitiesBy }, plugins),
+    kasiaReducer: makeReducer({ index }, plugins),
     kasiaSagas: plugins.sagas.map((saga) => effects.spawn(saga))
   }
 }

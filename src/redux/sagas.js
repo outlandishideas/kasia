@@ -1,10 +1,12 @@
-import { fork, call, take, put } from 'redux-saga/effects'
-import { camelize } from 'humps'
+import { takeEvery } from 'redux-saga'
+import { call, put } from 'redux-saga/effects'
 
 import { completeRequest, failRequest } from './actions'
 import ActionTypes from '../constants/ActionTypes'
-import makeQueryFn from '../util/makeQueryFn'
-import WP from '../wpapi'
+import queryBuilder from '../util/queryBuilder'
+import getWP from '../wpapi'
+
+const WP = getWP()
 
 /**
  * Make a fetch request to the WP-API according to the action
@@ -13,19 +15,16 @@ import WP from '../wpapi'
  */
 export function * fetch (action) {
   try {
-    const data = yield call(makeQueryFn(action), WP)
-    yield put(completeRequest({ data }))
+    const data = yield call(queryBuilder.makeQuery(WP, action))
+    yield put(completeRequest(data))
   } catch (error) {
-    yield put(failRequest({ error }))
+    yield put(failRequest(error))
   }
 }
 
 export function * watchRequests () {
-  while (true) {
-    const action = yield take([
-      ActionTypes.RequestCreatePost,
-      ActionTypes.RequestCreateQuery
-    ])
-    yield fork(fetch, action)
-  }
+  yield takeEvery([
+    ActionTypes.RequestCreatePost,
+    ActionTypes.RequestCreateQuery
+  ])
 }

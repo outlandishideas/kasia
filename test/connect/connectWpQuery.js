@@ -7,17 +7,20 @@ import { mount } from 'enzyme'
 
 import bookJson from '../mocks/fixtures/wp-api-responses/book'
 
-import state_multipleBooks from '../mocks/states/multipleBooks'
+import stateMultipleBooks from '../mocks/states/multipleBooks'
 import ActionTypes from '../../src/constants/ActionTypes'
 import OperationTypes from '../../src/constants/OperationTypes'
 
-import CustomQuery from '../mocks/components/CustomQuery'
-import CustomPropsComparator from '../mocks/components/CustomPropsComparator'
+import _CustomQuery from '../mocks/components/CustomQuery'
+import _CustomPropsComparator from '../mocks/components/CustomPropsComparator'
+
+const CustomQuery = (props, store) => mount(<_CustomQuery {...props} />, { context: { store } })
+const CustomPropsComparator = (props, store) => mount(<_CustomPropsComparator {...props} />, { context: { store } })
 
 function setup () {
   const dispatch = jest.fn()
   const subscribe = () => {}
-  const getState = () => state_multipleBooks
+  const getState = () => stateMultipleBooks
   const store = { dispatch, getState, subscribe }
   const props = { store, params: { id: bookJson.id } }
   return { store, props }
@@ -33,7 +36,7 @@ function expectRequestCreateAction (props) {
 describe('connectWpQuery', () => {
   describe('with primitive props', () => {
     const { store, props } = setup(bookJson.id)
-    const rendered = mount(<CustomQuery {...props} />, { context: { store } })
+    const rendered = CustomQuery(props, store)
 
     it('should wrap the component', () => {
       expect(CustomQuery.__kasia).toBe(true)
@@ -51,9 +54,10 @@ describe('connectWpQuery', () => {
   describe('with non-primitive props', () => {
     const { store, props } = setup(bookJson.id)
 
-    props.fn = () => {}
-
-    const rendered = mount(<CustomQuery {...props} />, { context: { store } })
+    const rendered = CustomQuery({
+      ...props,
+      fn: () => {}
+    }, store)
 
     it('should dispatch REQUEST_CREATE', () => {
       expectRequestCreateAction(props)
@@ -69,9 +73,10 @@ describe('connectWpQuery', () => {
   describe('with custom props comparator', () => {
     const { store, props } = setup(bookJson.id)
 
-    props.fn = () => {}
-
-    const rendered = mount(<CustomPropsComparator {...props} />, { context: { store } })
+    const rendered = CustomPropsComparator({
+      ...props,
+      fn: () => {}
+    }, store)
 
     it('should dispatch REQUEST_CREATE', () => {
       expectRequestCreateAction(props)
@@ -81,7 +86,5 @@ describe('connectWpQuery', () => {
       rendered.update()
       expect(store.dispatch.mock.calls.length).toEqual(1)
     })
-
-    // TODO test component updates according to the props comparator function (different `props.fn`)
   })
 })

@@ -1,9 +1,8 @@
 import { normalize, arrayOf } from 'normalizr'
-import merge from 'lodash.merge'
 import modifyResponse from 'wp-api-response-modify'
 
-import { makeSchemas, createSchema } from './schemas'
-import contentTypes from '../util/contentTypes'
+import schemasManager from './schemasManager'
+import contentTypesManager from '../util/contentTypesManager'
 
 /**
  * Split a response from the WP-API into its constituent entities.
@@ -12,17 +11,21 @@ import contentTypes from '../util/contentTypes'
  * @returns {Object}
  */
 export default function normalise (data, idAttribute) {
-  const schemas = makeSchemas(idAttribute)
+  let schemas = schemasManager.getSchemas()
+
+  if (!schemas) {
+    schemas = schemasManager.init(idAttribute)
+  }
 
   return data.reduce((entities, rawEntity) => {
     const entity = modifyResponse(rawEntity)
-    const type = contentTypes.derive(entity)
+    const type = contentTypesManager.derive(entity)
 
     const contentTypeSchema = schemas[type]
       // Built-in content type or previously registered custom content type
       ? schemas[type]
       // Custom content type, will only get here once for each type
-      : createSchema(type, idAttribute)
+      : schemasManager.createSchema(type, idAttribute)
 
     const schema = Array.isArray(entity)
       ? arrayOf(contentTypeSchema)
@@ -30,6 +33,6 @@ export default function normalise (data, idAttribute) {
 
     const normalised = normalize(entity, schema)
 
-    return merge({}, entities, normalised.entities)
+    return Object.assign({}, entities, normalised.entities)
   }, {})
 }

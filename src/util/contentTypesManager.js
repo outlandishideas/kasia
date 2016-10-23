@@ -1,10 +1,12 @@
 import wpFilterMixins from 'wpapi/lib/mixins/filters'
 import wpParamMixins from 'wpapi/lib/mixins/parameters'
-import merge from 'lodash.merge'
-import { camelize } from 'humps'
+import humps from 'humps'
 
 import { ContentTypes, ContentTypesPlural } from '../constants/ContentTypes'
+import getWP from '../wpapi'
 import invariants from './invariants'
+
+const WP = getWP()
 
 const contentTypes = {}
 
@@ -25,14 +27,13 @@ const optionsCache = Object.keys(ContentTypes).reduce((cache, key) => {
 
 /**
  * Create and set the options object for a content type in the cache
- * and create the method on an instance of wpapi.
- * @param {Object} WP Instance of wpapi
+ * and register the method on the wpapi instance.
  * @param {Object} contentType Content type options object
  * @returns {Object}
  */
-contentTypes.regiser = function contentTypes_register (WP, contentType) {
+contentTypes.register = function contentTypesRegister (contentType) {
   invariants.isValidContentTypeObject(contentType)
-  invariants.isNewContentType(getContentTypes(), contentType)
+  invariants.isNewContentType(contentTypes.getAll(), contentType)
 
   const {
     namespace = 'wp/v2',
@@ -40,8 +41,8 @@ contentTypes.regiser = function contentTypes_register (WP, contentType) {
   } = contentType
 
   const realRoute = route || `/${slug}/(?P<id>)`
-  const realMethodName = camelize(methodName || plural)
-  const mixins = merge({}, wpFilterMixins, wpParamMixins)
+  const realMethodName = humps.camelize(methodName || plural)
+  const mixins = Object.assign({}, wpFilterMixins, wpParamMixins)
 
   optionsCache[name] = contentType
   WP[realMethodName] = WP.registerRoute(namespace, realRoute, { mixins })
@@ -52,7 +53,7 @@ contentTypes.regiser = function contentTypes_register (WP, contentType) {
  * @param {String} contentType The name of the content type
  * @returns {Object}
  */
-contentTypes.get = function contentTypes_get (contentType) {
+contentTypes.get = function contentTypesGet (contentType) {
   return optionsCache[contentType]
 }
 
@@ -60,17 +61,17 @@ contentTypes.get = function contentTypes_get (contentType) {
  * Get all registered content types and their options.
  * @returns {Object}
  */
-contentTypes.getAll = function contentTypes_getAll () {
+contentTypes.getAll = function contentTypesGetAll () {
   return optionsCache
 }
 
 /**
  * Derive the content type of an entity from the WP-API.
  * Accepts normalised (camel-case keys) or non-normalised data.
- * @param {Object} entity
- * @returns {String} The content type
+ * @param {Object} entity Content entity
+ * @returns {String|Boolean} The content type name or false if unidentifiable
  */
-contentTypes.derive = function contentTypes_derive (entity) {
+contentTypes.derive = function contentTypesDerive (entity) {
   if (typeof entity.type !== 'undefined') {
     if (entity.type === 'comment') {
       return ContentTypes.Comment
@@ -120,4 +121,6 @@ contentTypes.derive = function contentTypes_derive (entity) {
   ) {
     return ContentTypes.User
   }
+
+  return false
 }

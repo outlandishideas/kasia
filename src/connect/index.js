@@ -1,17 +1,11 @@
 import React, { Component } from 'react'
-import merge from 'lodash.merge'
 
-import { createPostRequest, createQueryRequest } from '../redux/actions'
-import contentTypes from '../util/contentTypes'
+import { createPostRequest, createQueryRequest, deleteQueries } from '../redux/actions'
+import contentTypesManager from '../util/contentTypesManager'
 import OperationTypes from '../constants/OperationTypes'
 import invariants from '../util/invariants'
-import utils from './util'
-
-// Default `props.kasia` obj when a query failed, is incomplete, or does not exist
-const EMPTY_QUERY_OBJ = {
-  query: { complete: false },
-  data: null
-}
+import postUtils from './util.post'
+import queryUtils from './util.query'
 
 // Intermediate component context types
 const CONTEXT_TYPES = {
@@ -22,19 +16,23 @@ const CONTEXT_TYPES = {
 let queryId = 0
 
 /**
- * Build a connectWp* decorator.
+ * Create a connectWp* decorator Higher Order Component.
  * @param {String} operation
  * @param {Object} config Internal configuration
  * @returns {Function} connectWp* decorator
  */
-function connect (operation, config) {
-  const util = utils[operation]
+export function makeConnectWpDecorator (operation, config) {
+  const util = {
+    post: postUtils,
+    query: queryUtils
+  }[operation]
 
   if (!util) {
     throw new Error(`Unrecognised operation type "${operation}".`)
   }
 
   const {
+    emptyQueryObject,
     makePreloader, shouldUpdate,
     contentType, // connectWpPost* decorator only
     queryFn // connectWpQuery* decorator only
@@ -50,37 +48,9 @@ function connect (operation, config) {
       static contextTypes = CONTEXT_TYPES
       static makePreloader = makePreloader(displayName)
 
-      // ---
-      // LIFECYCLE
-      // ---
-
-      render () {
-        const props = merge({}, this.props, this._reconcileWpData())
-        return React.createElement(target, props)
-      }
-
-      componentWillMount () {
-        if (OperationTypes.Post === operation) {
-          invariants.isValidContentType(contentTypes.get(contentType), contentType, displayName)
-        }
-
-        const state = this._getState().wordpress
-
-        const query = Object.values(state.queries).find((query) => {
-          return query.prepared && query.id === queryId && query.type === operation
-        })
-
-        if (query) {
-          queryId = queryId + 1
-          this.queryId = query.id
-        } else {
-          this._requestWpData(this.props)
-        }
-      }
-
-      componentWillReceiveProps (nextProps) {
-        const shouldUpdate = shouldUpdate(this.props, nextProps, this._reconcileWpData.bind(this))
-        if (shouldUpdate) this._requestWpData(nextProps)
+      constructor (props, context) {
+        super(props, context)
+        this.queryIds = []
       }
 
       // ---
@@ -92,7 +62,7 @@ function connect (operation, config) {
       }
 
       _requestWpData (props) {
-        let action = null
+        let action
 
         if (OperationTypes.Post === operation) {
           const identifier = util.identifier(props)
@@ -102,33 +72,71 @@ function connect (operation, config) {
           action = createQueryRequest({ queryFn: wrappedQueryFn })
         }
 
-        if (action) {
-          this.queryId = queryId++
-          this.context.store.dispatch(action)
-        }
+        this.queryId = queryId++
+        this.queryIds.push(queryId)
+        this.context.store.dispatch(action)
       }
 
       _reconcileWpData () {
-        const query = this._getState().wordpress.queries[this.queryId]
+        const state = this._getState()
+        const query = state.wordpress.queries[this.queryId]
         const queryIsOk = query && !query.error
 
         if (queryIsOk) {
-          const entityData = util.makePropsData(this._getState(), query, config)
-          return { query, ...entityData }
-        }
-
-        if (query) {
+          const entityData = util.makePropsData(state, query, config)
+          return Object.assign({}, query, entityData)
+        } else if (query) {
           invariants.queryHasError(query, displayName)
         }
 
-        return EMPTY_QUERY_OBJ
+        return Object.assign({}, emptyQueryObject)
+      }
+
+      // ---
+      // LIFECYCLE
+      // ---
+
+      componentWillUnmount () {
+        this.context.store.dispatch(deleteQueries(this.queryIds))
+      }
+
+      componentWillMount () {
+        const state = this._getState().wordpress
+
+        invariants.hasWordpressObject(state)
+
+        if (OperationTypes.Post === operation) {
+          invariants.isValidContentType(contentTypesManager.get(contentType), contentType, displayName)
+        }
+
+        const query = Object.values(state.queries).find((query) => {
+          return query.prepared && query.id === queryId && query.type === operation
+        })
+
+        if (query) {
+          queryId = queryId + 1
+          this.queryId = query.id
+          this.queryIds.push(queryId)
+        } else {
+          this._requestWpData(this.props)
+        }
+      }
+
+      componentWillReceiveProps (nextProps) {
+        const willUpdate = shouldUpdate(this.props, nextProps, this._reconcileWpData.bind(this))
+        if (willUpdate) this._requestWpData(nextProps)
+      }
+
+      render () {
+        const props = Object.assign({}, this.props, this._reconcileWpData())
+        return React.createElement(target, props)
       }
     }
   }
 }
 
 /**
- * Connect a component to a single entity from the WP-API.
+ * Connect a component to a single entity from WordPress.
  *
  * Built-in content type, derived slug identifier:
  * ```js
@@ -158,19 +166,20 @@ export function connectWpPost (
   invariants.isString('contentType', contentType)
   invariants.isIdentifierArg(id)
 
-  return connect(OperationTypes.Post, {
+  return makeConnectWpDecorator(OperationTypes.Post, {
     contentType,
     id,
-    shouldUpdate: utils.Post.shouldUpdate.bind(null, id, contentType),
-    makePreloader: utils.Post.makePreloader(contentType)
+    shouldUpdate: postUtils.shouldUpdate.bind(null, id, contentType),
+    makePreloader: postUtils.makePreloader(contentType),
+    emptyQueryObject: postUtils.makeEmptyQueryObject(contentType)
   })
 }
 
 /**
- * Connect a component to arbitrary data from a WP-API query. By default
- * the component will request new data via the given `queryFn` if the
- * `shouldUpdate` returns true. The default property comparison
- * is performed only on primitive values on the props objects.
+ * Connect a component to arbitrary data from WordPress.
+ *
+ * The component will request new data via the given `queryFn`
+ * if `shouldUpdate` returns true.
  *
  * Example, get all posts by an author:
  * ```js
@@ -206,16 +215,15 @@ export function connectWpPost (
  */
 export function connectWpQuery (
   queryFn,
-  shouldUpdate,
-  preserveQueryReturn = false
+  shouldUpdate
 ) {
   invariants.isFunction('queryFn', queryFn)
   invariants.isFunction('shouldUpdate', shouldUpdate)
-  invariants.isBoolean('preserveQueryReturn', preserveQueryReturn)
 
-  return connect(OperationTypes.Query, {
+  return makeConnectWpDecorator(OperationTypes.Query, {
     queryFn,
     shouldUpdate,
-    makePreloader: utils.Query.makePreloader(queryFn)
+    makePreloader: queryUtils.makePreloader(queryFn),
+    emptyQueryObject: queryUtils.makeEmptyQueryObject()
   })
 }

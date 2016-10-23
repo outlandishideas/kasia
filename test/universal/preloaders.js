@@ -2,9 +2,9 @@
 
 jest.disableAutomock()
 
-import { Request, RequestTypes } from '../../src/constants/ActionTypes'
+import ActionTypes from '../../src/constants/ActionTypes'
+import { ContentTypes } from '../../src/constants/ContentTypes'
 import { fetch } from '../../src/redux/sagas'
-import ContentTypes from '../../src/constants/ContentTypes'
 
 import BuiltInContentType from '../mocks/components/BuiltInContentType'
 import BadContentType from '../mocks/components/BadContentType'
@@ -32,8 +32,8 @@ describe('Preloaders', () => {
       expect(result[0]).toEqual(fetch)
     })
 
-    it('contains createPostRequest action', () => {
-      expect(result[1].type).toEqual(Request.Create)
+    it('contains RequestCreatePost action', () => {
+      expect(result[1].type).toEqual(ActionTypes.RequestCreatePost)
       expect(result[1].contentType).toEqual(ContentTypes.Post)
       expect(result[1].identifier).toEqual(16)
     })
@@ -54,9 +54,8 @@ describe('Preloaders', () => {
       expect(result[0]).toEqual(fetch)
     })
 
-    it('contains Request.Create action', () => {
-      expect(result[1].type).toEqual(Request.Create)
-      expect(result[1].request).toEqual(RequestTypes.Query)
+    it('contains RequestCreateQuery action', () => {
+      expect(result[1].type).toEqual(ActionTypes.RequestCreateQuery)
     })
   })
 })

@@ -7,5 +7,7 @@ export default {
   // Place the result of a request on the store
   RequestComplete: 'kasia/REQUEST_COMPLETE',
   // Record the failure of a request on the store
-  RequestFail: 'kasia/REQUEST_FAILED'
+  RequestFail: 'kasia/REQUEST_FAILED',
+  // Delete queries from the store
+  DeleteQueries: 'kasia/DELETE_QUERIES'
 }

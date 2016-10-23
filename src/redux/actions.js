@@ -19,16 +19,21 @@ export const createQueryRequest = ({ queryFn }) =>
 
 /**
  * Place the result of a successful request on the store
- * @param {Number} id Query identifier
  * @param {Object} data Raw WP-API response data
  */
-export const completeRequest = ({ id, data }) =>
-  ({ type: ActionTypes.RequestComplete, id, data })
+export const completeRequest = (data) =>
+  ({ type: ActionTypes.RequestComplete, data })
 
 /**
  * Update the record of a request with the error returned from a failed response.
- * @param {Number} id Query identifier
  * @param {Error} error Error from failed request
  */
-export const failRequest = ({ id, error }) =>
-  ({ type: ActionTypes.RequestFail, id, error })
+export const failRequest = (error) =>
+  ({ type: ActionTypes.RequestFail, error })
+
+/**
+ * Remove all queries in `ids` from the store.
+ * @param {Array} ids Array of query IDs
+ */
+export const deleteQueries = (ids) =>
+  ({ type: ActionTypes.DeleteQueries, ids })

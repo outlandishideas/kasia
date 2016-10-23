@@ -2,93 +2,86 @@
 
 jest.disableAutomock()
 
-import merge from 'lodash.merge'
-
+import './mocks/WP'
+import { ContentTypes } from '../src/constants/ContentTypes'
 import normalise from '../src/normalise'
-import ContentTypes from '../src/constants/ContentTypes'
-
-import contentTypes from '../src/util/contentTypes'
+import contentTypesManager from '../src/util/contentTypesManager'
 
 function setup () {
-  const mockWP = {
-    registerRoute: jest.fn()
-  }
+  const testKeyById = true
+  const testKeyBySlug = true
 
-  contentTypes.register(mockWP, {
+  contentTypesManager.register({
     name: 'book',
     plural: 'books',
     slug: 'books'
   })
 
-  const tests = {
+  return {
     [ContentTypes.Category]: {
       // The expected entity collections on the store
       collections: ['categories'],
       // Whether to test normalisation by 'id' attr.
-      testKeyById: true,
+      testKeyById,
       // Whether to test normalisation by 'slug' attr.
-      testKeyBySlug: true
+      testKeyBySlug
     },
     [ContentTypes.Comment]: {
       collections: ['comments'],
-      testKeyById: true,
-      testKeyBySlug: false
+      testKeyById
     },
     [ContentTypes.Media]: {
       collections: ['media', 'users'],
-      testKeyById: true,
-      testKeyBySlug: true
+      testKeyById
     },
     [ContentTypes.Page]: {
       collections: ['pages', 'users', 'media'],
-      testKeyById: true,
-      testKeyBySlug: true
+      testKeyById,
+      testKeyBySlug
     },
     [ContentTypes.Post]: {
       collections: ['posts', 'users', 'media'],
-      testKeyById: true,
-      testKeyBySlug: true
+      testKeyById,
+      testKeyBySlug
     },
     [ContentTypes.PostStatus]: {
       collections: ['statuses'],
-      testKeyById: false,
-      testKeyBySlug: true
+      testKeyById,
+      testKeyBySlug
     },
     [ContentTypes.PostType]: {
       collections: ['types'],
-      testKeyById: false,
-      testKeyBySlug: true
+      testKeyById,
+      testKeyBySlug
     },
     [ContentTypes.Tag]: {
       collections: ['tags'],
-      testKeyById: true,
-      testKeyBySlug: true
+      testKeyById,
+      testKeyBySlug
     },
     [ContentTypes.Taxonomy]: {
       collections: ['taxonomies'],
-      testKeyById: false,
-      testKeyBySlug: true
+      testKeyById,
+      testKeyBySlug
     },
     [ContentTypes.User]: {
       collections: ['users'],
-      testKeyById: true,
-      testKeyBySlug: true
+      testKeyById,
+      testKeyBySlug
     },
     book: {
       collections: ['books'],
-      testKeyById: true,
-      testKeyBySlug: true
+      testKeyById,
+      testKeyBySlug
     }
   }
-
-  return { tests }
 }
 
 function fixtures (contentType) {
-  const first = require('./fixtures/wp-api-responses/' + contentType).default
+  const first = require('./mocks/fixtures/wp-api-responses/' + contentType).default
 
   // Imitate another entity by modifying identifiers
-  const second = merge({}, first, {
+  const second = Object.assign({}, first, {
     id: first.id + 1,
     slug: first.slug + '1'
   })
@@ -101,35 +94,41 @@ function fixtures (contentType) {
 }
 
 describe('Normaliser', () => {
-  const { tests } = setup()
+  const tests = setup()
 
   Object.keys(tests).forEach((contentType) => {
     describe('Normalise ' + contentType, () => {
-      const { plural } = contentTypes.get(contentType)
+      const { plural } = contentTypesManager.get(contentType)
       const { first, second, multiple } = fixtures(contentType)
       const { collections, testKeyBySlug, testKeyById } = tests[contentType]
 
       if (testKeyById) {
         it(`should normalise single ${contentType} by id`, () => {
           const result = normalise([first], 'id')
-          expect(Object.keys(result)).toEqual(collections)
+          const actual = Object.keys(result)
+          expect(actual).toEqual(collections)
         })
 
         it(`should normalise multiple ${contentType} by id`, () => {
           const result = normalise(multiple, 'id')
-          expect(Object.keys(result[plural])).toEqual([first.id, second.id].map(String))
+          const actual = Object.keys(result[plural])
+          const expected = [first.id, second.id].map(String)
+          expect(actual).toEqual(expected)
         })
       }
 
       if (testKeyBySlug) {
         it(`should normalise single ${contentType} by slug`, () => {
           const result = normalise([first], 'slug')
-          expect(Object.keys(result)).toEqual(collections)
+          const actual = Object.keys(result)
+          expect(actual).toEqual(collections)
         })
 
         it(`should normalise multiple ${contentType} by slug`, () => {
           const result = normalise(multiple, 'slug')
-          expect(Object.keys(result[plural])).toEqual([first.slug, second.slug])
+          const actual = Object.keys(result[plural])
+          const expected = [first.slug, second.slug]
+          expect(actual).toEqual(expected)
         })
       }
     })

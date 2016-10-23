@@ -4,7 +4,7 @@ jest.disableAutomock()
 
 import React, { Component } from 'react'
 
-import { connectWpQuery } from '../../src/connect'
+import { connectWpQuery } from '../../../src/connect'
 
 @connectWpQuery(
   (wpapi, props) => wpapi.books(props.params.id).get(),

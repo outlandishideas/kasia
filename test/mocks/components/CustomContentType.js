@@ -4,7 +4,7 @@ jest.disableAutomock()
 
 import React, { Component } from 'react'
 
-import { connectWpPost } from '../../src/connect'
+import { connectWpPost } from '../../../src/connect'
 
 @connectWpPost('book', (props) => props.params.id)
 export default class Book extends Component {

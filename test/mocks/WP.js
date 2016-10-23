@@ -1,5 +1,7 @@
 /* global jest:false */
 
-export default {
+import { setWP } from '../../src/wpapi'
+
+setWP({
   registerRoute: jest.fn()
-}
+})

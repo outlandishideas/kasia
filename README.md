@@ -34,7 +34,7 @@ function SpongebobSquarepants (props) {
 ## Features
 
 - Declaratively connect React components to data from WordPress.
-- Uses [`node-wpapi`](https://github.com/WP-API/node-wpapi) internally in order to facilitate complex queries.
+- Uses [`node-wpapi`](https://github.com/WP-API/node-wpapi) in order to facilitate complex queries.
 - Register and consume Custom Content Types with ease.
 - All WP data is normalised at `store.wordpress`, e.g. `store.wordpress.pages`.
 - Support for universal applications.
@@ -54,6 +54,8 @@ Check out the [Kasia boilerplate](https://github.com/outlandishideas/kasia-boile
 - [The Shape of Things](#the-shape-of-things)
 - [Plugins](#plugins)
 - [Universal Applications](#universal-applications)
+- [Hints & Tips](#hints-&-tips)
+- [Contributing](#contributing)
 - [Author & License](#author-&-license)
 
 ## Requirements
@@ -136,6 +138,58 @@ export default function configureStore (initialState) {
 
 ## Usage
 
+### `Kasia(options) : Object`
+
+Configure Kasia.
+
+- __options__ {Object} Options object
+
+Returns an object containing the Kasia reducer and sagas.
+
+```js
+const { kasiaReducer, kasiaSagas } = Kasia({
+  WP: new wpapi({ endpoint: 'http://wordpress/wp-json' })
+})
+```
+
+The `options` object accepts:
+
+- `WP` {wpapi}
+
+    An instance of `node-wpapi`.
+
+- `contentTypes` {Array} _(optional)_
+
+    Array of custom content type definitions
+
+    ```js
+    // Example custom content type definition
+    contentTypes: [{
+      name: 'book',
+      plural: 'books',
+      slug: 'books',
+      route, // optional, default="/{plural}/(?P<id>)"
+      namespace, // optional, default="wp/v2"
+      methodName // optional, default={plural}
+    }]
+    ```
+
+- `plugins` {Array} _(optional)_
+
+    Array of Kasia plugins.
+
+    ```js
+    import KasiaWpApiMenusPlugin from 'kasia-plugin-wp-api-menus'
+
+    // Example passing in plugin
+    plugins: [
+        [KasiaWpApiMenusPlugin, { route: 'menus' }], // with configuration
+        KasiaWpApiMenusPlugin, // without configuration
+    ]
+    ```
+    
+### Decorators
+
 Things to keep in mind:
 
 - A component will make a request for data 1) when it mounts and 2) if its props change. For `connectWpPost` a change
@@ -145,10 +199,11 @@ is made.
 - In arbitrary queries with `connectWpQuery`, we suggest that you always call the `embed` method on the
 query chain, otherwise embedded content data will be omitted from the response.
 - Paging data for the request made on behalf of the component is available at `this.props.kasia.query.paging`.
-- The examples given assume the use of [decorators.](https://github.com/loganfsmyth/babel-plugin-transform-decorators-legacy)
-However decorator support is not necessary. See the end of each example for the alternative Higher Order Component approach.
+- The examples given assume the use of [decorators (sometimes called annotations)](https://github.com/loganfsmyth/babel-plugin-transform-decorators-legacy).
+However decorator support is not necessary. 
+See the end of each example for the alternative Higher Order Component approach.
 
-### `@connectWpPost(contentType, identifier) : Component`
+#### `@connectWpPost(contentType, identifier) : Component`
 
 Connect a component to a single entity in WordPress, e.g. Post, Page, or custom content type. 
 
@@ -182,17 +237,16 @@ export default class Page extends Component {
 export default connectWpPost(Page, (props) => props.params.slug)(Post)
 ```
 
-### `@connectWpQuery(queryFn[, propsComparatorFn]) : Component`
+#### `@connectWpQuery(queryFn[, shouldUpdate]) : Component`
 
 Connect a component to the result of an arbitrary WP-API query.
 
 - __queryFn__ {Function} Function that accepts args `wpapi`, `props`, `state` and should return a WP-API query
-- __propsComparatorFn__ {Function} _(optional)_ Function that determines if new data should be requested by inspecting props
+- __shouldUpdate__ {Function} Called on componentWillReceiveProps, return true to run query 
 
 Returns a connected component.
 
-By default the component will request new data via the given `queryFn` if the `propsComparatorFn` returns true.
-The default property comparison behaviour is to diff primitive values on the props objects.
+The component will request new data via `queryFn` if `shouldUpdate` returns true.
 
 Entities returned from the query will be placed on `this.props.kasia.entities` under the same
 normalised structure as described in [The Shape of Things](#the-shape-of-things).
@@ -235,63 +289,9 @@ export default connectWpQuery((wpapi) => {
 })(Post)
 ```
 
-### `Kasia(options) : Object`
-
-Configure Kasia.
-
-- __options__ {Object} Options object
-
-Returns an object containing the Kasia reducer and sagas.
-
-```js
-const { kasiaReducer, kasiaSagas } = Kasia({
-  WP: new wpapi({ endpoint: 'http://wordpress/wp-json' })
-})
-```
-
-The `options` object accepts:
-
-- `WP` {wpapi}
-
-    An instance of `node-wpapi`.
-
-- `keyEntitiesBy` {String} _(optional)_ (default `'id'`)
-
-    Property of entities used to key them in the store
-
-- `contentTypes` {Array} _(optional)_
-
-    Array of custom content type definitions
-
-    ```js
-    // Example custom content type definition
-    contentTypes: [{
-      name: 'book',
-      plural: 'books',
-      slug: 'books',
-      route, // optional, default="/{plural}/(?P<id>)"
-      namespace, // optional, default="wp/v2"
-      methodName // optional, default={plural}
-    }]
-    ```
-
-- `plugins` {Array} _(optional)_
-
-    Array of Kasia plugins.
-
-    ```js
-    import KasiaWpApiMenusPlugin from 'kasia-plugin-wp-api-menus'
-
-    // Example passing in plugin
-    plugins: [
-        [KasiaWpApiMenusPlugin, { route: 'menus' }], // with configuration
-        KasiaWpApiMenusPlugin, // without configuration
-    ]
-    ```
-
 ## Exports
 
-### `kasia`
+### `Kasia`
 
 The Kasia configurator.
 
@@ -326,11 +326,13 @@ Utility methods to help you when building your application.
 
 ```js
 import { 
-  makePreloaderSaga, 
-  makeQueryPreloaderSaga,
-  makePostPreloaderSaga
+  preload,
+  preloadPost,
+  preloadQuery
 } from 'kasia/util'
 ```
+
+See [Universal Application Utilities](#Utilities) for more details.
 
 ## The Shape of Things
 
@@ -341,7 +343,7 @@ The changes made to the data are all effects available in the
 
 ### Why?
 
-The JSON returned from WP-API contains such things as objects with a single property (e.g. objects with `rendered`),
+The JSON returned from WP-API contains such things as objects with a single property (e.g. objects with `rendered`)
 and meta data property names prefixed with an underscore (e.g. `_links`).
 
 ### What changes should I be aware of?
@@ -416,13 +418,15 @@ A plugin should:
 ### Available plugins:
 
 - [`kasia-plugin-wp-api-menus`](https://github.com/outlandishideas/kasia-plugin-wp-api-menus)
-- [`kasia=plugin-wp-api-all-terms`](https://github.com/outlandishideas/kasia-plugin-wp-api-all-terms)
+- [`kasia-plugin-wp-api-all-terms`](https://github.com/outlandishideas/kasia-plugin-wp-api-all-terms)
+
+Please create a pull request to get your own added to the list.
 
 ## Universal Applications
 
 ### Utilities
 
-#### `util/makePreloaderSaga(components, renderProps) : Generator`
+#### `util/preload(components, renderProps) : Generator`
 
 Create a single saga operation that will preload all data for any Kasia components in `components`.
 
@@ -431,7 +435,7 @@ Create a single saga operation that will preload all data for any Kasia componen
 
 Returns a saga operation.
 
-#### `util/makeQueryPreloaderSaga(queryFn, renderProps) : Generator`
+#### `util/preloadQuery(queryFn, renderProps) : Generator`
 
 Create a single saga operation that will preload data for an arbitrary query against the WP API.
 
@@ -440,7 +444,7 @@ Create a single saga operation that will preload data for an arbitrary query aga
 
 Returns a saga operation.
 
-#### `util/makePostPreloaderSaga(contentType, id[, state]) : Generator`
+#### `util/preloadPost(contentType, id[, state]) : Generator`
 
 Create a single saga operation that will preload data for a single post from the WP API.
 
@@ -451,87 +455,72 @@ Create a single saga operation that will preload data for a single post from the
 
 Returns a saga operation.
 
-#### `ConnectedComponent.makePreloader(renderProps[, state]) : Array<Array>`
+#### `<Component>.makePreloader(renderProps[, state]) : Array<Array>`
 
 Connected components expose a static method `makePreloader` that produces an array of saga operations
 to facilitate the request for entity data on the server ("preloaders").
 
-Create an array of preloader operations.
-
 - __renderProps__ {Object} Render props object derived from the matched route 
 - [__state__] {Object} _(optional)_ State object (default: `null`) 
 
-Returns an array of saga operations in the form:
+Returns an array of saga "preloader" operations in the form:
 
 ```js
 // Saga operations
 [ [sagaGeneratorFn, action] ]
 ```
 
-Elements:
+Where:
 
-- `sagaGenerator` {Function} Must be called with the `action`
+- `sagaGenerator` is a {Function} that must be called with the `action`.
 
-- `action` {Object} An action object containing information for the saga to fetch data
+- `action` is an action {Object} containing information for the saga to fetch data.
 
 ### Example
 
-A somewhat contrived example using the available `kasia/util` methods (see below).
+A somewhat contrived example using the available `kasia/util` methods.
 
 ```js
 import { match } from 'react-router'
+import { runSagas } from 'redux-sagas-util'
+import { preload, preloadQuery } from 'kasia/util'
 
-import { 
-  makePreloaderSaga,
-  makeQueryPreloaderSaga
-} from 'kasia/util'
-
-// Our application's react-router routes
 import routes from './routes'
-
-// Configures the redux store with saga middleware
-// and enhances it with the `runSaga` method
 import store from './store'
-
-// Takes the components and render props from matched route, and
-// the store state and produces the complete HTML as a string
 import renderToString from './render'
-
-// Collection of query functions that request data via `wpapi`
 import { categoriesQuery } from './queries'
 
-// Run all `sagas` until their completion
-function runSagas (store, sagas) {
-  return sagas.reduce((promise, saga) => {
-    return promise.then(() => store.runSaga(saga).done)
-  }, Promise.resolve())
-}
+export function renderPage (res, route) { 
+  return match({ routes, location: route }, (error, redirectLocation, renderProps) => {
+    if (error) {
+      res.sendStatus(500)
+      return
+    }
+      
+    if (redirectLocation) {
+      res.redirect(302, redirectLocation.pathname + redirectLocation.search)
+      return
+    }
+    
+    const { components } = renderProps 
 
-// Produce a static webpage and send to the client for the given `route`
-export function preload (res, route) { 
-  return match({ routes, location: route })
-    .then((error, redirectLocation, renderProps) => {
-      if (error) {
-        res.sendStatus(500)
-        return
-      }
-        
-      if (redirectLocation) {
-        res.redirect(302, redirectLocation.pathname + redirectLocation.search)
-        return
-      }
+    const preloaders = [
+      preload(components, renderProps),
+      preloadQuery(categoriesQuery, renderProps)
+    ]
 
-      const preloaders = [
-        makePreloaderSaga(renderProps.components, renderProps),
-        makeQueryPreloaderSaga(categoriesQuery, renderProps)
-      ]
-
-      return runSagas(preloaders)
-        .then(() => renderToString(components, renderProps, store.getState()))
-        .then((document) => res.send(document))
-    })
+    runSagas(preloaders)
+      .then(() => renderToString(components, renderProps, store.getState()))
+      .then((document) => res.send(document))
+  })  
 }
 ```
+
+## Hints & Tips
+
+- Cache WP API requests: https://github.com/airesvsg/wp-rest-api-cache
+
+Please create a pull request to get your own hint added to the list.
 
 ## Contributing
 
@@ -547,4 +536,3 @@ If you're not sure how to contribute, check out Kent C. Dodds'
 ## Author & License
 
 `kasia` was created by [Outlandish](https://twitter.com/outlandish) and is released under the MIT license.
-

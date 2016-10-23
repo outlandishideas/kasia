@@ -1,61 +1,98 @@
 import { createPostRequest } from '../redux/actions'
 import { fetch } from '../redux/sagas'
-import contentTypes from '../util/contentTypes'
+import contentTypesManager from '../util/contentTypesManager'
 import invariants from '../util/invariants'
 
-export function makePropsData (state, { contentType, id }) {
-  const { plural, name } = contentTypes.get(contentType)
+const util = {}
+
+export default util
+
+/**
+ * Produce an object to be used as the component's Kasia props object when
+ * the query for data is incomplete or failed.
+ * @param {String} contentType Entity content type
+ * @returns {Object} Kasia props object
+ */
+util.makeEmptyQueryObject = function postMakeEmptyQueryObject (contentType) {
+  return {
+    query: { complete: false },
+    [contentType]: null
+  }
+}
+
+/**
+ * Produce the component's data object derived from entities in the store.
+ * @param {Object} state Current store state
+ * @param {String} contentType Entity content type
+ * @param {Number|String} id Entity identifier
+ * @returns {Object} Data to be merged into component's Kasia props object
+ */
+util.makePropsData = function postMakePropsData (state, { contentType, id }) {
+  const { plural, name } = contentTypesManager.get(contentType)
   const entityCollection = state.wordpress.entities[plural]
   return { [name]: findEntity(entityCollection, id) }
+}
+
+/**
+ * Create a function that create the component's preloader function given metadata of the component.
+ * @param {String} contentType Entity content type
+ * @returns {Function} Function that creates a preloader function
+ */
+util.makePreloader = function postMakePreloader (contentType) {
+  return (displayName) => (renderProps) => {
+    invariants.isValidContentType(contentTypesManager.get(contentType), contentType, displayName)
+    return [fetch, createPostRequest({
+      contentType,
+      identifier: identifier(renderProps)
+    })]
+  }
+}
+
+/**
+ * Determine whether the component should make a new request for data by inspecting the
+ * current and next props objects.
+ * @param {Number|String} id Entity identifier
+ * @param {String} contentType Entity content type
+ * @param {Object} thisProps Current component props object
+ * @param {Object} nextProps Next component props object
+ * @param {Function} buildProps Function to create component's next Kasia props object
+ * @returns {Boolean} True if should make new request for data, false otherwise
+ */
+util.shouldUpdate = function postShouldUpdate (id, contentType, thisProps, nextProps, buildProps) {
+  const typeConfig = contentTypesManager.get(contentType)
+  const nextBuiltProps = buildProps(nextProps)
+
+  return (
+    // Changed identifier
+    !nextBuiltProps.kasia[typeConfig.name] &&
+    // Cannot derive entity from existing props
+    identifier(id, nextProps) !== identifier(id, thisProps)
+  )
 }
 
 /**
  * Find an entity in `entities` with the given `identifier`.
  * @param {Object} entities Entity collection
  * @param {String|Number} identifier Entity ID or slug
- * @returns {Object}
+ * @returns {Object|null} Entity object if found, null otherwise
  */
-export function findEntity (entities, identifier) {
-  if (!entities) {
-    return {}
-  }
-
-  if (typeof identifier === 'number') {
-    return entities[identifier]
-  }
-
-  return Object.keys(entities).find((key) => {
-    return entities[key].slug === identifier
-  }) || null
+function findEntity (entities, identifier) {
+  if (!entities) return {}
+  // Entities keyed by ID
+  if (typeof identifier === 'number') return entities[identifier]
+  // Entities keyed by slug
+  return Object.keys(entities).find((key) => entities[key].slug === identifier) || null
 }
 
-export function makePreloader (contentType) {
-  return (displayName) => (renderProps) => {
-    invariants.isValidContentType(contentTypes.get(contentType), contentType, displayName)
-
-    const action = createPostRequest({
-      contentType,
-      identifier: identifier(renderProps),
-    })
-
-    return [fetch, action]
-  }
-}
-
-export function identifier (id, props) {
+/**
+ * Get the desired entity identifier. It is either `id` as-is, or the result of
+ * calling `id` with `props` if `id` is a function.
+ * @param {Number|String|Function} id Entity identifier or function to derive it from props
+ * @param {Object} props Component props object
+ * @returns {Number|String} Entity identifier
+ */
+function identifier (id, props) {
   const realId = typeof id === 'function' ? id(props) : id
   invariants.isIdentifierValue(realId)
   return realId
-}
-
-export function shouldUpdate (id, contentType, thisProps, nextProps, buildProps) {
-  const typeConfig = contentTypes.get(contentType)
-  const nextBuiltProps = buildProps(nextProps)
-
-  return (
-    // changed identifier
-    !nextBuiltProps.kasia[typeConfig.name] &&
-    // cannot derive entity from existing props
-    identifier(id, nextProps) !== identifier(id, thisProps)
-  )
 }
