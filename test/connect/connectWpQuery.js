@@ -5,14 +5,15 @@ jest.disableAutomock()
 import React from 'react'
 import { mount } from 'enzyme'
 
-import bookJson from '../mocks/fixtures/wp-api-responses/book'
-
-import stateMultipleBooks from '../mocks/states/multipleBooks'
 import ActionTypes from '../../src/constants/ActionTypes'
 import OperationTypes from '../../src/constants/OperationTypes'
 
-import _CustomQuery from '../mocks/components/CustomQuery'
-import _CustomPropsComparator from '../mocks/components/CustomPropsComparator'
+import '../__mocks__/WP'
+import stateMultipleBooks from '../__mocks__/states/multipleBooks'
+import _CustomQuery from '../__mocks__/components/CustomQuery'
+import _CustomPropsComparator from '../__mocks__/components/CustomPropsComparator'
+
+import bookJson from '../__fixtures__/wp-api-responses/book'
 
 const CustomQuery = (props, store) => mount(<_CustomQuery {...props} />, { context: { store } })
 const CustomPropsComparator = (props, store) => mount(<_CustomPropsComparator {...props} />, { context: { store } })
@@ -33,7 +34,7 @@ function expectRequestCreateAction (props) {
   expect(action.request).toEqual(OperationTypes.Query)
 }
 
-describe('connectWpQuery', () => {
+describe('@connectWpQuery', () => {
   describe('with primitive props', () => {
     const { store, props } = setup(bookJson.id)
     const rendered = CustomQuery(props, store)

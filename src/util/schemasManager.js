@@ -20,7 +20,7 @@ let categorySchema, mediaSchema, pageSchema, postSchema, revisionSchema, tagSche
   commentSchema, postTypeSchema, postStatusSchema, taxonomySchema
 
 /**
- * Flush the schema object cache.
+ * Invalidate the schema object cache.
  */
 schemasManager.__flush__ = function schemasManagerFlush () {
   schemas = null
@@ -43,6 +43,11 @@ schemasManager.getSchemas = function schemasManagerGetSchemas () {
 schemasManager.createSchema = function schemasManagerCreateSchema (name, idAttribute) {
   if (!schemas) {
     throw new Error('createSchema called before schema cache populated, call makeSchemas first.')
+  } else if (typeof name !== 'string') {
+    console.log(name)
+    throw new Error(`Expecting name to be a string, got "${typeof name}".`)
+  } else if (typeof idAttribute !== 'string') {
+    throw new Error(`Expecting idAttribute to be a string, got "${typeof idAttribute}".`)
   }
 
   const contentTypeSchema = new Schema(name, { idAttribute })
@@ -62,6 +67,10 @@ schemasManager.createSchema = function schemasManagerCreateSchema (name, idAttri
  * @returns {Object} Schema cache
  */
 schemasManager.init = function schemasManagerInit (idAttribute) {
+  if (typeof idAttribute !== 'string') {
+    throw new Error(`Expecting idAttribute to be a string, got "${typeof idAttribute}".`)
+  }
+
   if (schemas) return schemas
 
   // Content types with `id` properties

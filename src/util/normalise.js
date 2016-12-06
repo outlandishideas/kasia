@@ -3,11 +3,11 @@ import modifyResponse from 'wp-api-response-modify'
 import merge from 'lodash.merge'
 
 import schemasManager from './schemasManager'
-import contentTypesManager from '../util/contentTypesManager'
+import contentTypesManager from './contentTypesManager'
 
 /**
  * Split a response from the WP-API into its constituent entities.
- * @param {Array} response The WP API response
+ * @param {Array|Object} response The WP API response
  * @param {String} idAttribute The property name of an entity's identifier
  * @returns {Object}
  */

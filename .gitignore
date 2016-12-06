@@ -6,3 +6,4 @@ lib/
 
 *.log
 .npm-debug.log
+lerna-debug.log

@@ -4,12 +4,12 @@ jest.disableAutomock()
 
 import merge from 'lodash.merge'
 
-import '../mocks/WP'
-import postJson from '../mocks/fixtures/wp-api-responses/post'
+import '../__mocks__/WP'
+import postJson from '../__fixtures__/wp-api-responses/post'
 
 import { INITIAL_STATE, completeReducer, failReducer } from '../../src/redux/reducer'
 
-describe('Reducers', () => {
+describe('redux/reducer', () => {
   const id = '0'
   const initialState = { wordpress: INITIAL_STATE }
 
@@ -55,7 +55,7 @@ describe('Reducers', () => {
       store = newStore
     })
 
-    it('set error in the query object', () => {
+    it('sets error in the query object', () => {
       expect(store.wordpress.queries[id].error).toEqual(String(error))
     })
 

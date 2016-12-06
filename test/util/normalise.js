@@ -2,11 +2,9 @@
 
 jest.disableAutomock()
 
-import './mocks/WP'
-import { ContentTypes } from '../src/constants/ContentTypes'
-import normalise from '../src/util/normalise'
-import schemasManager from '../src/util/schemasManager'
-import contentTypesManager from '../src/util/contentTypesManager'
+import '../__mocks__/WP'
+import { ContentTypes } from '../../src/constants/ContentTypes'
+import { normalise, schemasManager, contentTypesManager } from '../../src/util'
 
 function setup () {
   const testKeyById = true
@@ -27,59 +25,56 @@ function setup () {
       // Whether to test normalisation by 'slug' attr.
       testKeyBySlug
     },
-    // [ContentTypes.Comment]: {
-    //   collections: ['comments'],
-    //   testKeyById
-    // },
-    // [ContentTypes.Media]: {
-    //   collections: ['media', 'users'],
-    //   testKeyById
-    // },
-    // [ContentTypes.Page]: {
-    //   collections: ['pages', 'users', 'media'],
-    //   testKeyById,
-    //   testKeyBySlug
-    // },
-    // [ContentTypes.Post]: {
-    //   collections: ['posts', 'users', 'media'],
-    //   testKeyById,
-    //   testKeyBySlug
-    // },
-    // [ContentTypes.PostStatus]: {
-    //   collections: ['statuses'],
-    //   testKeyById,
-    //   testKeyBySlug
-    // },
-    // [ContentTypes.PostType]: {
-    //   collections: ['types'],
-    //   testKeyById,
-    //   testKeyBySlug
-    // },
-    // [ContentTypes.Tag]: {
-    //   collections: ['tags'],
-    //   testKeyById,
-    //   testKeyBySlug
-    // },
-    // [ContentTypes.Taxonomy]: {
-    //   collections: ['taxonomies'],
-    //   testKeyById,
-    //   testKeyBySlug
-    // },
-    // [ContentTypes.User]: {
-    //   collections: ['users'],
-    //   testKeyById,
-    //   testKeyBySlug
-    // },
-    // book: {
-    //   collections: ['books'],
-    //   testKeyById,
-    //   testKeyBySlug
-    // }
+    [ContentTypes.Comment]: {
+      collections: ['comments'],
+      testKeyById
+    },
+    [ContentTypes.Media]: {
+      collections: ['media', 'users'],
+      testKeyById
+    },
+    [ContentTypes.Page]: {
+      collections: ['pages', 'users', 'media'],
+      testKeyById,
+      testKeyBySlug
+    },
+    [ContentTypes.Post]: {
+      collections: ['posts', 'users', 'media'],
+      testKeyById,
+      testKeyBySlug
+    },
+    [ContentTypes.PostStatus]: {
+      collections: ['statuses'],
+      testKeyBySlug
+    },
+    [ContentTypes.PostType]: {
+      collections: ['types'],
+      testKeyBySlug
+    },
+    [ContentTypes.Tag]: {
+      collections: ['tags'],
+      testKeyById,
+      testKeyBySlug
+    },
+    [ContentTypes.Taxonomy]: {
+      collections: ['taxonomies'],
+      testKeyBySlug
+    },
+    [ContentTypes.User]: {
+      collections: ['users'],
+      testKeyById,
+      testKeyBySlug
+    },
+    book: {
+      collections: ['books'],
+      testKeyById,
+      testKeyBySlug
+    }
   }
 }
 
 function fixtures (contentType) {
-  const first = require('./mocks/fixtures/wp-api-responses/' + contentType).default
+  const first = require('../__fixtures__/wp-api-responses/' + contentType).default
 
   // Imitate another entity by modifying identifiers
   const second = Object.assign({}, first, {
@@ -94,7 +89,7 @@ function fixtures (contentType) {
   }
 }
 
-describe('Normaliser', () => {
+describe('util/normalise', () => {
   const tests = setup()
 
   Object.keys(tests).forEach((contentType) => {

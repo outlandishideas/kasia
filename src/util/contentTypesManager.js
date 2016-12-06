@@ -6,24 +6,25 @@ import { ContentTypes, ContentTypesPlural } from '../constants/ContentTypes'
 import getWP from '../wpapi'
 import invariants from './invariants'
 
-const WP = getWP()
-
 const contentTypes = {}
 
 export default contentTypes
 
+function hasKeys (obj, ...keys) {
+  return keys.reduce((bool, key) => {
+    if (!bool) return bool
+    return obj.hasOwnProperty(key)
+  }, true)
+}
+
 // Pre-populate cache with built-in content type options
 const optionsCache = Object.keys(ContentTypes).reduce((cache, key) => {
   const name = ContentTypes[key]
-
-  cache[name] = {
-    name,
-    plural: ContentTypesPlural[name],
-    slug: ContentTypesPlural[name]
-  }
-
+  const plural = ContentTypesPlural[name]
+  const slug = ContentTypesPlural[name]
+  cache.set(name, { name, plural, slug })
   return cache
-}, {})
+}, new Map())
 
 /**
  * Create and set the options object for a content type in the cache
@@ -37,15 +38,17 @@ contentTypes.register = function contentTypesRegister (contentType) {
 
   const {
     namespace = 'wp/v2',
-    name, methodName, plural, route, slug
+    name, plural, slug, route: _route, methodName: _methodName
   } = contentType
 
-  const realRoute = route || `/${slug}/(?P<id>)`
-  const realMethodName = humps.camelize(methodName || plural)
+  const WP = getWP()
+  const route = _route || `/${slug}/(?P<id>)`
+  const methodName = humps.camelize(_methodName || plural)
   const mixins = Object.assign({}, wpFilterMixins, wpParamMixins)
+  const options = Object.assign({}, contentType, { route, methodName })
 
-  optionsCache[name] = contentType
-  WP[realMethodName] = WP.registerRoute(namespace, realRoute, { mixins })
+  WP[methodName] = WP.registerRoute(namespace, route, { mixins })
+  optionsCache.set(name, options)
 }
 
 /**
@@ -54,7 +57,7 @@ contentTypes.register = function contentTypesRegister (contentType) {
  * @returns {Object}
  */
 contentTypes.get = function contentTypesGet (contentType) {
-  return optionsCache[contentType]
+  return optionsCache.get(contentType)
 }
 
 /**
@@ -69,58 +72,28 @@ contentTypes.getAll = function contentTypesGetAll () {
  * Derive the content type of an entity from the WP-API.
  * Accepts normalised (camel-case keys) or non-normalised data.
  * @param {Object} entity Content entity
- * @returns {String|Boolean} The content type name or false if unidentifiable
+ * @returns {String|null} The content type name or null if unidentifiable
  */
 contentTypes.derive = function contentTypesDerive (entity) {
   if (typeof entity.type !== 'undefined') {
-    if (entity.type === 'comment') {
-      return ContentTypes.Comment
-    } else if (entity.type === 'attachment') {
-      return ContentTypes.Media
-    } else if (entity.type === 'page') {
-      return ContentTypes.Page
-    } else if (entity.type === 'post') {
-      return ContentTypes.Post
-    } else {
-      // Custom content type
-      return entity.type
+    switch (entity.type) {
+      case 'attachment': return ContentTypes.Media
+      case 'comment': return ContentTypes.Comment
+      case 'page': return ContentTypes.Page
+      case 'post': return ContentTypes.Post
+      default: return entity.type // Custom content type
     }
-  }
-
-  if (
-    typeof entity.public !== 'undefined' &&
-    typeof entity.queryable !== 'undefined' &&
-    typeof entity.slug !== 'undefined'
-  ) {
-    return ContentTypes.PostStatus
   }
 
   if (typeof entity.taxonomy !== 'undefined') {
-    if (entity.taxonomy === 'category') {
-      return ContentTypes.Category
-    } else if (entity.taxonomy === 'post_tag') {
-      return ContentTypes.Tag
-    }
+    if (entity.taxonomy === 'category') return ContentTypes.Category
+    if (entity.taxonomy === 'post_tag') return ContentTypes.Tag
   }
 
-  if (entity.types instanceof Array) {
-    return ContentTypes.Taxonomy
-  }
+  if (Array.isArray(entity.types)) return ContentTypes.Taxonomy
+  if (entity.avatar_urls || entity.avatarUrls) return ContentTypes.User
+  if (hasKeys(entity, 'description', 'hierarchical', 'name')) return ContentTypes.PostType
+  if (hasKeys(entity, 'public', 'queryable', 'slug')) return ContentTypes.PostStatus
 
-  if (
-    typeof entity.description !== 'undefined' &&
-    typeof entity.hierarchical !== 'undefined' &&
-    typeof entity.name !== 'undefined'
-  ) {
-    return ContentTypes.PostType
-  }
-
-  if (
-    typeof entity.avatar_urls !== 'undefined' ||
-    typeof entity.avatarUrls !== 'undefined'
-  ) {
-    return ContentTypes.User
-  }
-
-  return false
+  return null
 }

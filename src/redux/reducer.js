@@ -2,8 +2,7 @@ import merge from 'lodash.merge'
 import isNode from 'is-node-fn'
 
 import ActionTypes from '../constants/ActionTypes'
-import pickEntityIds from '../util/pickEntityIds'
-import normalise from '../util/normalise'
+import { pickEntityIds, normalise } from '../util'
 
 const __IS_NODE__ = isNode()
 
@@ -17,7 +16,7 @@ export const INITIAL_STATE = {
 // COMPLETE
 // Place entity on the store; update query record
 export const completeReducer = (normalise) => (state, action) => {
-  return merge({}, state, ({
+  return merge({}, state, {
     wordpress: {
       entities: Object.assign({},
         state.entities,
@@ -27,14 +26,14 @@ export const completeReducer = (normalise) => (state, action) => {
         [action.id]: {
           id: action.id,
           entities: pickEntityIds(action.data),
-          paging: action.data._paging || null,
+          paging: action.data._paging || {},
           prepared: __IS_NODE__,
           complete: true,
           OK: true
         }
       }
     }
-  }))
+  })
 }
 
 // FAIL
@@ -58,14 +57,16 @@ export const failReducer = (state, action) => {
 // DELETE QUERIES
 // Remove query objects from `state.wordpress.queries`
 export const deleteReducer = (state, action) => {
+  const queries = Object
+    .values(state.wordpress.queries)
+    .reduce((queries, query) => {
+      if (query.id in action.ids) return queries
+      queries[query.id] = query
+      return queries
+    }, {})
+
   return merge({}, state, {
-    wordpress: {
-      queries: Object.values(state.wordpress.queries).reduce((queries, query) => {
-        if (query.id in action.ids) return queries
-        queries[query.id] = query
-        return queries
-      }, {})
-    }
+    wordpress: { queries }
   })
 }
 
@@ -76,7 +77,7 @@ export const deleteReducer = (state, action) => {
  * @returns {Object} Kasia reducer
  */
 export default function makeReducer (options, plugins) {
-  const normaliseData = (data) => normalise(data, options.index)
+  const normaliseData = (data) => normalise(data, options.keyEntitiesBy)
 
   const reducer = {
     ...plugins.reducers,

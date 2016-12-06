@@ -1,7 +1,7 @@
 import modifyResponse from 'wp-api-response-modify'
 import merge from 'lodash.merge'
 
-import bookJson from '../../mocks/fixtures/wp-api-responses/book'
+import bookJson from '../../__fixtures__/wp-api-responses/book'
 
 import { INITIAL_STATE } from '../../../src/redux/reducer'
 

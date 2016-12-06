@@ -6,11 +6,11 @@ import ActionTypes from '../../src/constants/ActionTypes'
 import { ContentTypes } from '../../src/constants/ContentTypes'
 import { fetch } from '../../src/redux/sagas'
 
-import BuiltInContentType from '../mocks/components/BuiltInContentType'
-import BadContentType from '../mocks/components/BadContentType'
-import CustomQuery from '../mocks/components/CustomQuery'
+import BuiltInContentType from '../__mocks__/components/BuiltInContentType'
+import BadContentType from '../__mocks__/components/BadContentType'
+import CustomQuery from '../__mocks__/components/CustomQuery'
 
-describe('Preloaders', () => {
+describe('util/preload', () => {
   describe('connectWpPost', () => {
     const result = BuiltInContentType.makePreloader({ params: { id: 16 } })
 

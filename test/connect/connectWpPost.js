@@ -5,17 +5,18 @@ jest.disableAutomock()
 import React from 'react'
 import { mount } from 'enzyme'
 
-import postJson from '../mocks/fixtures/wp-api-responses/post'
-import bookJson from '../mocks/fixtures/wp-api-responses/book'
-import stateMultipleEntities from '../mocks/states/multipleEntities'
-
 import ActionTypes from '../../src/constants/ActionTypes'
 import OperationTypes from '../../src/constants/OperationTypes'
-import contentTypesManager from '../../src/util/contentTypesManager'
+import { contentTypesManager } from '../../src/util'
 
-import _BuiltInType from '../mocks/components/BuiltInContentType'
-import _CustomType from '../mocks/components/CustomContentType'
-import _BadContentType from '../mocks/components/BadContentType'
+import '../__mocks__/WP'
+import stateMultipleEntities from '../__mocks__/states/multipleEntities'
+import _BuiltInType from '../__mocks__/components/BuiltInContentType'
+import _CustomType from '../__mocks__/components/CustomContentType'
+import _BadContentType from '../__mocks__/components/BadContentType'
+
+import postJson from '../__fixtures__/wp-api-responses/post'
+import bookJson from '../__fixtures__/wp-api-responses/book'
 
 const BuiltInType = (props, store) => mount(<_BuiltInType {...props} />, { context: { store } })
 const CustomType = (props, store) => mount(<_CustomType {...props} />, { context: { store } })
@@ -34,7 +35,7 @@ function setup () {
   return { dispatch, getState, subscribe }
 }
 
-describe('connectWpPost', () => {
+describe('@connectWpPost', () => {
   describe('with built-in content type', () => {
     const store = setup()
     const dispatch = store.dispatch

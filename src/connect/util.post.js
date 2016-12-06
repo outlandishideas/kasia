@@ -1,11 +1,37 @@
 import { createPostRequest } from '../redux/actions'
 import { fetch } from '../redux/sagas'
-import contentTypesManager from '../util/contentTypesManager'
-import invariants from '../util/invariants'
+import { contentTypesManager, invariants } from '../util'
 
 const util = {}
 
 export default util
+
+/**
+ * Find an entity in `entities` with the given `identifier`.
+ * @param {Object} entities Entity collection
+ * @param {String|Number} identifier Entity ID or slug
+ * @returns {Object|null} Entity object if found, null otherwise
+ */
+function findEntity (entities, identifier) {
+  if (!entities) return {}
+  // Entities keyed by ID
+  if (typeof identifier === 'number') return entities[identifier]
+  // Entities keyed by slug
+  return Object.keys(entities).find((key) => entities[key].slug === identifier) || null
+}
+
+/**
+ * Get the desired entity identifier. It is either `id` as-is, or the result of
+ * calling `id` with `props` if `id` is a function.
+ * @param {Number|String|Function} id Entity identifier or function to derive it from props
+ * @param {Object} props Component props object
+ * @returns {Number|String} Entity identifier
+ */
+function identifier (id, props) {
+  const realId = typeof id === 'function' ? id(props) : id
+  invariants.isIdentifierValue(realId)
+  return realId
+}
 
 /**
  * Produce an object to be used as the component's Kasia props object when
@@ -62,37 +88,11 @@ util.shouldUpdate = function postShouldUpdate (id, contentType, thisProps, nextP
   const typeConfig = contentTypesManager.get(contentType)
   const nextBuiltProps = buildProps(nextProps)
 
+  // Make a call to the query function if..
   return (
-    // Changed identifier
+    // ..we cannot find the entity in the store using next props
     !nextBuiltProps.kasia[typeConfig.name] &&
-    // Cannot derive entity from existing props
+    // ..the identifier has changed
     identifier(id, nextProps) !== identifier(id, thisProps)
   )
-}
-
-/**
- * Find an entity in `entities` with the given `identifier`.
- * @param {Object} entities Entity collection
- * @param {String|Number} identifier Entity ID or slug
- * @returns {Object|null} Entity object if found, null otherwise
- */
-function findEntity (entities, identifier) {
-  if (!entities) return {}
-  // Entities keyed by ID
-  if (typeof identifier === 'number') return entities[identifier]
-  // Entities keyed by slug
-  return Object.keys(entities).find((key) => entities[key].slug === identifier) || null
-}
-
-/**
- * Get the desired entity identifier. It is either `id` as-is, or the result of
- * calling `id` with `props` if `id` is a function.
- * @param {Number|String|Function} id Entity identifier or function to derive it from props
- * @param {Object} props Component props object
- * @returns {Number|String} Entity identifier
- */
-function identifier (id, props) {
-  const realId = typeof id === 'function' ? id(props) : id
-  invariants.isIdentifierValue(realId)
-  return realId
 }

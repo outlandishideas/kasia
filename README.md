@@ -157,6 +157,12 @@ The `options` object accepts:
 - `WP` {wpapi}
 
     An instance of `node-wpapi`.
+    
+- `keyEntitiesBy` {String} _(optional, default=`'id'`)_
+
+    Property of entities that is used to key them in the store.
+     
+    One of: `'slug'`, `'id'`.
 
 - `contentTypes` {Array} _(optional)_
 
@@ -515,12 +521,6 @@ export function renderPage (res, route) {
   })  
 }
 ```
-
-## Hints & Tips
-
-- Cache WP API requests: https://github.com/airesvsg/wp-rest-api-cache
-
-Please create a pull request to get your own hint added to the list.
 
 ## Contributing
 

@@ -6,6 +6,6 @@ export default function getWP () {
 }
 
 export function setWP (_WP) {
-  if (WP) throw new Error('WP already set')
   WP = _WP
+  return WP
 }

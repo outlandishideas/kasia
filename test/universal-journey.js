@@ -8,12 +8,13 @@ import * as effects from 'redux-saga/effects'
 import { createStore, applyMiddleware, compose, combineReducers } from 'redux'
 import { mount } from 'enzyme'
 
-import { ContentTypes } from '../../src/constants/ContentTypes'
-import { fetch } from '../../src/redux/sagas'
-import { completeRequest as _completeRequest } from '../../src/redux/actions'
-import ActionTypes from '../../src/constants/ActionTypes'
-import makeReducer from '../../src/redux/reducer'
-import BuiltInContentType from '../mocks/components/BuiltInContentType'
+import './__mocks__/WP'
+import { ContentTypes } from '../src/constants/ContentTypes'
+import { fetch } from '../src/redux/sagas'
+import { completeRequest as _completeRequest } from '../src/redux/actions'
+import ActionTypes from '../src/constants/ActionTypes'
+import makeReducer from '../src/redux/reducer'
+import BuiltInContentType from './__mocks__/components/BuiltInContentType'
 
 function setup () {
   const renderProps = { params: { id: 0 } }
@@ -86,10 +87,9 @@ describe('Universal journey', function () {
     expect(preloader[1]).toEqual(expectedAction)
   })
 
-  it('that when run updates number of prepared queries', (done) => {
+  it('that when run updates number of prepared queries', () => {
     return completeRequest(id, postJson1, 'BuiltInContentType').then(() => {
       expect(store.getState().wordpress.__kasia__.numPreparedQueries).toEqual(1)
-      done()
     })
   })
 
@@ -106,7 +106,7 @@ describe('Universal journey', function () {
 
   it('should render the prepared query data on client', () => {
     rendered = mount(
-      <BuiltInContentType params={{ id: postJson1.id }} __QUERY_ID__={0} __IS_NODE__={false} />,
+      <BuiltInContentType params={{ id: postJson1.id }} />,
       { context: { store } }
     )
     expect(rendered.html()).toEqual(`<div>${postJson1.title}</div>`)
@@ -116,16 +116,14 @@ describe('Universal journey', function () {
     expect(store.getState().wordpress.__kasia__.numPreparedQueries).toEqual(0)
   })
 
-  it('should make a non-prepared query on props change', (done) => {
-    completeRequest(++id, postJson2).then(() => {
+  it('should make a non-prepared query on props change', () => {
+    return completeRequest(++id, postJson2).then(() => {
       const state = store.getState().wordpress
 
       rendered.setProps({ params: { id: 1 } })
 
       expect(state.__kasia__.numPreparedQueries).toEqual(0)
       expect(Object.keys(state.queries)).toContain(String(id))
-
-      done()
     })
   })
 

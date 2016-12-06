@@ -2,12 +2,14 @@
 
 jest.disableAutomock()
 
-import './mocks/WP'
+import './__mocks__/WP'
 import Kasia from '../src/Kasia'
-import getWP from '../src/wpapi'
+import getWP, { setWP } from '../src/wpapi'
 
 describe('Kasia', () => {
   const WP = getWP()
+
+  afterEach(() => setWP(null))
 
   it('exports a function', () => {
     expect(typeof Kasia).toEqual('function')
@@ -27,8 +29,8 @@ describe('Kasia', () => {
 
   it('throws with bad index value', () => {
     expect(() => {
-      Kasia({ WP, index: 0 })
-    }).toThrowError(/Expecting index to be string/)
+      Kasia({ WP, keyEntitiesBy: 0 })
+    }).toThrowError(/Expecting keyEntitiesBy to be string/)
   })
 
   it('throws with bad contentTypes value', () => {

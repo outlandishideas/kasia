@@ -1,9 +1,8 @@
 import React, { Component } from 'react'
 
 import { createPostRequest, createQueryRequest, deleteQueries } from '../redux/actions'
-import contentTypesManager from '../util/contentTypesManager'
+import { contentTypesManager, invariants } from '../util'
 import OperationTypes from '../constants/OperationTypes'
-import invariants from '../util/invariants'
 import postUtils from './util.post'
 import queryUtils from './util.query'
 
@@ -17,26 +16,32 @@ let queryId = 0
 
 /**
  * Create a connectWp* decorator Higher Order Component.
- * @param {String} operation
- * @param {Object} config Internal configuration
+ * @param {String} operation Operation type, Post or Query
+ * @param {Object} config Decorator configuration object
+ * @param {Object} config.emptyQueryObject An object that represents an incomplete or erroneous query
+ * @param {Object} config.makePreloader Function to create preloader saga given component props
+ * @param {Object} [config.contentType] Post content type, Post op only
+ * @param {Object} [config.shouldUpdate] Function to determine if query should fire again, Query op only
+ * @param {Object} [config.queryFn] Query function, Query op only
  * @returns {Function} connectWp* decorator
  */
 export function makeConnectWpDecorator (operation, config) {
+  const {
+    emptyQueryObject,
+    makePreloader,
+    contentType,
+    shouldUpdate,
+    queryFn
+  } = config
+
   const util = {
-    post: postUtils,
-    query: queryUtils
+    [OperationTypes.Post]: postUtils,
+    [OperationTypes.Query]: queryUtils
   }[operation]
 
   if (!util) {
     throw new Error(`Unrecognised operation type "${operation}".`)
   }
-
-  const {
-    emptyQueryObject,
-    makePreloader, shouldUpdate,
-    contentType, // connectWpPost* decorator only
-    queryFn // connectWpQuery* decorator only
-  } = config
 
   return (target) => {
     const displayName = target.displayName || target.name
@@ -44,7 +49,7 @@ export function makeConnectWpDecorator (operation, config) {
     invariants.isNotWrapped(target, displayName)
 
     return class KasiaIntermediateComponent extends Component {
-      static __kasia = operation
+      static __kasia__ = operation
       static contextTypes = CONTEXT_TYPES
       static makePreloader = makePreloader(displayName)
 
@@ -138,6 +143,7 @@ export function makeConnectWpDecorator (operation, config) {
 /**
  * Connect a component to a single entity from WordPress.
  *
+ * @example
  * Built-in content type, derived slug identifier:
  * ```js
  * const { Page } from 'kasia/types'
@@ -181,6 +187,7 @@ export function connectWpPost (
  * The component will request new data via the given `queryFn`
  * if `shouldUpdate` returns true.
  *
+ * @example
  * Example, get all posts by an author:
  * ```js
  * connectWpQuery((wpapi) => wpapi.posts().embed().author('David Bowie'))

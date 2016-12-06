@@ -1,10 +1,8 @@
-import { runSagas } from 'redux-saga-util'
-import { fork } from 'redux-saga/effects'
+import { fork, join } from 'redux-saga/effects'
 
 import { fetch } from '../redux/sagas'
 import { createPostRequest, createQueryRequest } from '../redux/actions'
-import contentTypesManager from '../util/contentTypesManager'
-import invariants from '../util/invariants'
+import { contentTypesManager, invariants } from '../util'
 
 const preloaders = {}
 
@@ -13,12 +11,13 @@ export default preloaders
 /**
  * Make a preloader saga for all Kasia components within the `components` array.
  * Resets the libraries internal prepared query counter to zero.
+ * @param {Object} store Redux store enhanced with `runSaga`
  * @param {Array} components Array of components
  * @param {Object} renderProps Render props object
  * @param {Object} [state] State object
  * @returns {Function} A single saga operation
  */
-preloaders.preload = function preloadersPreload (components, renderProps, state = null) {
+preloaders.preload = function preloadersPreload (store, components, renderProps, state = null) {
   if (!Array.isArray(components)) {
     throw new Error(`Expecting components to be array, got "${typeof components}".`)
   } else if (!components.length) {
@@ -31,7 +30,10 @@ preloaders.preload = function preloadersPreload (components, renderProps, state 
     .filter(component => component && typeof component.makePreloader === 'function')
     .map(component => component.makePreloader(renderProps, state))
 
-  return runSagas(preloaders)
+  return function * () {
+    const tasks = yield preloaders.map(([ fn, action ]) => fork(fn, action))
+    yield tasks.map(join)
+  }
 }
 
 /**
@@ -79,4 +81,26 @@ preloaders.preloadQuery = function preloadersPreloadQuery (queryFn, renderProps,
   return function * () {
     yield fork(fetch, action)
   }
+}
+
+/**
+ * Run multiple `sagas` against `store`, passing each the given `args`.
+ * @param {Object} store Store object
+ * @param {Array|Function} sagas Saga or array of sagas
+ * @returns {Promise} Resolves with success of each saga operation
+ */
+export function runSagas (store, sagas) {
+  if (typeof store.runSaga !== 'function') {
+    throw new Error('No `store.runSaga`. See documentation for `runSagasEnhancer`.')
+  } else if (!sagas || (typeof sagas !== 'function' && !Array.isArray(sagas))) {
+    throw new Error(`Expecting sagas to be function or array, got "${typeof sagas}".`)
+  }
+
+  return Promise.all(
+    [].concat(sagas).map((saga) => {
+      return store
+        .runSaga(saga, ...args).done
+        .then(([ result ]) => result)
+    })
+  )
 }

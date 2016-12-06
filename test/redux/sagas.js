@@ -4,25 +4,22 @@ jest.disableAutomock()
 
 import { put, call } from 'redux-saga/effects'
 
-import '../mocks/WP'
-import getWP from '../../src/wpapi'
+import '../__mocks__/WP'
+import { queryBuilder } from '../../src/util'
 import { fetch } from '../../src/redux/sagas'
 import { completeRequest, createPostRequest, createQueryRequest } from '../../src/redux/actions'
 import { ContentTypes } from '../../src/constants/ContentTypes'
 
 function setup () {
   const mockResult = 'mockResult'
-  const WP = getWP()
   const queryFn = jest.fn(() => mockResult)
-  return { WP, queryFn, mockResult }
+  return { queryFn, mockResult }
 }
 
-describe('Sagas', () => {
-  const { WP, queryFn, mockResult } = setup()
+describe('redux/sagas', () => {
+  const { queryFn, mockResult } = setup()
 
-  describe('on createPostRequest', () => {
-    const queryId = 0
-
+  describe('createPostRequest', () => {
     const opts = {
       contentType: ContentTypes.Post,
       identifier: 16
@@ -31,36 +28,36 @@ describe('Sagas', () => {
     const action = createPostRequest(opts)
     const generator = fetch(action)
 
-    // Skip select
-    generator.next()
-
-    // Skip call
-    generator.next(queryId)
+    it('yields a call to result of queryBuilder.makeQuery', () => {
+      const actual = generator.next().value
+      const expected = call(queryBuilder.makeQuery(action))
+      actual.CALL.fn = actual.CALL.fn.toString()
+      expected.CALL.fn = expected.CALL.fn.toString()
+      expect(actual).toEqual(expected)
+    })
 
     it('yields a put with completeRequest action', () => {
       const actual = generator.next(mockResult).value
-      const expected = put(completeRequest({ id: queryId, data: mockResult }))
+      const expected = put(completeRequest(mockResult))
       expect(actual).toEqual(expected)
     })
   })
 
-  describe('on createQueryRequest', () => {
-    const queryId = 1
-    const action = createQueryRequest({ id: queryId, queryFn })
+  describe('createQueryRequest', () => {
+    const opts = { queryFn }
+
+    const action = createQueryRequest(opts)
     const generator = fetch(action)
 
-    // Skip select
-    generator.next()
-
-    it('yields a call to correctly resolved queryFn', () => {
-      const actual = generator.next(queryId).value
-      const expected = call(queryFn, WP)
+    it('yields a call to queryFn', () => {
+      const actual = generator.next().value
+      const expected = call(queryFn)
       expect(actual).toEqual(expected)
     })
 
     it('puts a completeRequest action with result', () => {
       const actual = generator.next(mockResult).value
-      const expected = put(completeRequest({ id: queryId, data: mockResult }))
+      const expected = put(completeRequest(mockResult))
       expect(actual).toEqual(expected)
     })
   })

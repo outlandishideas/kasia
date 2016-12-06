@@ -58,20 +58,20 @@ export default {
   isValidContentType: (contentTypeOptions, name, componentName) => invariant(
     typeof contentTypeOptions !== 'undefined',
     'Content type "%s" is not recognised. ' +
-    'Pass built-ins from `kasia/types`, e.g. Post. ' +
+    'Pass built-ins from `kasia/types`, e.g. `{ Post }`. ' +
     'Pass the name of custom content types, e.g. "Book". ' +
-    'Check connectWpPost arguments for the %s component.',
+    'Check connectWpPost arguments for %s.',
     name,
     componentName
   ),
-  isNewContentType: (allTypes = [], contentType) => invariant(
-    typeof allTypes[contentType.name] === 'undefined',
+  isNewContentType: (typesMap, contentType) => invariant(
+    typesMap && !typesMap.get(contentType.name),
     'Content type with name "%s" already exists.',
     contentType.name
   ),
   isNotWrapped: (target = () => {}, displayName) => invariant(
     !target.__kasia,
-    'The component "%s" is already wrapped by Kasia.',
+    '%s is already wrapped by Kasia.',
     displayName
   ),
   isIdentifierValue: (id) => invariant(
@@ -89,11 +89,9 @@ export default {
   ),
   queryHasError: (query, displayName) => invariant(
     query && query.error,
-    'Ignoring query %s. ' +
-    'Error: "%s". ' +
-    'Check connectWp* decorator for "%s".',
-    query.id,
-    query.error,
-    displayName
+    'Ignoring connectWp%s query for %s. %s.',
+    query.type,
+    displayName,
+    query.error
   )
 }
