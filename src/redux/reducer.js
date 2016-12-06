@@ -3,7 +3,7 @@ import isNode from 'is-node-fn'
 
 import ActionTypes from '../constants/ActionTypes'
 import pickEntityIds from '../util/pickEntityIds'
-import normalise from '../normalise'
+import normalise from '../util/normalise'
 
 const __IS_NODE__ = isNode()
 

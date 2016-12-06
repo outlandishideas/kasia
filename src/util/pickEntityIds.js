@@ -9,13 +9,13 @@ import contentTypesManager from './contentTypesManager'
  * @returns {Array} Entity identifiers
  */
 export default function pickEntityIds (data) {
-  let entityIdentifiers = pickToArray(data, 'id')
+  const entityIdentifiers = pickToArray(data, 'id')
 
   // Accommodate content types that do not have an `id` property
   data.forEach((entity) => {
     const type = contentTypesManager.derive(entity)
     if (ContentTypesWithoutId[type]) {
-      entityIdentifiers = entityIdentifiers.concat(pickToArray(entity, 'slug'))
+      entityIdentifiers.push(...pickToArray(entity, 'slug'))
     }
   })
 

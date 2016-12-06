@@ -1,23 +1,24 @@
 import { normalize, arrayOf } from 'normalizr'
 import modifyResponse from 'wp-api-response-modify'
+import merge from 'lodash.merge'
 
 import schemasManager from './schemasManager'
 import contentTypesManager from '../util/contentTypesManager'
 
 /**
  * Split a response from the WP-API into its constituent entities.
- * @param {Array} data The WP API response data
+ * @param {Array} response The WP API response
  * @param {String} idAttribute The property name of an entity's identifier
  * @returns {Object}
  */
-export default function normalise (data, idAttribute) {
+export default function normalise (response, idAttribute) {
   let schemas = schemasManager.getSchemas()
 
   if (!schemas) {
     schemas = schemasManager.init(idAttribute)
   }
 
-  return data.reduce((entities, rawEntity) => {
+  return [].concat(response).reduce((entities, rawEntity) => {
     const entity = modifyResponse(rawEntity)
     const type = contentTypesManager.derive(entity)
 
@@ -33,6 +34,6 @@ export default function normalise (data, idAttribute) {
 
     const normalised = normalize(entity, schema)
 
-    return Object.assign({}, entities, normalised.entities)
+    return merge(entities, normalised.entities)
   }, {})
 }

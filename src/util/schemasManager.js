@@ -20,6 +20,13 @@ let categorySchema, mediaSchema, pageSchema, postSchema, revisionSchema, tagSche
   commentSchema, postTypeSchema, postStatusSchema, taxonomySchema
 
 /**
+ * Flush the schema object cache.
+ */
+schemasManager.__flush__ = function schemasManagerFlush () {
+  schemas = null
+}
+
+/**
  * Get the schema object cache.
  * @returns {Object} Schema object cache
  */
