@@ -45,11 +45,15 @@ const reducer = {
 function fetch (WP, action) {
   switch (action.type) {
     case ActionTypes.REQUEST_MENU:
-      return WP.menus().id(action.id).get()
+      return typeof action.id === 'string'
+        ? WP.menus().slug(action.id).get()
+        : WP.menus().id(action.id).get()
     case ActionTypes.REQUEST_MENUS:
       return WP.menus().get()
     case ActionTypes.REQUEST_LOCATION:
-      return WP.locations().id(action.id).get()
+      return typeof action.id === 'string'
+        ? WP.locations().slug(action.id).get()
+        : WP.locations().id(action.id).get()
     case ActionTypes.REQUEST_LOCATIONS:
       return WP.locations().get()
     default:
@@ -102,8 +106,8 @@ export function makePreloader (WP, action) {
 export default function (WP, config) {
   config.route = config.route || defaultRoute
 
-  WP.menus = WP.registerRoute(config.route, 'menus/(?P<id>)')
-  WP.locations = WP.registerRoute(config.route, 'menu-locations/(?P<id>)')
+  WP.menus = WP.registerRoute(config.route, '/menus/(?P<id>)')
+  WP.locations = WP.registerRoute(config.route, '/menu-locations/(?P<id>)')
 
   return {
     reducers: reducer,

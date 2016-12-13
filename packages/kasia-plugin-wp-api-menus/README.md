@@ -55,7 +55,7 @@ Menus will be available at `store.wordpress.menus`.
 
 Get a single menu.
 
-- __id__ {String} ID of the menu to fetch
+- __id__ {Number|String} ID or slug of the menu to fetch
 
 Menu will be available at `store.wordpress.menus[id]`.
 
@@ -69,7 +69,7 @@ Theme locations will be available at `store.wordpress.menusLocations`.
 
 Get a single theme menu location.
 
-- __id__ {String} ID of the theme menu location to fetch
+- __id__ {Number|String} ID or slug of the theme menu location to fetch
 
 Menu will be available at `store.wordpress.menuLocations[id]`.
 
