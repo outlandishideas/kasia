@@ -102,8 +102,8 @@ export function makePreloader (WP, action) {
 export default function (WP, config) {
   config.route = config.route || defaultRoute
 
-  WP.menus = WP.registerRoute(config.route, 'menus/(?P<id>)')
-  WP.locations = WP.registerRoute(config.route, 'menu-locations/(?P<id>)')
+  WP.menus = WP.registerRoute(config.route, '/wp-api-menus/v2/(?P<id>)')
+  WP.locations = WP.registerRoute(config.route, '/wp-api-menus/v2/(?P<id>)')
 
   return {
     reducers: reducer,
