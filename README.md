@@ -423,8 +423,8 @@ A plugin should:
 
 ### Available plugins:
 
-- [`kasia-plugin-wp-api-menus`](https://github.com/outlandishideas/kasia-plugin-wp-api-menus)
-- [`kasia-plugin-wp-api-all-terms`](https://github.com/outlandishideas/kasia-plugin-wp-api-all-terms)
+- [`kasia-plugin-wp-api-menus`](https://github.com/outlandishideas/kasia/tree/master/packages/kasia-plugin-wp-api-menus)
+- [`kasia-plugin-wp-api-all-terms`](https://github.com/outlandishideas/kasia/tree/master/packages/kasia-plugin-wp-api-all-terms)
 
 Please create a pull request to get your own added to the list.
 
