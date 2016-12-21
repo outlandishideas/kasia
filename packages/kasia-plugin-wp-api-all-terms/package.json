@@ -1,6 +1,6 @@
 {
   "name": "kasia-plugin-wp-api-all-terms",
-  "version": "0.0.3",
+  "version": "3.0.3",
   "description": "Provides support for the WP-API all terms plugin to Kasia",
   "main": "lib/index.js",
   "jsnext:main": "src/index.js",
