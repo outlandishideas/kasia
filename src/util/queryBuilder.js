@@ -4,20 +4,6 @@ import ActionTypes from '../constants/ActionTypes'
 import getWP from '../wpapi'
 import { contentTypesManager } from '../util'
 
-const QUERY_FN_ARGS = [
-  'wpapi',
-  'contentTypeMethodName',
-  'identifierTypeMethodName',
-  'identifierValue'
-]
-
-const QUERY_FN_TEMPLATE = `
-  return wpapi
-    [contentTypeMethodName]()
-    [identifierTypeMethodName](identifierValue)
-    .embed().get()
-`
-
 const queryBuilder = {}
 
 export default queryBuilder
@@ -38,12 +24,19 @@ export default queryBuilder
  * @returns {Function} A function to make a request to the WP-API
  */
 queryBuilder._deriveQuery = function queryBuilderDeriveQuery (contentTypeMethodName, identifier) {
-  return () => new Function(...QUERY_FN_ARGS, QUERY_FN_TEMPLATE)(
-    getWP(),
-    contentTypeMethodName,
-    typeof identifier === 'string' ? 'slug' : 'id',
-    identifier
-  )
+  return () => {
+    const fn = (wpapi, contentTypeMethodName, identifierTypeMethodName, identifierValue) => {
+      const contentTypeApi = wpapi[contentTypeMethodName]()
+      const query = contentTypeApi[identifierTypeMethodName](identifierValue)
+      return query.embed().get()
+    }
+    return fn(
+      getWP(),
+      contentTypeMethodName,
+      typeof identifier === 'string' ? 'slug' : 'id',
+      identifier
+    )
+  }
 }
 
 /**

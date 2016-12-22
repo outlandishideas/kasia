@@ -82,25 +82,3 @@ preloaders.preloadQuery = function preloadersPreloadQuery (queryFn, renderProps,
     yield fork(fetch, action)
   }
 }
-
-/**
- * Run multiple `sagas` against `store`, passing each the given `args`.
- * @param {Object} store Store object
- * @param {Array|Function} sagas Saga or array of sagas
- * @returns {Promise} Resolves with success of each saga operation
- */
-export function runSagas (store, sagas) {
-  if (typeof store.runSaga !== 'function') {
-    throw new Error('No `store.runSaga`. See documentation for `runSagasEnhancer`.')
-  } else if (!sagas || (typeof sagas !== 'function' && !Array.isArray(sagas))) {
-    throw new Error(`Expecting sagas to be function or array, got "${typeof sagas}".`)
-  }
-
-  return Promise.all(
-    [].concat(sagas).map((saga) => {
-      return store
-        .runSaga(saga, ...args).done
-        .then(([ result ]) => result)
-    })
-  )
-}

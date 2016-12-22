@@ -62,8 +62,12 @@ describe('redux/reducer journey', () => {
 
     it('places query on store', () => {
       const expected = {
-        id: 0, complete: true, OK: true, paging: {},
-        entities: pickEntityIds(postJson), prepared: true
+        id: 0,
+        complete: true,
+        OK: true,
+        paging: {},
+        entities: pickEntityIds(postJson),
+        prepared: true
       }
       const actual = store.getState().wordpress.queries[0]
       expect(actual).toEqual(expected)

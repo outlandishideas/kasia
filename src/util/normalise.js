@@ -12,11 +12,9 @@ import contentTypesManager from './contentTypesManager'
  * @returns {Object}
  */
 export default function normalise (response, idAttribute) {
-  let schemas = schemasManager.getSchemas()
-
-  if (!schemas) {
-    schemas = schemasManager.init(idAttribute)
-  }
+  const schemas =
+    schemasManager.getSchemas() ||
+    schemasManager.init(idAttribute)
 
   return [].concat(response).reduce((entities, rawEntity) => {
     const entity = modifyResponse(rawEntity)

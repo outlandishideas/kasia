@@ -7,34 +7,29 @@ export default {
   isString: (name, value) => invariant(
     typeof value === 'string',
     'Expecting %s to be string, got "%s".',
-    name,
-    typeof value
+    name, typeof value
   ),
   isFunction: (name, value) => invariant(
     typeof value === 'function',
     'Expecting %s to be function, got "%s".',
-    name,
-    typeof value
+    name, typeof value
   ),
   isPlugin: (name, value) => invariant(
     typeof value === 'function',
     'Expecting %s to be function, got "%s". ' +
     'Please file an issue with the plugin if you ' +
     'think there might be a problem with it.',
-    name,
-    typeof value
+    name, typeof value
   ),
   isArray: (name, value) => invariant(
     Array.isArray(value),
     'Expecting %s to be array, got "%s".',
-    name,
-    typeof value
+    name, typeof value
   ),
   isBoolean: (name, value) => invariant(
     typeof value === 'object',
     'Expecting %s to be boolean, got "%s".',
-    name,
-    typeof value
+    name, typeof value
   ),
   isWpApiInstance: (value = {}) => invariant(
     typeof value.registerRoute === 'function',
@@ -61,8 +56,7 @@ export default {
     'Pass built-ins from `kasia/types`, e.g. `{ Post }`. ' +
     'Pass the name of custom content types, e.g. "Book". ' +
     'Check connectWpPost arguments for %s.',
-    name,
-    componentName
+    name, componentName
   ),
   isNewContentType: (typesMap, contentType) => invariant(
     typesMap && !typesMap.get(contentType.name),
@@ -90,8 +84,6 @@ export default {
   queryHasError: (query, displayName) => invariant(
     query && query.error,
     'Ignoring connectWp%s query for %s. %s.',
-    query.type,
-    displayName,
-    query.error
+    query.type, displayName, query.error
   )
 }
