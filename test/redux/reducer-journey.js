@@ -6,7 +6,6 @@ jest.mock('redux-saga')
 
 import { combineReducers, createStore } from 'redux'
 import Wpapi from 'wpapi'
-import modify from 'wp-api-response-modify'
 
 import postJson from '../__fixtures__/wp-api-responses/post'
 import initialState from '../__mocks__/states/initial'
@@ -52,7 +51,7 @@ describe('redux/reducer journey', () => {
         data: postJson
       }))
 
-      const expected = normalise(modify(postJson), 'id')
+      const expected = normalise(postJson, 'id')
       const actual = store.getState().wordpress.entities
 
       console.log(actual)

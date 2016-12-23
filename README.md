@@ -20,7 +20,7 @@
 Get data from WordPress and into components with ease...
 
 ```js
-// e.g. Get a Post by its slug
+// e.g. Get a post by its slug
 @connectWpPost('Post', 'spongebob-squarepants')
 export default class extends React.Component (props) {
   render () {
@@ -46,17 +46,14 @@ Check out the [Kasia boilerplate](https://github.com/outlandishideas/kasia-boile
 
 ## Glossary
 
-- [Notice](#notice)
 - [Requirements](#requirements)
 - [Install](#install)
 - [Import](#import)
 - [__Configure__](#configure)
 - [__Usage__](#usage)
 - [Exports](#exports)
-- [The Shape of Things](#the-shape-of-things)
 - [Plugins](#plugins)
 - [Universal Applications](#universal-applications)
-- [Hints & Tips](#hints-&-tips)
 - [Contributing](#contributing)
 - [Author & License](#author-&-license)
 
@@ -247,7 +244,7 @@ export default connectWpPost(Page, (props) => props.params.slug)(Post)
 
 #### `@connectWpQuery(queryFn[, shouldUpdate]) : Component`
 
-Connect a component to the result of an arbitrary WP-API query.
+Connect a component to the result of an arbitrary WP-API query. Query is always made with `?embed` query parameter.
 
 - __queryFn__ {Function} Function that accepts args `wpapi`, `props`, `state` and should return a WP-API query
 - __shouldUpdate__ {Function} Called on componentWillReceiveProps, return true to run query 
@@ -342,61 +339,6 @@ import {
 
 See [Universal Application Utilities](#Utilities) for more details.
 
-## The Shape of Things
-
-Kasia restructures the [shape of things](https://www.youtube.com/watch?v=Zn2JFlteeJ0) returned from the WP-API.
-
-The changes made to the data are all effects available in the
-[`wp-api-response-modify`](https://github.com/outlandishideas/wp-api-response-modify) library.
-
-### Why?
-
-The JSON returned from WP-API contains such things as objects with a single property (e.g. objects with `rendered`)
-and meta data property names prefixed with an underscore (e.g. `_links`).
-
-### What changes should I be aware of?
-
-- Queries initiated by `connectWpPost` will always request embedded data.
-
-    The primary reason for this is to reduce the number of requests made to the WP-API as it is very common
-    to not only want content data, but also any metadata such as authors.
-
-- All property names are camel-cased.
-
-    ```js
-    "featured_media" => "featuredMedia"
-    ```
-
-- Links are removed.
-
-    ```js
-    { title: 'Wow what an amazing title!', _links: {}, ... }
-    // becomes...
-    { title: 'Wow what an amazing  title!', ... }
-    ```
-
-- Objects that have a single property `'rendered'` are flattened.
-
-    ```js
-    { content: { rendered: '<h1>Hello, World!</h1>' }, ... }
-    // becomes...
-    { content: '<h1>Hello, World!</h1>', ... }
-    ```
-
-- Content types are normalised using [`normalizr`](https://github.com/paularmstrong/normalizr).
-This means that any embedded content data is made available on the store within its respective content type collection.
-For example:
-
-    ```js
-    {
-      posts: {},
-      users: {},
-      pages: {},
-      news: {}, // custom content type
-      ...
-    }
-    ```
-
 ## Plugins
 
 Kasia exposes a simple API for third-party plugins.
@@ -423,10 +365,16 @@ A plugin should:
 }
 ```
 
+A plugin can hook into Kasia's native action types, available at `kasia/lib/constants/ActionTypes`.
+All reducers for an action type are merged into a single function that calls each reducer in succession
+with the state returned by the previous reducer. This means the order of plugins that touch the same
+action type is important.
+
 ### Available plugins:
 
-- [`kasia-plugin-wp-api-menus`](https://github.com/outlandishideas/kasia/tree/master/packages/kasia-plugin-wp-api-menus)
+- [`kasia-plugin-wp-api-menus`](https://github.com/outlandishideas/kasia/tree/master/packages/kasia-plugin-wp-api-menus) 
 - [`kasia-plugin-wp-api-all-terms`](https://github.com/outlandishideas/kasia/tree/master/packages/kasia-plugin-wp-api-all-terms)
+- [`kasia-plugin-wp-api-response-modify`](https://github.com/outlandishideas/kasia/tree/master/packages/kasia-plugin-wp-api-response-modify)
 
 Please create a pull request to get your own added to the list.
 
@@ -474,51 +422,39 @@ to facilitate the request for entity data on the server ("preloaders").
 Returns an array of saga "preloader" operations in the form:
 
 ```js
-// Saga operations
 [ [sagaGeneratorFn, action] ]
 ```
 
 Where:
 
-- `sagaGenerator` is a {Function} that must be called with the `action`.
+- `sagaGenerator` Function that must be called with the `action`.
 
-- `action` is an action {Object} containing information for the saga to fetch data.
+- `action` action Object containing information for the saga to fetch data.
 
 ### Example
 
-A somewhat contrived example using the available `kasia/util` methods.
+A somewhat contrived example using the available `kasia/util` preloader methods.
 
 ```js
 import { match } from 'react-router'
-import { runSagas } from 'redux-sagas-util'
 import { preload, preloadQuery } from 'kasia/util'
 
 import routes from './routes'
 import store from './store'
 import renderToString from './render'
-import { categoriesQuery } from './queries'
+import getAllCategories from './queries/categories'
 
-export function renderPage (res, route) { 
-  return match({ routes, location: route }, (error, redirectLocation, renderProps) => {
-    if (error) {
-      res.sendStatus(500)
-      return
-    }
-      
-    if (redirectLocation) {
-      res.redirect(302, redirectLocation.pathname + redirectLocation.search)
-      return
-    }
+export default function renderPage (res, location) { 
+  return match({ routes, location }, (error, redirect, renderProps) => {
+    if (error) return res.sendStatus(500)
+    if (redirect) return res.redirect(302, redirect.pathname + redirect.search)
     
-    const { components } = renderProps 
-
-    const preloaders = [
-      preload(components, renderProps),
-      preloadQuery(categoriesQuery, renderProps)
-    ]
-
-    runSagas(preloaders)
-      .then(() => renderToString(components, renderProps, store.getState()))
+    return store
+      .runSagas([
+        preload(renderProps.components, renderProps),
+        preloadQuery(getAllCategories, renderProps)
+      ])
+      .then(() => renderToString(renderProps.components, renderProps, store.getState()))
       .then((document) => res.send(document))
   })  
 }

@@ -1,4 +1,3 @@
-import modifyResponse from 'wp-api-response-modify'
 import merge from 'lodash.merge'
 
 import bookJson from '../../__fixtures__/wp-api-responses/book'
@@ -16,9 +15,9 @@ export default {
     },
     entities: {
       books: {
-        [String(bookJson.id)]: modifyResponse(bookJson),
+        [String(bookJson.id)]: bookJson,
         [String(bookJson.id + 1)]: merge({},
-          modifyResponse(bookJson),
+          bookJson,
           { id: bookJson.id + 1, slug: 'new-slug' }
         )
       }

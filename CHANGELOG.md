@@ -1,5 +1,12 @@
 # Kasia Changelog
 
+- __v4.0.0__
+
+  - [BREAKING] WP API responses no longer modified by `wp-api-response-modify` by default. Functionality
+  moved out into `kasia-plugin-wp-api-response-modify`.
+  - Complete refactor of library to make codebase more sensible & manageable.
+  - 
+
 - __v3.2.0__ - _23/09/16_
 
     - Implemented safer internal query reconciliation logic such that prepared queries 

@@ -70,7 +70,6 @@ contentTypes.getAll = function contentTypesGetAll () {
 
 /**
  * Derive the content type of an entity from the WP-API.
- * Accepts normalised (camel-case keys) or non-normalised data.
  * @param {Object} entity Content entity
  * @returns {String|null} The content type name or null if unidentifiable
  */
@@ -86,14 +85,14 @@ contentTypes.derive = function contentTypesDerive (entity) {
   }
 
   if (typeof entity.taxonomy !== 'undefined') {
-    if (entity.taxonomy === 'category') return ContentTypes.Category
     if (entity.taxonomy === 'post_tag') return ContentTypes.Tag
+    if (entity.taxonomy === 'category') return ContentTypes.Category
   }
 
+  if (entity.avatar_urls) return ContentTypes.User
   if (Array.isArray(entity.types)) return ContentTypes.Taxonomy
-  if (entity.avatar_urls || entity.avatarUrls) return ContentTypes.User
-  if (hasKeys(entity, 'description', 'hierarchical', 'name')) return ContentTypes.PostType
   if (hasKeys(entity, 'public', 'queryable', 'slug')) return ContentTypes.PostStatus
+  if (hasKeys(entity, 'description', 'hierarchical', 'name')) return ContentTypes.PostType
 
   return null
 }

@@ -1,5 +1,4 @@
 import { normalize, arrayOf } from 'normalizr'
-import modifyResponse from 'wp-api-response-modify'
 import merge from 'lodash.merge'
 
 import schemasManager from './schemasManager'
@@ -16,8 +15,7 @@ export default function normalise (response, idAttribute) {
     schemasManager.getSchemas() ||
     schemasManager.init(idAttribute)
 
-  return [].concat(response).reduce((entities, rawEntity) => {
-    const entity = modifyResponse(rawEntity)
+  return [].concat(response).reduce((entities, entity) => {
     const type = contentTypesManager.derive(entity)
 
     const contentTypeSchema = schemas[type]

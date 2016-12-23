@@ -1,6 +1,6 @@
 {
   "name": "kasia-plugin-wp-api-all-terms",
-  "version": "3.0.3",
+  "version": "4.0.0",
   "description": "Provides support for the WP-API all terms plugin to Kasia",
   "main": "lib/index.js",
   "jsnext:main": "src/index.js",
@@ -18,12 +18,15 @@
     "react",
     "redux",
     "wordpress",
-    "word press",
+    "word",
+    "press",
     "wp-api",
-    "wordpress api",
+    "wordpress",
+    "api",
     "terms",
     "term",
-    "all"
+    "all",
+    "kasia"
   ],
   "author": "Outlandish <hello@outlandish.com>",
   "license": "MIT",

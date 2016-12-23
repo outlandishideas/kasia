@@ -18,7 +18,9 @@ npm install --save kasia-plugin-wp-api-all-terms
 ```js
 // ES2015
 import KasiaWpApiAllTermsPlugin from 'kasia-plugin-wp-api-all-terms'
+```
 
+```js
 // CommonJS
 var KasiaWpApiAllTermsPlugin = require('kasia-plugin-wp-api-all-terms')
 ```

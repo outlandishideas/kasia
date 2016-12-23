@@ -18,7 +18,9 @@ npm install --save kasia-plugin-wp-api-menus
 ```js
 // ES2015
 import KasiaWpApiMenusPlugin from 'kasia-plugin-wp-api-menus'
+```
 
+```js
 // CommonJS
 var KasiaWpApiMenusPlugin = require('kasia-plugin-wp-api-menus')
 ```

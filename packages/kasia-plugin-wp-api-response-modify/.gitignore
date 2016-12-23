@@ -1,7 +1,4 @@
 .idea/
 .vscode/
 node_modules/
-coverage/
-lib/
-
 *.log

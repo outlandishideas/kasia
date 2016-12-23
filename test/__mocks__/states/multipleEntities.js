@@ -1,4 +1,3 @@
-import modifyResponse from 'wp-api-response-modify'
 import merge from 'lodash.merge'
 
 import postJson from '../../__fixtures__/wp-api-responses/post'
@@ -15,11 +14,11 @@ export default {
     },
     entities: {
       posts: {
-        [String(postJson.id)]: modifyResponse(postJson),
-        [String(postJson.id + 1)]: merge({}, modifyResponse(postJson), { title: 'new title' })
+        [String(postJson.id)]: postJson,
+        [String(postJson.id + 1)]: merge({}, postJson, { title: 'new title' })
       },
       books: {
-        [String(bookJson.id)]: modifyResponse(bookJson)
+        [String(bookJson.id)]: bookJson
       }
     }
   })

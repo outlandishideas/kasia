@@ -1,6 +1,6 @@
 {
   "name": "kasia",
-  "version": "3.3.0",
+  "version": "4.0.0",
   "description": "A React Redux toolset for the WordPress API",
   "main": "index.js",
   "jsnext:main": "src/Kasia.js",
@@ -44,7 +44,6 @@
     "react-dom": "^15.0.1",
     "redux": "^3.4.0",
     "redux-saga": "^0.13.0",
-    "wp-api-response-modify": "^2.0.0",
     "wpapi": "^0.11.0"
   },
   "devDependencies": {

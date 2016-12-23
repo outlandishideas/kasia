@@ -13,10 +13,49 @@ export const INITIAL_STATE = {
   entities: {}
 }
 
+/**
+ * Merge all native and plugin reducers such that a single
+ * function reduces for a single action type.
+ * @param {Object} options Consumer options object
+ * @param {Object} plugins Merged plugin configurations
+ * @returns {Object} Reducer object
+ */
+function mergeNativeAndThirdPartyReducers (options, plugins) {
+  const normaliseData = (data) => normalise(data, options.keyEntitiesBy)
+
+  const baseReducer = {
+    [ActionTypes.RequestComplete]: [completeReducer(normaliseData)],
+    [ActionTypes.RequestFail]: [failReducer],
+    [ActionTypes.DeleteQueries]: [deleteReducer]
+  }
+
+  // Group reducers by their action type
+  const reducersByActionType = Object.keys(plugins.reducers)
+    .reduce(function groupByActionType (reducer, actionType) {
+      reducer[actionType] = [].concat(reducer[actionType] || [], plugins.reducers[actionType] || [])
+      return reducer
+    }, baseReducer)
+
+  // Produce a single function for each action type
+  return Object.keys(reducersByActionType)
+    .reduce(function collapseToAggregateReducerFn (reducer, actionType) {
+      if (reducersByActionType[actionType].length > 1) {
+        // Call each reducer function in succession, passing the state returned from each to the next
+        reducer[actionType] = (state, action) => {
+          return reducersByActionType[actionType].reduce((state, fn) => fn(state, action), state)
+        }
+      } else {
+        // Take the first and only function as the whole reducer
+        reducer[actionType] = reducersByActionType[actionType][0]
+      }
+      return reducer
+    }, {})
+}
+
 // COMPLETE
 // Place entity on the store; update query record
-export const completeReducer = (normalise) => (state, action) => {
-  return merge({}, state, {
+export function completeReducer (normalise) {
+  return (state, action) => merge({}, state, {
     wordpress: {
       entities: Object.assign({},
         state.entities,
@@ -38,7 +77,7 @@ export const completeReducer = (normalise) => (state, action) => {
 
 // FAIL
 // Update query record only
-export const failReducer = (state, action) => {
+export function failReducer (state, action) {
   return merge({}, state, {
     wordpress: {
       queries: {
@@ -56,7 +95,7 @@ export const failReducer = (state, action) => {
 
 // DELETE QUERIES
 // Remove query objects from `state.wordpress.queries`
-export const deleteReducer = (state, action) => {
+export function deleteReducer (state, action) {
   const queries = Object
     .values(state.wordpress.queries)
     .reduce((queries, query) => {
@@ -71,20 +110,13 @@ export const deleteReducer = (state, action) => {
 }
 
 /**
- * Make the reducer for Kasia.
+ * Create the aggregate reducer for an instance of Kasia.
  * @param {Object} options Options object
  * @param {Object} plugins Plugin configurations
  * @returns {Object} Kasia reducer
  */
-export default function makeReducer (options, plugins) {
-  const normaliseData = (data) => normalise(data, options.keyEntitiesBy)
-
-  const reducer = {
-    ...plugins.reducers,
-    [ActionTypes.RequestComplete]: completeReducer(normaliseData),
-    [ActionTypes.RequestFail]: failReducer,
-    [ActionTypes.DeleteQueries]: deleteReducer
-  }
+export default function createReducer (options, plugins) {
+  const reducer = mergeNativeAndThirdPartyReducers(options, plugins)
 
   return {
     wordpress: function kasiaReducer (state = INITIAL_STATE, action) {

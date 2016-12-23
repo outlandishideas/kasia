@@ -7,27 +7,31 @@ import { combineReducers, createStore } from 'redux'
 import { spawn } from 'redux-saga/effects'
 
 import Kasia from '../src/Kasia'
+import ActionTypes from '../src/constants/ActionTypes'
 
 const testActionType = 'kasia/TEST_ACTION'
 
-let didHitPluginReducer = false
+let didHitPluginOwnActionTypeReducer = 0
+let didHitPluginNativeActionTypeReducer = 0
 
 function pluginSaga () {}
 
 function setup () {
   const pluginReducer = {
-    [testActionType]: (action, state) => {
-      didHitPluginReducer = true
+    [testActionType]: (state) => {
+      didHitPluginOwnActionTypeReducer++
+      return state
+    },
+    [ActionTypes.RequestComplete]: (state) => {
+      didHitPluginNativeActionTypeReducer++
       return state
     }
   }
 
-  const plugin = () => {
-    return {
-      reducers: pluginReducer,
-      sagas: [pluginSaga]
-    }
-  }
+  const plugin = () => ({
+    reducers: pluginReducer,
+    sagas: [pluginSaga]
+  })
 
   const { kasiaReducer, kasiaSagas } = Kasia({
     WP: new WP({ endpoint: 'wow-so-much-endpoint' }),
@@ -43,14 +47,27 @@ function setup () {
 describe('Plugin', () => {
   const { store, kasiaSagas } = setup()
 
-  it('should call plugin action handler when type is matched', () => {
-    store.dispatch({ type: testActionType })
-    expect(didHitPluginReducer).toEqual(true)
+  describe('native action type', () => {
+    it('should hit native action handler', () => {
+      store.dispatch({ type: ActionTypes.RequestComplete })
+      expect(didHitPluginOwnActionTypeReducer).toEqual(1)
+    })
+
+    it('should hit plugin action handler', () => {
+      expect(didHitPluginNativeActionTypeReducer).toEqual(1)
+    })
   })
 
-  it('should add the plugin saga to sagas array', () => {
-    const actual = kasiaSagas.toString()
-    const expected = spawn(pluginSaga).toString()
-    expect(actual).toContain(expected)
+  describe('new action type', () => {
+    it('should hit plugin action handler', () => {
+      store.dispatch({ type: testActionType })
+      expect(didHitPluginOwnActionTypeReducer).toEqual(2)
+    })
+
+    it('should add the plugin saga to sagas array', () => {
+      const actual = kasiaSagas.toString()
+      const expected = spawn(pluginSaga).toString()
+      expect(actual).toContain(expected)
+    })
   })
 })
