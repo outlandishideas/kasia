@@ -2,14 +2,14 @@
   "name": "kasia",
   "version": "4.0.0",
   "description": "A React Redux toolset for the WordPress API",
-  "main": "index.js",
+  "main": "lib/Kasia.js",
   "jsnext:main": "src/Kasia.js",
   "scripts": {
     "build": "rimraf lib && babel -d lib/ src/",
     "lint": "snazzy",
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage",
+    "test": "jest --config .jestrc",
+    "test:watch": "jest --watch --config .jestrc",
+    "test:coverage": "jest --coverage --config .jestrc",
     "prepublish": "in-publish && npm run lint && npm run test && npm run build"
   },
   "repository": {
@@ -17,21 +17,12 @@
     "url": "git+https://github.com/outlandishideas/kasia.git"
   },
   "keywords": [
-    "javascript",
-    "react",
-    "redux",
-    "wordpress",
-    "word",
-    "press",
-    "wp-api",
-    "wp",
-    "api"
+    "javascript", "react", "redux", "wordpress",
+    "word", "press", "wp-api", "wp", "api", "saga"
   ],
   "author": "Outlandish <hello@outlandish.com>",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/outlandishideas/kasia/issues"
-  },
+  "bugs": "https://github.com/outlandishideas/kasia/issues",
   "homepage": "https://github.com/outlandishideas/kasia#readme",
   "dependencies": {
     "humps": "^2.0.0",
@@ -68,30 +59,9 @@
     "standard": "^8.6.0",
     "lerna": "2.0.0-beta.31"
   },
-  "jest": {
-    "automock": true,
-    "verbose": true,
-    "testRegex": "/test/.*\\.js$",
-    "unmockedModulePathPatterns": [
-      "<rootDir>/node_modules/react",
-      "<rootDir>/node_modules/react-dom",
-      "<rootDir>/node_modules/react-addons-test-utils",
-      "<rootDir>/node_modules/enzyme",
-      "<rootDir>/node_modules/lodash"
-    ],
-    "testPathIgnorePatterns": [
-      "/node_modules/",
-      "/__mocks__/",
-      "/__fixtures__/"
-    ]
-  },
   "standard": {
-    "env": [
-      "jasmine"
-    ],
+    "env": ["jasmine"],
     "parser": "babel-eslint",
-    "ignore": [
-      "/lib"
-    ]
+    "ignore": ["/lib", "/packages"]
   }
 }
