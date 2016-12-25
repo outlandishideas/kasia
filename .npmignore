@@ -2,7 +2,10 @@
 .vscode/
 node_modules/
 coverage/
-*.log
 packages/
+assets/
+test/
+src/
+*.log
 
 !lib/
