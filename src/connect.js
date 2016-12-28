@@ -108,21 +108,18 @@ export function _makeConnectWpDecorator (operation, {
         const state = this._getState()
         const query = state.wordpress.queries[this.queryId]
         const queryIsOk = query && !query.error
+        const dataKey = OperationTypes.Post === operation ? 'data' : contentType
 
         if (queryIsOk) {
           const entityData = makePropsData(state, query)
-          return Object.assign({}, query, entityData)
+          return Object.assign({}, { query }, { [dataKey]: entityData })
         } else {
           if (query) {
             invariants.queryHasError(query, displayName)
           }
 
-          const key = OperationTypes.Post === operation
-            ? 'data'
-            : contentType
-
           return Object.assign({}, {
-            [key]: null,
+            [dataKey]: null,
             query: { complete: false, OK: null }
           })
         }
@@ -205,9 +202,9 @@ export function connectWpPost (contentType, id) {
 
     /** Produce the component's data object derived from entities in the store. */
     makePropsData: function postMakePropsData (state) {
-      const { plural, name } = contentTypesManager.get(contentType)
+      const { plural } = contentTypesManager.get(contentType)
       const entityCollection = state.wordpress.entities[plural]
-      return { [name]: findEntity(entityCollection, id) }
+      return findEntity(entityCollection, id)
     },
 
     /** Determine whether component should make new request for data by inspecting current and next props objects. */
@@ -286,7 +283,7 @@ export function connectWpQuery (queryFn, shouldUpdate) {
     /** Produce the component's data object derived from entities in the store. */
     makePropsData: function queryMakePropsData (state, query) {
       const { entities: stateEntities } = state.wordpress
-      return { data: findEntities(stateEntities, query.entities) }
+      return findEntities(stateEntities, query.entities)
     },
 
     /** Create a function that create the component's preloader function given metadata of the component. */
