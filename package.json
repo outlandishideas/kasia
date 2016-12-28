@@ -5,12 +5,12 @@
   "main": "lib/Kasia.js",
   "jsnext:main": "src/Kasia.js",
   "scripts": {
-    "build": "rimraf lib && babel -d lib/ src/",
-    "lint": "snazzy",
-    "test": "jest --config .jestrc",
-    "test:watch": "jest --watch --config .jestrc",
+    "build":         "rimraf lib && babel -d lib/ src/",
+    "lint":          "snazzy",
+    "test":          "jest --config .jestrc",
+    "test:watch":    "jest --watch --config .jestrc",
     "test:coverage": "jest --coverage --config .jestrc",
-    "prepublish": "in-publish && npm run lint && npm run test && npm run build"
+    "prepublish":    "in-publish && npm run lint && npm run test && npm run build"
   },
   "repository": {
     "type": "git",

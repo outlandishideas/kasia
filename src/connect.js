@@ -174,26 +174,25 @@ export function _makeConnectWpDecorator (operation, {
 /**
  * Connect a component to a single entity from WordPress.
  *
- * @example
- * Built-in content type, derived slug identifier:
+ * @example Built-in content type, derived slug identifier:
  * ```js
  * const { Page } from 'kasia/types'
  * connectWordPress(Page, (props) => props.params.slug)(Component)
  * ```
  *
- * Built-in content type, explicit ID identifier:
+ * @example Built-in content type, explicit ID identifier:
  * ```js
  * const { Post } from 'kasia/types'
  * connectWordPress(Post, 16)(Component)
  * ```
  *
- * Custom content type, derived identifier:
+ * @example Custom content type, derived identifier:
  * ```js
  * connectWordPress('News', (props) => props.params.slug)(Component)
  * ```
  *
- * @params {String} contentType Content type of the WP entity to fetch
- * @params {Function|String|Number} id Entity's ID/slug/a function that derives either from props
+ * @param {String} contentType Content type of the WP entity to fetch
+ * @param {Function|String|Number} id Entity's ID/slug/a function that derives either from props
  * @returns {Function} Decorated component
  */
 export function connectWpPost (contentType, id) {
@@ -246,36 +245,34 @@ export function connectWpPost (contentType, id) {
  * The component will request new data via the given `queryFn`
  * if `shouldUpdate` returns true.
  *
- * @example
- * Example, get all posts by an author:
+ * @example Get all posts by an author:
  * ```js
- * connectWpQuery((wpapi) => wpapi.posts().embed().author('David Bowie'))
+ * connectWpQuery((wpapi) => wpapi.posts().embed().author('David Bowie'), () => true)
  * ```
  *
- * Example, get all pages:
+ * @example Get all pages:
  * ```js
- * connectWpQuery((wpapi) => wpapi.pages().embed()
+ * connectWpQuery((wpapi) => wpapi.pages().embed(), () => true)
  * ```
  *
- * Example, get custom content type by slug (content type registered at init):
- * ```js
- * connectWpQuery((wpapi) => {
- *   return wpapi.news()
- *     .slug('gullible-removed-from-the-dictionary')
- *     .embed()
- * })
- * ```
- *
- * Example, with custom props comparator:
+ * @example Get custom content type by slug (content type registered at init):
  * ```js
  * connectWpQuery(
- *   (wpapi, props) => wpapi.page().id(props.identifier()).embed().get(),
- *   (thisProps, nextProps) => thisProps.identifier() !== nextProps.identifier()
+ *   (wpapi) => wpapi.news().slug('gullible-removed-from-the-dictionary').embed(),
+ *   () => true
  * )
  * ```
  *
- * @params {Function} queryFn Function that returns a wpapi query
- * @params {Function} shouldUpdate Inspect props to determine if new data request is made
+ * @example Update only when `props.id` changes:
+ * ```js
+ * connectWpQuery(
+ *   (wpapi, props) => wpapi.page().id(props.identifier()).embed().get(),
+ *   (thisProps, nextProps) => thisProps.id !== nextProps.id
+ * )
+ * ```
+ *
+ * @param {Function} queryFn Function that returns a wpapi query
+ * @param {Function} shouldUpdate Inspect props to determine if new data request is made
  * @returns {Function} Decorated component
  */
 export function connectWpQuery (queryFn, shouldUpdate) {
