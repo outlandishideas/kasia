@@ -64,7 +64,7 @@ describe('Universal journey', function () {
 
   function completeRequest (id, data, target = null) {
     return sagaMiddleware.run(function * () {
-      yield effects.put(_completeRequest({ id, data, target }))
+      yield effects.put(_completeRequest(id, data))
     }).done
   }
 

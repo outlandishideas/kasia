@@ -8,22 +8,24 @@ import { spawn } from 'redux-saga/effects'
 
 import Kasia from '../src/Kasia'
 import ActionTypes from '../src/constants/ActionTypes'
+import { completeRequest } from '../src/redux/actions'
+import postJson from './__fixtures__/wp-api-responses/post'
 
 const testActionType = 'kasia/TEST_ACTION'
 
-let didHitPluginOwnActionTypeReducer = 0
-let didHitPluginNativeActionTypeReducer = 0
+let countHitPluginOwnActionTypeReducer = 0
+let countHitPluginNativeActionTypeReducer = 0
 
 function pluginSaga () {}
 
 function setup () {
   const pluginReducer = {
     [testActionType]: (state) => {
-      didHitPluginOwnActionTypeReducer++
+      countHitPluginOwnActionTypeReducer++
       return state
     },
     [ActionTypes.RequestComplete]: (state) => {
-      didHitPluginNativeActionTypeReducer++
+      countHitPluginNativeActionTypeReducer++
       return state
     }
   }
@@ -47,21 +49,21 @@ function setup () {
 describe('Plugin', () => {
   const { store, kasiaSagas } = setup()
 
-  describe('native action type', () => {
+  describe('with native action type', () => {
     it('should hit native action handler', () => {
-      store.dispatch({ type: ActionTypes.RequestComplete })
-      expect(didHitPluginOwnActionTypeReducer).toEqual(1)
+      store.dispatch(completeRequest(0, postJson))
+      expect(store.getState().wordpress.queries['0']).toBeTruthy()
     })
 
-    it('should hit plugin action handler', () => {
-      expect(didHitPluginNativeActionTypeReducer).toEqual(1)
+    it('should hit third-party action handler for native action type', () => {
+      expect(countHitPluginNativeActionTypeReducer).toEqual(1)
     })
   })
 
-  describe('new action type', () => {
-    it('should hit plugin action handler', () => {
+  describe('with new action type', () => {
+    it('should hit third-party action handler for third-party action type', () => {
       store.dispatch({ type: testActionType })
-      expect(didHitPluginOwnActionTypeReducer).toEqual(2)
+      expect(countHitPluginOwnActionTypeReducer).toEqual(1)
     })
 
     it('should add the plugin saga to sagas array', () => {

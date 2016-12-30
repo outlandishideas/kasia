@@ -10,22 +10,12 @@ import { fetch } from '../../src/redux/sagas'
 import { completeRequest, createPostRequest, createQueryRequest } from '../../src/redux/actions'
 import { ContentTypes } from '../../src/constants/ContentTypes'
 
-function setup () {
-  const mockResult = 'mockResult'
-  const queryFn = jest.fn(() => mockResult)
-  return { queryFn, mockResult }
-}
+const mockResult = 'mockResult'
+const queryFn = jest.fn(() => mockResult)
 
 describe('redux/sagas', () => {
-  const { queryFn, mockResult } = setup()
-
   describe('createPostRequest', () => {
-    const opts = {
-      contentType: ContentTypes.Post,
-      identifier: 16
-    }
-
-    const action = createPostRequest(opts)
+    const action = createPostRequest(ContentTypes.Post, 16)
     const generator = fetch(action)
 
     it('yields a call to result of queryBuilder.makeQuery', () => {
@@ -38,15 +28,13 @@ describe('redux/sagas', () => {
 
     it('yields a put with completeRequest action', () => {
       const actual = generator.next(mockResult).value
-      const expected = put(completeRequest(mockResult))
+      const expected = put(completeRequest(action.id, mockResult))
       expect(actual).toEqual(expected)
     })
   })
 
   describe('createQueryRequest', () => {
-    const opts = { queryFn }
-
-    const action = createQueryRequest(opts)
+    const action = createQueryRequest(queryFn)
     const generator = fetch(action)
 
     it('yields a call to queryFn', () => {
@@ -57,7 +45,7 @@ describe('redux/sagas', () => {
 
     it('puts a completeRequest action with result', () => {
       const actual = generator.next(mockResult).value
-      const expected = put(completeRequest(mockResult))
+      const expected = put(completeRequest(action.id, mockResult))
       expect(actual).toEqual(expected)
     })
   })

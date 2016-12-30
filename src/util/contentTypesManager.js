@@ -74,6 +74,10 @@ contentTypes.getAll = function contentTypesGetAll () {
  * @returns {String|null} The content type name or null if unidentifiable
  */
 contentTypes.derive = function contentTypesDerive (entity) {
+  if (!entity) {
+    throw new Error(`Expecting entity to be an object, got "${typeof entity}".`)
+  }
+
   if (typeof entity.type !== 'undefined') {
     switch (entity.type) {
       case 'attachment': return ContentTypes.Media

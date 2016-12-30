@@ -11,12 +11,14 @@ import contentTypesManager from './contentTypesManager'
  * @returns {Object}
  */
 export default function normalise (response, idAttribute) {
-  const schemas =
-    schemasManager.getSchemas() ||
-    schemasManager.init(idAttribute)
+  const schemas = schemasManager.getSchemas() || schemasManager.init(idAttribute)
 
   return [].concat(response).reduce((entities, entity) => {
     const type = contentTypesManager.derive(entity)
+
+    if (!type) {
+      throw new Error(`Could not derive entity type. Entity: ${entity ? JSON.stringify(entity) : typeof entity}`)
+    }
 
     const contentTypeSchema = schemas[type]
       // Built-in content type or previously registered custom content type

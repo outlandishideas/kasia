@@ -6,13 +6,12 @@ import merge from 'lodash.merge'
 
 import '../__mocks__/WP'
 import postJson from '../__fixtures__/wp-api-responses/post'
-
 import { INITIAL_STATE, completeReducer, failReducer } from '../../src/redux/reducer'
 
-describe('redux/reducer', () => {
-  const id = '0'
-  const initialState = { wordpress: INITIAL_STATE }
+const id = '0'
+const initialState = { wordpress: INITIAL_STATE }
 
+describe('redux/reducer', () => {
   describe('completeAction', () => {
     const payload = { id, data: [postJson] }
     const reducer = completeReducer((data) => data)

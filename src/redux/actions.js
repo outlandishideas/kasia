@@ -6,7 +6,7 @@ import ActionTypes from '../constants/ActionTypes'
  * @param {String|Number} identifier The entity identifier, slug or ID
  * @returns {Object} Action object
  */
-export const createPostRequest = ({ contentType, identifier }) =>
+export const createPostRequest = (contentType, identifier) =>
   ({ type: ActionTypes.RequestCreatePost, contentType, identifier })
 
 /**
@@ -14,7 +14,7 @@ export const createPostRequest = ({ contentType, identifier }) =>
  * @param {Function} queryFn Function that returns WP-API request
  * @returns {Object} Action object
  */
-export const createQueryRequest = ({ queryFn }) =>
+export const createQueryRequest = (queryFn) =>
   ({ type: ActionTypes.RequestCreateQuery, queryFn })
 
 /**
@@ -22,7 +22,7 @@ export const createQueryRequest = ({ queryFn }) =>
  * @param {Number} id Request ID
  * @param {Object} data Raw WP-API response data
  */
-export const completeRequest = ({ id, data }) =>
+export const completeRequest = (id, data) =>
   ({ type: ActionTypes.RequestComplete, id, data })
 
 /**
@@ -30,7 +30,7 @@ export const completeRequest = ({ id, data }) =>
  * @param {Number} id Request ID
  * @param {Error} error Error from failed request
  */
-export const failRequest = ({ id, error }) =>
+export const failRequest = (id, error) =>
   ({ type: ActionTypes.RequestFail, id, error })
 
 /**

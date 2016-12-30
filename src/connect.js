@@ -1,4 +1,4 @@
-import React, { Component } from 'react'
+import React from 'react'
 
 import { createPostRequest, createQueryRequest, deleteQueries } from './redux/actions'
 import { contentTypesManager, invariants } from './util'
@@ -20,18 +20,18 @@ function findEntity (entities, identifier) {
 function findEntities (entities, identifiers) {
   identifiers = identifiers.map(String)
 
-  return Object.keys(entities).reduce((reduced, entityTypeName) => {
-    return Object.keys(entities[entityTypeName]).reduce((reduced, entityId) => {
-      const obj = entities[entityTypeName][entityId]
+  const reduced = {}
 
+  for (const entityTypeName in entities) {
+    for (const entityId in entities[entityTypeName]) {
       if (identifiers.indexOf(entityId) !== -1) {
         reduced[entityTypeName] = reduced[entityTypeName] || {}
-        reduced[entityTypeName][entityId] = obj
+        reduced[entityTypeName][entityId] = entities[entityTypeName][entityId]
       }
+    }
+  }
 
-      return reduced
-    }, reduced)
-  }, {})
+  return reduced
 }
 
 /** Get desired entity identifier. It is either `id` as-is or the result of calling `id` with `props`. */
@@ -47,9 +47,9 @@ function identifier (id, props) {
  * @param {String} operation Operation type, Post or Query
  * @param {Object} makePropsData Function to create partial kasia data object for props
  * @param {Object} makePreloader Function to create preloader saga given component props
- * @param {Object} [contentType] Post content type, Post op only
- * @param {Object} [shouldUpdate] Function to determine if query should fire again, Query op only
- * @param {Object} [queryFn] Query function, Query op only
+ * @param {Object} [contentType] Post content type (Post operation only)
+ * @param {Object} [shouldUpdate] Function to determine if query should fire again (Query operation only)
+ * @param {Object} [queryFn] Query function (Query operation only)
  * @returns {Function} connectWp* decorator
  */
 export function _makeConnectWpDecorator (operation, {
@@ -68,7 +68,7 @@ export function _makeConnectWpDecorator (operation, {
 
     invariants.isNotWrapped(target, displayName)
 
-    return class KasiaIntermediateComponent extends Component {
+    return class KasiaIntermediateComponent extends React.Component {
       static __kasia__ = operation
       static makePreloader = makePreloader(displayName)
       static contextTypes = {
@@ -85,7 +85,7 @@ export function _makeConnectWpDecorator (operation, {
       // ---
 
       _getState () {
-        return this.context.store._getState()
+        return this.context.store.getState()
       }
 
       _requestWpData (props) {
@@ -93,10 +93,10 @@ export function _makeConnectWpDecorator (operation, {
 
         if (OperationTypes.Post === operation) {
           const identifier = identifier(props)
-          action = createPostRequest({ identifier, contentType })
+          action = createPostRequest(contentType, identifier)
         } else if (OperationTypes.Query === operation) {
           const wrappedQueryFn = (wpapi) => queryFn(wpapi, props, this._getState())
-          action = createQueryRequest({ queryFn: wrappedQueryFn })
+          action = createQueryRequest(wrappedQueryFn)
         }
 
         this.queryId = queryId++
@@ -110,18 +110,13 @@ export function _makeConnectWpDecorator (operation, {
         const queryIsOk = query && !query.error
         const dataKey = OperationTypes.Post === operation ? 'data' : contentType
 
-        if (queryIsOk) {
-          const entityData = makePropsData(state, query)
-          return Object.assign({}, { query }, { [dataKey]: entityData })
-        } else {
-          if (query) {
-            invariants.queryHasError(query, displayName)
-          }
+        if (!queryIsOk && query) {
+          invariants.queryHasError(query, displayName)
+        }
 
-          return Object.assign({}, {
-            [dataKey]: null,
-            query: { complete: false, OK: null }
-          })
+        return {
+          query: queryIsOk ? query : { complete: false, OK: null },
+          [dataKey]: queryIsOk ? makePropsData(state, query) : null
         }
       }
 
@@ -196,20 +191,19 @@ export function connectWpPost (contentType, id) {
   invariants.isString('contentType', contentType)
   invariants.isIdentifierArg(id)
 
-  const config = {
+  const typeConfig = contentTypesManager.get(contentType)
+
+  return _makeConnectWpDecorator(OperationTypes.Post, {
     contentType,
     id,
 
     /** Produce the component's data object derived from entities in the store. */
     makePropsData: function postMakePropsData (state) {
-      const { plural } = contentTypesManager.get(contentType)
-      const entityCollection = state.wordpress.entities[plural]
-      return findEntity(entityCollection, id)
+      return findEntity(state.wordpress.entities[typeConfig.plural], id)
     },
 
-    /** Determine whether component should make new request for data by inspecting current and next props objects. */
+    /** Determine if component should request new data by inspecting current and next props. */
     shouldUpdate: function postShouldUpdate (thisProps, nextProps, buildProps) {
-      const typeConfig = contentTypesManager.get(contentType)
       const nextBuiltProps = buildProps(nextProps)
 
       // Make a call to the query function if..
@@ -221,26 +215,20 @@ export function connectWpPost (contentType, id) {
       )
     },
 
-    /** Create a function that create the component's preloader function given metadata of the component. */
-    makePreloader: function postMakePreloader () {
-      return (displayName) => (renderProps) => {
-        invariants.isValidContentType(contentTypesManager.get(contentType), contentType, displayName)
-        return [fetch, createPostRequest({
-          contentType,
-          identifier: identifier(renderProps)
-        })]
+    /** Create a fn that produces the component's preloader. */
+    makePreloader: function postMakePreloader (displayName) {
+      return (renderProps) => {
+        invariants.isValidContentType(typeConfig, contentType, displayName)
+        return [fetch, createPostRequest(contentType, identifier(id, renderProps))]
       }
     }
-  }
-
-  return _makeConnectWpDecorator(OperationTypes.Post, config)
+  })
 }
 
 /**
  * Connect a component to arbitrary data from WordPress.
  *
- * The component will request new data via the given `queryFn`
- * if `shouldUpdate` returns true.
+ * The component will request new data via the given `queryFn` if `shouldUpdate` returns true.
  *
  * @example Get all posts by an author:
  * ```js
@@ -276,24 +264,21 @@ export function connectWpQuery (queryFn, shouldUpdate) {
   invariants.isFunction('queryFn', queryFn)
   invariants.isFunction('shouldUpdate', shouldUpdate)
 
-  const config = {
+  return _makeConnectWpDecorator(OperationTypes.Query, {
     queryFn,
     shouldUpdate,
 
     /** Produce the component's data object derived from entities in the store. */
     makePropsData: function queryMakePropsData (state, query) {
-      const { entities: stateEntities } = state.wordpress
-      return findEntities(stateEntities, query.entities)
+      return findEntities(state.wordpress.entities, query.entities)
     },
 
-    /** Create a function that create the component's preloader function given metadata of the component. */
+    /** Create a fn that produces the component's preloader. */
     makePreloader: function queryMakePreloader () {
-      return (displayName) => (renderProps, state) => {
+      return (renderProps, state) => {
         const realQueryFn = (wpapi) => queryFn(wpapi, renderProps, state)
-        return [fetch, createQueryRequest({ queryFn: realQueryFn })]
+        return [fetch, createQueryRequest(realQueryFn)]
       }
     }
-  }
-
-  return _makeConnectWpDecorator(OperationTypes.Query, config)
+  })
 }

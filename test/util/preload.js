@@ -19,9 +19,7 @@ describe('util/preload', () => {
     })
 
     it('throws with bad content type', () => {
-      expect(() => {
-        BadContentType.makePreloader()
-      }).toThrowError(/not recognised/)
+      expect(() => BadContentType.makePreloader()).toThrowError(/not recognised/)
     })
 
     it('returns an array with saga operation', () => {

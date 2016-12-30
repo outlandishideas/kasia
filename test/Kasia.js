@@ -6,9 +6,9 @@ import './__mocks__/WP'
 import Kasia from '../src/Kasia'
 import getWP, { setWP } from '../src/wpapi'
 
-describe('Kasia', () => {
-  const WP = getWP()
+const WP = getWP()
 
+describe('Kasia', () => {
   afterEach(() => setWP(null))
 
   it('exports a function', () => {

@@ -38,18 +38,12 @@ describe('redux/reducer journey', () => {
   })
 
   it('can REQUEST_CREATE', () => {
-    store.dispatch(createPostRequest({
-      contentType: ContentTypes.Post,
-      identifier: 16
-    }))
+    store.dispatch(createPostRequest(ContentTypes.Post, 16))
   })
 
   describe('can REQUEST_COMPLETE', () => {
     it('places normalised data on store', () => {
-      store.dispatch(completeRequest({
-        id: 0,
-        data: postJson
-      }))
+      store.dispatch(completeRequest(0, postJson))
 
       const expected = normalise(postJson, 'id')
       const actual = store.getState().wordpress.entities
@@ -74,14 +68,8 @@ describe('redux/reducer journey', () => {
   })
 
   it('can REQUEST_FAIL', () => {
-    store.dispatch(createPostRequest({
-      contentType: ContentTypes.Post,
-      identifier: 16
-    }))
-    store.dispatch(failRequest({
-      id: 1,
-      error: new Error('Request failed')
-    }))
+    store.dispatch(createPostRequest(ContentTypes.Post, 16))
+    store.dispatch(failRequest(1, new Error('Request failed')))
 
     const expected = { id: 1, complete: true, OK: false, error: 'Error: Request failed', prepared: true }
     const actual = store.getState().wordpress.queries[1]

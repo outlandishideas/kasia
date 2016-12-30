@@ -36,7 +36,7 @@ function expectRequestCreateAction (props) {
 
 describe('@connectWpQuery', () => {
   describe('with primitive props', () => {
-    const { store, props } = setup(bookJson.id)
+    const { store, props } = setup()
     const rendered = CustomQuery(props, store)
 
     it('should wrap the component', () => {
@@ -53,7 +53,7 @@ describe('@connectWpQuery', () => {
   })
 
   describe('with non-primitive props', () => {
-    const { store, props } = setup(bookJson.id)
+    const { store, props } = setup()
 
     const rendered = CustomQuery({
       ...props,
@@ -72,7 +72,7 @@ describe('@connectWpQuery', () => {
   })
 
   describe('with custom props comparator', () => {
-    const { store, props } = setup(bookJson.id)
+    const { store, props } = setup()
 
     const rendered = CustomPropsComparator({
       ...props,

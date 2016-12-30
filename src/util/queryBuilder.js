@@ -2,19 +2,10 @@ import ActionTypes from '../constants/ActionTypes'
 import getWP from '../wpapi'
 import { contentTypesManager } from '../util'
 
-function handleQueryFnError (err) {
-  // TODO log something useful, e.g. is custom content type declared?
-  throw err
-}
-
 function queryFn (wpapi, contentTypeMethodName, identifierTypeMethodName, identifierValue) {
-  try {
-    const contentTypeApi = wpapi[contentTypeMethodName]()
-    const query = contentTypeApi[identifierTypeMethodName](identifierValue)
-    return query.embed().get().catch(handleQueryFnError)
-  } catch (err) {
-    handleQueryFnError(err)
-  }
+  const contentTypeApi = wpapi[contentTypeMethodName]()
+  const query = contentTypeApi[identifierTypeMethodName](identifierValue)
+  return query.embed().get()
 }
 
 const queryBuilder = {}

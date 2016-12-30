@@ -13,9 +13,9 @@ import ActionTypes from '../constants/ActionTypes'
 export function * fetch (action) {
   try {
     const data = yield call(queryBuilder.makeQuery(action))
-    yield put(completeRequest(data))
+    yield put(completeRequest(action.id, data))
   } catch (error) {
-    yield put(failRequest(error))
+    yield put(failRequest(action.id, error))
   }
 }
 

@@ -51,7 +51,7 @@ preloaders.preloadPost = function preloadersPreloadPost (contentType, id, render
   }
 
   const identifier = typeof id === 'function' ? id(renderProps) : id
-  const action = createPostRequest({ contentType, identifier })
+  const action = createPostRequest(contentType, identifier)
 
   invariants.isValidContentType(contentTypesManager.get(contentType), contentType, 'call to makePostPreloaderSaga')
   invariants.isIdentifierValue(identifier)
@@ -76,7 +76,7 @@ preloaders.preloadQuery = function preloadersPreloadQuery (queryFn, renderProps,
   }
 
   const realQueryFn = (wpapi) => queryFn(wpapi, renderProps, state)
-  const action = createQueryRequest({ queryFn: realQueryFn })
+  const action = createQueryRequest(realQueryFn)
 
   return function * () {
     yield fork(fetch, action)

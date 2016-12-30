@@ -30,16 +30,16 @@ function setup () {
       testKeyById
     },
     [ContentTypes.Media]: {
-      collections: ['media', 'users'],
+      collections: ['media'],
       testKeyById
     },
     [ContentTypes.Page]: {
-      collections: ['pages', 'users', 'media'],
+      collections: ['pages'],
       testKeyById,
       testKeyBySlug
     },
     [ContentTypes.Post]: {
-      collections: ['posts', 'users', 'media'],
+      collections: ['posts'],
       testKeyById,
       testKeyBySlug
     },

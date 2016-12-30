@@ -6,7 +6,7 @@ import React, { Component } from 'react'
 
 import { connectWpQuery } from '../../../src/connect'
 
-@connectWpQuery((wpapi, props) => wpapi.books(props.params.id).get())
+@connectWpQuery((wpapi, props) => wpapi.books(props.params.id).get(), () => true)
 export default class Books extends Component {
   render () {
     const {
