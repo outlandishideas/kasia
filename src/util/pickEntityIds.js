@@ -1,10 +1,10 @@
 import pickToArray from 'pick-to-array'
 
-import { ContentTypesWithoutId } from '../constants/ContentTypes'
 import contentTypesManager from './contentTypesManager'
+import { ContentTypesWithoutId } from '../constants'
 
 /**
- * Pick all entity identifiers from a raw WP-API response.
+ * Pick all entity identifiers from a WP-API response.
  * @param {Object} data Raw WP-API JSON
  * @returns {Array} Entity identifiers
  */
@@ -14,7 +14,7 @@ export default function pickEntityIds (data) {
   // Accommodate content types that do not have an `id` property
   ;[].concat(data).forEach((entity) => {
     const type = contentTypesManager.derive(entity)
-    if (ContentTypesWithoutId[type]) {
+    if (ContentTypesWithoutId.includes(type)) {
       entityIdentifiers.push(...pickToArray(entity, 'slug'))
     }
   })

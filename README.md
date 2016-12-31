@@ -12,7 +12,15 @@
     <a href="http://badge.fury.io/js/kasia"><img alt="npm version" src="https://badge.fury.io/js/kasia.svg" /></a>
     <a href="http://standardjs.com/"><img src="https://img.shields.io/badge/code%20style-standard-brightgreen.svg" /></a>
     <a href="https://travis-ci.org/outlandishideas/kasia"><img alt="travis ci build" src="https://travis-ci.org/outlandishideas/kasia.svg" /></a>
-    <a href="https://coveralls.io/repos/github/outlandishideas/kasia/badge.svg?branch=master"><img alt="coverage" src="https://coveralls.io/repos/github/outlandishideas/kasia/badge.svg?branch=master" /></a>
+    <a href='https://coveralls.io/github/outlandishideas/kasia?branch=master'><img src='https://coveralls.io/repos/github/outlandishideas/kasia/badge.svg?branch=master' alt='Coverage Status' /></a>
+</p>
+
+<hr/>
+
+<p align="center">
+  <strong>
+  v4 introduces breaking changes. Please read the <a href="https://github.com/outlandishideas/kasia/blob/master/CHANGELOG.md">CHANGELOG</a> for more details.
+  </strong>
 </p>
 
 <hr/>
@@ -22,13 +30,16 @@ Get data from WordPress and into components with ease...
 ```js
 // e.g. Get a post by its slug
 @connectWpPost('Post', 'spongebob-squarepants')
-export default class extends React.Component (props) {
+export default class extends React.Component () {
   render () {
     const { post: spongebob } = this.props.kasia
     
-    return spongebob
-      ? <h1>{spongebob.title}</h1> //=> Spongebob Squarepants
-      : <span>Loading...</span>
+    if (!spongebob) {
+      return <p>{'Who lives in a pineapple under the sea?'}</p>
+    }
+    
+    return <h1>{spongebob.title.rendered}!</h1>
+    //=> Spongebob Squarepants!
   }
 }
 ```
@@ -82,12 +93,12 @@ yarn add kasia
 
 ```js
 // ES2015
-import Kasia from 'kasia'
+import kasia from 'kasia'
 ```
 
 ```js
 // CommonJS
-var Kasia = require('kasia')
+var kasia = require('kasia')
 ```
 
 ## Configure
@@ -105,12 +116,12 @@ A slimline example...
 ```js
 import { combineReducers, createStore, applyMiddleware } from 'redux'
 import createSagaMiddleware from 'redux-saga'
-import Kasia from 'kasia'
+import kasia from 'kasia'
 import wpapi from 'wpapi'
 
 const WP = new wpapi({ endpoint: 'http://wordpress/wp-json' })
 
-const { kasiaReducer, kasiaSagas } = Kasia({ WP })
+const { kasiaReducer, kasiaSagas } = kasia({ WP })
 
 const rootSaga = function * () {
   yield [...kasiaSagas]
@@ -137,7 +148,7 @@ export default function configureStore (initialState) {
 
 ## Usage
 
-### `Kasia(options) : Object`
+### `kasia(options) : Object`
 
 Configure Kasia.
 
@@ -146,14 +157,14 @@ Configure Kasia.
 Returns an object containing the Kasia reducer and sagas.
 
 ```js
-const { kasiaReducer, kasiaSagas } = Kasia({
+const { kasiaReducer, kasiaSagas } = kasia({
   WP: new wpapi({ endpoint: 'http://wordpress/wp-json' })
 })
 ```
 
 The `options` object accepts:
 
-- `WP` {wpapi}
+- `wpapi` {wpapi}
 
     An instance of `node-wpapi`.
     
@@ -162,10 +173,14 @@ The `options` object accepts:
     Property of entities that is used to key them in the store.
      
     One of: `'slug'`, `'id'`.
+    
+- `debug` {Boolean} _(optional, default=`false`)_
+
+  Log debug information to the console.
 
 - `contentTypes` {Array} _(optional)_
 
-    Array of custom content type definitions
+    Array of custom content type definitions.
 
     ```js
     // Example custom content type definition
@@ -184,12 +199,12 @@ The `options` object accepts:
     Array of Kasia plugins.
 
     ```js
-    import KasiaWpApiMenusPlugin from 'kasia-plugin-wp-api-menus'
+    import kasiaWpApiMenusPlugin from 'kasia-plugin-wp-api-menus'
 
     // Example passing in plugin
     plugins: [
-        [KasiaWpApiMenusPlugin, { route: 'menus' }], // with configuration
-        KasiaWpApiMenusPlugin, // without configuration
+        [kasiaWpApiMenusPlugin, { route: 'menus' }], // with configuration
+        kasiaWpApiMenusPlugin, // without configuration
     ]
     ```
     
@@ -247,7 +262,7 @@ export default connectWpPost(Page, (props) => props.params.slug)(Post)
 Connect a component to the result of an arbitrary WP-API query. Query is always made with `?embed` query parameter.
 
 - __queryFn__ {Function} Function that accepts args `wpapi`, `props`, `state` and should return a WP-API query
-- __shouldUpdate__ {Function} Called on componentWillReceiveProps, return true to run query 
+- __shouldUpdate__ {Function} Called on `componentWillReceiveProps`, return true to run query again
 
 Returns a connected component.
 
@@ -271,7 +286,7 @@ export default class RecentNews extends Component {
   render () {
     const {
       query,
-      entities: { news }
+      data: { news }
     } = this.props.kasia
 
     if (!query.complete) {
@@ -296,12 +311,12 @@ export default connectWpQuery((wpapi) => {
 
 ## Exports
 
-### `Kasia`
+### `kasia`
 
-The Kasia configurator.
+The Kasia configurator and preload utilities.
 
 ```js
-import Kasia from 'kasia'
+import kasia, { preload, preloadQuery } from 'kasia'
 ```
 
 ### `kasia/connect`
@@ -323,18 +338,6 @@ import {
   Post, PostStatus, PostType,
   PostRevision, Tag, Taxonomy, User
 } from 'kasia/types'
-```
-
-### `kasia/util`
-
-Utility methods to help you when building your application.
-
-```js
-import { 
-  preload,
-  preloadPost,
-  preloadQuery
-} from 'kasia/util'
 ```
 
 See [Universal Application Utilities](#Utilities) for more details.
@@ -380,49 +383,58 @@ Please create a pull request to get your own added to the list.
 
 ## Universal Applications
 
+__Important...__ 
+
+  - __before calling the preloaders for SSR you must call `kasia.rewind()`__
+  - __or if you call `runSagas()` from the utilities then this is done for you.__
+
 ### Utilities
 
-#### `util/preload(components, renderProps) : Generator`
+#### `runSagas(store, sagas) : Promise`
 
-Create a single saga operation that will preload all data for any Kasia components in `components`.
+Run a bunch of sagas against the store and wait on their completion.
+
+- __store__ {Object} Redux store enhanced with `runSaga` method
+- __sagas__ {Array} Array of functions that accept the store state and return a saga generator
+
+Returns a Promise resolving on completion of all the sagas.
+
+#### `preload(components[, renderProps][, state]) : Generator`
+
+Create a saga operation that will preload all data for any Kasia components in `components`.
 
 - __components__ {Array} Array of components
-- __renderProps__ {Object} Render props object derived from the matched route
+- [__renderProps__] {Object} _(optional)_ Render props object derived from the matched route
+- [__state__] {Object} _(optional)_ Store state
 
-Returns a saga operation.
+Returns a [saga operation](#saga-operation-signature).
 
-#### `util/preloadQuery(queryFn, renderProps) : Generator`
+#### `preloadQuery(queryFn[, renderProps][, state]) : Generator`
 
-Create a single saga operation that will preload data for an arbitrary query against the WP API.
+Create a saga operation that will preload data for an arbitrary query against the WP API.
 
-- __queryFn__ {Function} Query function that accepts `wpapi` as argument
-- __renderProps__ {Object} Render props object
+- __queryFn__ {Function} Query function that returns `node-wpapi` query
+- [__renderProps__] {Object} _(optional)_ Render props object
+- [__state__] {Object} _(optional)_ Store state
 
-Returns a saga operation.
+Returns a [saga operation](#saga-operation-signature).
 
-#### `util/preloadPost(contentType, id[, state]) : Generator`
+#### `<KasiaConnectedComponent>.preload(renderProps[, state]) : Array<Array>`
 
-Create a single saga operation that will preload data for a single post from the WP API.
-
-- __contentType__ {String} The content type of the item to fetch
-- __id__ {String|Number|Function} ID of the post or a function to derive from `renderProps`
-- __renderProps__ {Object} Render props object
-- [__state__] {Object} _(optional)_ State object (default: `null`)
-
-Returns a saga operation.
-
-#### `<Component>.makePreloader(renderProps[, state]) : Array<Array>`
-
-Connected components expose a static method `makePreloader` that produces an array of saga operations
-to facilitate the request for entity data on the server ("preloaders").
+Connected components expose a static method `preload` that produces an array of saga operations
+to facilitate the request for entity data on the server.
 
 - __renderProps__ {Object} Render props object derived from the matched route 
 - [__state__] {Object} _(optional)_ State object (default: `null`) 
 
-Returns an array of saga "preloader" operations in the form:
+Returns an array of [saga operations](#saga-operation-signature).
+
+#### Saga Operation Signature
+
+A saga operation is an array of the form:
 
 ```js
-[ [sagaGeneratorFn, action] ]
+[ sagaGeneratorFn, action ]
 ```
 
 Where:
@@ -433,11 +445,11 @@ Where:
 
 ### Example
 
-A somewhat contrived example using the available `kasia/util` preloader methods.
+A somewhat contrived example using the available preloader methods.
 
 ```js
 import { match } from 'react-router'
-import { preload, preloadQuery } from 'kasia/util'
+import { runSagas, preload, preloadQuery } from 'kasia'
 
 import routes from './routes'
 import store from './store'
@@ -449,11 +461,19 @@ export default function renderPage (res, location) {
     if (error) return res.sendStatus(500)
     if (redirect) return res.redirect(302, redirect.pathname + redirect.search)
     
-    return store
-      .runSagas([
-        preload(renderProps.components, renderProps),
-        preloadQuery(getAllCategories, renderProps)
-      ])
+    // We are using `runSagas` which rewinds for us, but if we weren't then
+    // we would call `kasia.rewind()` here instead:
+    //
+    // kasia.rewind()
+    
+    // Each preloader accepts the state that may/may not have been modified by
+    // the saga before it, so the order might be important depending on your use-case!
+    const preloaders = [
+      () => preload(renderProps.components, renderProps),
+      (state) => preloadQuery(getAllCategories, renderProps, state)
+    ]
+    
+    return runSagas(store, preloaders)
       .then(() => renderToString(renderProps.components, renderProps, store.getState()))
       .then((document) => res.send(document))
   })  

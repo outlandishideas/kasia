@@ -1,4 +1,4 @@
-/* global jest:false */
+/* global jest:false, expect:false */
 
 jest.disableAutomock()
 
@@ -10,70 +10,75 @@ import Wpapi from 'wpapi'
 import postJson from '../__fixtures__/wp-api-responses/post'
 import initialState from '../__mocks__/states/initial'
 
-import Kasia from '../../src/Kasia'
-import { normalise, pickEntityIds } from '../../src/util'
-import { ContentTypes } from '../../src/constants/ContentTypes'
+import kasia from '../../src'
+import normalise from '../../src/util/normalise'
+import queryCounter from '../../src/util/queryCounter'
+import pickEntityIds from '../../src/util/pickEntityIds'
+import schemasManager from '../../src/util/schemasManager'
+import { ContentTypes } from '../../src/constants'
 import { createPostRequest, completeRequest, failRequest } from '../../src/redux/actions'
 
-function setup () {
-  const WP = new Wpapi({ endpoint: '123' })
-  const { kasiaReducer } = Kasia({ WP })
-  const rootReducer = combineReducers(kasiaReducer, {
-    someOtherNamespace: () => ({}) // Should never get hit
+function setup (keyEntitiesBy) {
+  const { kasiaReducer } = kasia({
+    wpapi: new Wpapi({ endpoint: '123' }),
+    keyEntitiesBy
   })
+  const rootReducer = combineReducers(kasiaReducer)
   const store = createStore(rootReducer)
-  return { store, initialState }
+  return { store, initialState: initialState(keyEntitiesBy) }
 }
 
-describe('redux/reducer journey', () => {
-  const { store, initialState } = setup()
+describe('reducer journey', () => {
+  const error = new Error('Request failed').stack
 
-  it('has initial state on store', () => {
-    expect(store.getState()).toEqual(initialState)
+  const tests = [
+    ['id', 16],
+    ['slug', 'architecto-enim-omnis-repellendus']
+  ]
+
+  beforeEach(() => {
+    queryCounter.reset()
+    schemasManager.__flush__()
   })
 
-  it('does not modify store without action namespace', () => {
-    store.dispatch({ type: 'someOtherNamespace/' })
-    expect(store.getState()).toEqual(initialState)
-  })
+  tests.forEach(([ keyEntitiesBy, param ]) => {
+    describe('keyEntitiesBy = ' + keyEntitiesBy, () => {
+      const { store, initialState } = setup(keyEntitiesBy)
 
-  it('can REQUEST_CREATE', () => {
-    store.dispatch(createPostRequest(ContentTypes.Post, 16))
-  })
+      it('has initial state on store', () => {
+        expect(store.getState()).toEqual(initialState)
+      })
 
-  describe('can REQUEST_COMPLETE', () => {
-    it('places normalised data on store', () => {
-      store.dispatch(completeRequest(0, postJson))
+      it('does not modify store without action namespace', () => {
+        store.dispatch({ type: 'REQUEST_COMPLETE', id: 0, entities: [''] })
+        expect(store.getState()).toEqual(initialState)
+      })
 
-      const expected = normalise(postJson, 'id')
-      const actual = store.getState().wordpress.entities
+      it('can Request*Create', () => {
+        store.dispatch(createPostRequest(ContentTypes.Post, param))
+      })
 
-      console.log(actual)
+      it('can RequestComplete', () => {
+        store.dispatch(completeRequest(0, postJson))
+        const expected = normalise(postJson, keyEntitiesBy)
+        const actual = store.getState().wordpress.entities
+        expect(actual).toEqual(expected)
+      })
 
-      expect(actual).toEqual(expected)
+      it('places query on store', () => {
+        const entities = pickEntityIds(postJson)
+        const expected = { id: 0, complete: true, OK: true, paging: {}, entities, prepared: true }
+        const actual = store.getState().wordpress.queries[0]
+        expect(actual).toEqual(expected)
+      })
+
+      it('can RequestFail', () => {
+        store.dispatch(createPostRequest(ContentTypes.Post, param))
+        store.dispatch(failRequest(1, error))
+        const expected = { id: 1, complete: true, OK: false, error, prepared: true }
+        const actual = store.getState().wordpress.queries[1]
+        expect(actual).toEqual(expected)
+      })
     })
-
-    it('places query on store', () => {
-      const expected = {
-        id: 0,
-        complete: true,
-        OK: true,
-        paging: {},
-        entities: pickEntityIds(postJson),
-        prepared: true
-      }
-      const actual = store.getState().wordpress.queries[0]
-      expect(actual).toEqual(expected)
-    })
-  })
-
-  it('can REQUEST_FAIL', () => {
-    store.dispatch(createPostRequest(ContentTypes.Post, 16))
-    store.dispatch(failRequest(1, new Error('Request failed')))
-
-    const expected = { id: 1, complete: true, OK: false, error: 'Error: Request failed', prepared: true }
-    const actual = store.getState().wordpress.queries[1]
-
-    expect(actual).toEqual(expected)
   })
 })

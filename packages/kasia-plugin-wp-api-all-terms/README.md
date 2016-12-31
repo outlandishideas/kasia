@@ -67,10 +67,10 @@ Terms will be available at `store.wordpress.terms`, for example:
 ## Universal Applications
 
 ```js
-import { makePreloader } from 'kasia-plugin-wp-api-all-terms'
+import kasiaPluginWpApiAllTerms from 'kasia-plugin-wp-api-all-terms'
 ```
 
-### `makePreloader(WP)`
+### `kasiaPluginWpApiAllTerms.preload(WP)`
 
 - __WP__ {Object} WP API instance
 

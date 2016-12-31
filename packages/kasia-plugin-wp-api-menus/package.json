@@ -1,6 +1,6 @@
 {
   "name": "kasia-plugin-wp-api-menus",
-  "version": "4.0.0",
+  "version": "4.0.4",
   "description": "Provides support for the WP-API menus plugin to Kasia",
   "main": "lib/index.js",
   "jsnext:main": "src/index.js",

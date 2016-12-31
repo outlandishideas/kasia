@@ -1,41 +1,41 @@
-/* global jest:false */
+/* global jest:false, expect:false */
 
 jest.disableAutomock()
 
-import './__mocks__/WP'
-import Kasia from '../src/Kasia'
-import getWP, { setWP } from '../src/wpapi'
-
-const WP = getWP()
+import { wpapi } from './__mocks__/WP'
+import kasia, { preload, preloadQuery } from '../src'
 
 describe('Kasia', () => {
-  afterEach(() => setWP(null))
-
   it('exports a function', () => {
-    expect(typeof Kasia).toEqual('function')
+    expect(typeof kasia).toEqual('function')
+  })
+
+  it('exports preloaders', () => {
+    expect(typeof preload).toEqual('function')
+    expect(typeof preloadQuery).toEqual('function')
   })
 
   it('throws with bad WP value', () => {
     expect(() => {
-      Kasia({ WP: '' })
+      kasia({ wpapi: '' })
     }).toThrowError(/Expecting WP to be instance of `node-wpapi`/)
   })
 
   it('throws with bad plugins value', () => {
     expect(() => {
-      Kasia({ WP, plugins: '' })
+      kasia({ wpapi, plugins: '' })
     }).toThrowError(/Expecting plugins to be array/)
   })
 
   it('throws with bad index value', () => {
     expect(() => {
-      Kasia({ WP, keyEntitiesBy: 0 })
-    }).toThrowError(/Expecting keyEntitiesBy to be string/)
+      kasia({ wpapi, keyEntitiesBy: 0 })
+    }).toThrowError(/Expecting keyEntitiesBy/)
   })
 
   it('throws with bad contentTypes value', () => {
     expect(() => {
-      Kasia({ WP, contentTypes: '' })
+      kasia({ wpapi, contentTypes: '' })
     }).toThrowError(/Expecting contentTypes to be array/)
   })
 })

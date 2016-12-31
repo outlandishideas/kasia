@@ -1,9 +1,11 @@
-import * as effects from 'redux-saga/effects'
+import { take, call, put } from 'redux-saga/effects'
 import merge from 'lodash.merge'
 
 import ActionTypes from './constants/ActionTypes'
 
 export * from './actions'
+
+export default kasiaPluginWpApiMenus
 
 // The default wp-api-menus namespace in the WP-API.
 const defaultRoute = 'wp-api-menus/v2'
@@ -70,7 +72,7 @@ function fetch (WP, action) {
 function makeSagas (WP) {
   return [function * fetchSaga () {
     while (true) {
-      const action = yield effects.take(action => requestTypes.indexOf(action.type) !== -1)
+      const action = yield take((action) => requestTypes.indexOf(action.type) !== -1)
       yield fetchResource(WP, action)
     }
   }]
@@ -83,18 +85,8 @@ function makeSagas (WP) {
  */
 function * fetchResource (WP, action) {
   const { id, type } = action
-  const data = yield effects.call(fetch, WP, action)
-  yield effects.put({ type: ActionTypes.RECEIVE_DATA, request: type, data, id })
-}
-
-/**
- * Make a preloader function that can be used to request data on the server.
- * @param {Object} WP Instance of `wpapi`
- * @param {Object} action Action object
- * @returns {Function} Function that returns a collection of saga operation definitions
- */
-export function makePreloader (WP, action) {
-  return () => fetchResource(WP, action)
+  const data = yield call(fetch, WP, action)
+  yield put({ type: ActionTypes.RECEIVE_DATA, request: type, data, id })
 }
 
 /**
@@ -103,7 +95,7 @@ export function makePreloader (WP, action) {
  * @param {Object} config User's plugin configuration
  * @returns {Object} Plugin reducer and sagas
  */
-export default function (WP, config) {
+function kasiaPluginWpApiMenus (WP, config) {
   config.route = config.route || defaultRoute
 
   WP.menus = WP.registerRoute(config.route, '/menus/(?P<id>)')
@@ -112,5 +104,11 @@ export default function (WP, config) {
   return {
     reducers: reducer,
     sagas: makeSagas(WP)
+  }
+}
+
+kasiaPluginWpApiMenus.preload = function (WP, action) {
+  return function * () {
+    yield * fetchResource(WP, action)
   }
 }

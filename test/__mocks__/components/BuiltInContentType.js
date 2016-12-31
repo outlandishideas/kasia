@@ -4,18 +4,20 @@ jest.disableAutomock()
 
 import React, { Component } from 'react'
 
-import { ContentTypes } from '../../../src/constants/ContentTypes'
+import { ContentTypes } from '../../../src/constants'
 import { connectWpPost } from '../../../src/connect'
 
-@connectWpPost(ContentTypes.Post, (props) => props.params.id)
-export default class BuiltInContentType extends Component {
+export const target = class extends Component {
   render () {
     const { query, post } = this.props.kasia
-
-    if (!query.complete) {
-      return <div>Loading...</div>
-    }
-
-    return <div>{post.title}</div>
+    if (!query.complete || !query.OK) return <div>Loading...</div>
+    return <div>{post.title.rendered}</div>
   }
 }
+
+export default connectWpPost(
+  ContentTypes.Post,
+  // check for both id and slug so we can test both
+  // usually you would target one or the other depending on `keyEntitiesBy`
+  (props) => props.params.id || props.params.slug
+)(target)

@@ -1,10 +1,10 @@
-/* global jest:false */
+/* global jest:false, expect:false */
 
 jest.disableAutomock()
 
 import '../__mocks__/WP'
-import { ContentTypes } from '../../src/constants/ContentTypes'
-import { contentTypesManager } from '../../src/util'
+import contentTypesManager from '../../src/util/contentTypesManager'
+import { ContentTypes } from '../../src/constants'
 
 describe('util/contentTypesManager', () => {
   describe('#getAll', () => {
@@ -24,8 +24,7 @@ describe('util/contentTypesManager', () => {
   describe('#register', () => {
     it('throws with bad options object', () => {
       const fn = () => contentTypesManager.register('')
-      const message = 'Invalid content type object. See documentation http://kasia.io.'
-      expect(fn).toThrowError(message)
+      expect(fn).toThrowError(/Invalid content type object/)
     })
 
     Object.values(ContentTypes).forEach((builtInType) => {

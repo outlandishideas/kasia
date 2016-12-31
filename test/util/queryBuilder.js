@@ -1,9 +1,9 @@
-/* global jest:false */
+/* global jest:false, expect:false */
 
 jest.disableAutomock()
 
-import { setWP } from '../../src/wpapi'
-import { queryBuilder } from '../../src/util'
+import getWP, { setWP } from '../../src/wpapi'
+import { deriveQueryFunction } from '../../src/util/queryBuilder'
 
 setWP({
   posts: () => ({
@@ -18,18 +18,18 @@ setWP({
 })
 
 const input = 16
-const queryFn = queryBuilder._deriveQuery('posts', input)
+const queryFn = deriveQueryFunction('posts', input)
 
 let output
 
 describe('util/queryBuilder', () => {
-  describe('_deriveQuery', () => {
+  describe('#_deriveQuery', () => {
     it('returns a function', () => {
       expect(typeof queryFn).toEqual('function')
     })
 
     it('that calls chain with correct method name and identifier', () => {
-      queryFn()
+      queryFn(getWP())
       expect(output).toEqual(input)
     })
   })

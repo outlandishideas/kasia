@@ -1,14 +1,14 @@
-/* global jest:false */
+/* global jest:false, expect:false */
 
 jest.disableAutomock()
 
-import WP from 'wpapi'
+import Wpapi from 'wpapi'
 import { combineReducers, createStore } from 'redux'
 import { spawn } from 'redux-saga/effects'
 
-import Kasia from '../src/Kasia'
-import ActionTypes from '../src/constants/ActionTypes'
-import { completeRequest } from '../src/redux/actions'
+import kasia from '../src'
+import { ActionTypes } from '../src/constants'
+import { acknowledgeRequest, completeRequest } from '../src/redux/actions'
 import postJson from './__fixtures__/wp-api-responses/post'
 
 const testActionType = 'kasia/TEST_ACTION'
@@ -19,24 +19,22 @@ let countHitPluginNativeActionTypeReducer = 0
 function pluginSaga () {}
 
 function setup () {
-  const pluginReducer = {
-    [testActionType]: (state) => {
-      countHitPluginOwnActionTypeReducer++
-      return state
-    },
-    [ActionTypes.RequestComplete]: (state) => {
-      countHitPluginNativeActionTypeReducer++
-      return state
-    }
-  }
-
   const plugin = () => ({
-    reducers: pluginReducer,
-    sagas: [pluginSaga]
+    sagas: [pluginSaga],
+    reducers: {
+      [testActionType]: (state) => {
+        countHitPluginOwnActionTypeReducer++
+        return state
+      },
+      [ActionTypes.RequestComplete]: (state) => {
+        countHitPluginNativeActionTypeReducer++
+        return state
+      }
+    }
   })
 
-  const { kasiaReducer, kasiaSagas } = Kasia({
-    WP: new WP({ endpoint: 'wow-so-much-endpoint' }),
+  const { kasiaReducer, kasiaSagas } = kasia({
+    wpapi: new Wpapi({ endpoint: '' }),
     plugins: [plugin]
   })
 
@@ -48,6 +46,11 @@ function setup () {
 
 describe('Plugin', () => {
   const { store, kasiaSagas } = setup()
+
+  it('should run untouched native action type', () => {
+    store.dispatch(acknowledgeRequest({ type: ActionTypes.RequestCreatePost, id: 0 }))
+    expect(store.getState().wordpress.queries['0']).toBeTruthy()
+  })
 
   describe('with native action type', () => {
     it('should hit native action handler', () => {

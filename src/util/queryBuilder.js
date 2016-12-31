@@ -1,16 +1,11 @@
-import ActionTypes from '../constants/ActionTypes'
-import getWP from '../wpapi'
-import { contentTypesManager } from '../util'
+import contentTypesManager from './contentTypesManager'
 
-function queryFn (wpapi, contentTypeMethodName, identifierTypeMethodName, identifierValue) {
+/** Fetch data for a single post via the `wpapi` instance. */
+function queryFn (wpapi, contentTypeMethodName, idTypeMethodName, id) {
   const contentTypeApi = wpapi[contentTypeMethodName]()
-  const query = contentTypeApi[identifierTypeMethodName](identifierValue)
+  const query = contentTypeApi[idTypeMethodName](id)
   return query.embed().get()
 }
-
-const queryBuilder = {}
-
-export default queryBuilder
 
 /**
  * Create a function that dynamically calls the necessary wpapi
@@ -27,33 +22,13 @@ export default queryBuilder
  * @param {String|Number} identifier The identifier's id or slug
  * @returns {Function} A function to make a request to the WP-API
  */
-queryBuilder._deriveQuery = function queryBuilderDeriveQuery (contentTypeMethodName, identifier) {
-  return () => queryFn(
-    getWP(),
-    contentTypeMethodName,
-    typeof identifier === 'string' ? 'slug' : 'id',
-    identifier
-  )
+export function deriveQueryFunction (contentTypeMethodName, identifier) {
+  const idMethodName = typeof identifier === 'string' ? 'slug' : 'id'
+  return (wpapi) => queryFn(wpapi, contentTypeMethodName, idMethodName, identifier)
 }
 
-/**
- * Given an `action`, produce a function that will query the WP-API.
- * @param {Object} action Redux action object
- * @returns {Function}
- */
-queryBuilder.makeQuery = function queryBuilderMakeQuery (action) {
-  const { contentType, identifier, queryFn } = action
-
-  let realQueryFn
-
-  if (ActionTypes.RequestCreatePost === action.type) {
-    const options = contentTypesManager.get(contentType)
-    realQueryFn = queryBuilder._deriveQuery(options.methodName, identifier)
-  } else if (ActionTypes.RequestCreateQuery === action.type) {
-    realQueryFn = queryFn
-  } else {
-    throw new Error(`Unknown request type "${action.request}".`)
-  }
-
-  return realQueryFn
+/** Given an `action` produce a function that will query the WP-API. */
+export function buildQueryFunction (action) {
+  const options = contentTypesManager.get(action.contentType)
+  return deriveQueryFunction(options.methodName, action.identifier)
 }

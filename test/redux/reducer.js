@@ -1,69 +1,45 @@
-/* global jest:false */
+/* global jest:false, expect:false */
 
 jest.disableAutomock()
 
-import merge from 'lodash.merge'
-
 import '../__mocks__/WP'
 import postJson from '../__fixtures__/wp-api-responses/post'
-import { INITIAL_STATE, completeReducer, failReducer } from '../../src/redux/reducer'
-
-const id = '0'
-const initialState = { wordpress: INITIAL_STATE }
+import { INITIAL_STATE, acknowledgeReducer, completeReducer, failReducer } from '../../src/redux/reducer'
 
 describe('redux/reducer', () => {
-  describe('completeAction', () => {
-    const payload = { id, data: [postJson] }
-    const reducer = completeReducer((data) => data)
-    const store = reducer(initialState, payload)
+  const id = 0
 
-    it('returns an object', () => {
-      expect(typeof store).toEqual('object')
-    })
+  let state
+  let query
 
-    it('sets entity ids from response in query object', () => {
-      expect(store.wordpress.queries[id].entities).toEqual([postJson.id])
-    })
+  function assertState (fn) {
+    return () => {
+      const newState = fn()
+      expect(typeof newState).toEqual('object')
+      expect(newState === state).toEqual(false)
+      state = newState
+      query = state.queries[id]
+    }
+  }
 
-    it('sets complete to true in query object', () => {
-      expect(store.wordpress.queries[id].complete).toEqual(true)
-    })
-
-    it('sets OK to true in query object', () => {
-      expect(store.wordpress.queries[id].OK).toEqual(true)
-    })
+  describe('acknowledge', () => {
+    it('returns a new object', assertState(() => acknowledgeReducer(INITIAL_STATE, { id })))
+    it('sets query on state', () => expect(query).toEqual({ id, prepared: true, complete: false, OK: null }))
   })
 
-  describe('failAction', () => {
-    const error = new Error('Wuh-oh!')
+  describe('complete', () => {
+    it('returns a new object', assertState(() => completeReducer((data) => data)(state, { id, data: [postJson] })))
+    it('sets entity ids', () => expect(query.entities).toEqual([postJson.id]))
+    it('sets complete', () => expect(query.complete).toEqual(true))
+    it('sets OK', () => expect(query.OK).toEqual(true))
+  })
 
-    let store = {
-      wordpress: {
-        queries: {
-          [id]: {
-            id,
-            complete: false
-          }
-        }
-      }
-    }
+  describe('fail', () => {
+    const error = new Error('Wuh-oh!').stack
 
-    it('returns a new object', () => {
-      const newStore = failReducer(merge(initialState, store), { id, error })
-      expect(newStore === store).toEqual(false)
-      store = newStore
-    })
-
-    it('sets error in the query object', () => {
-      expect(store.wordpress.queries[id].error).toEqual(String(error))
-    })
-
-    it('sets complete to true in query object', () => {
-      expect(store.wordpress.queries[id].complete).toEqual(true)
-    })
-
-    it('sets OK to false in query object', () => {
-      expect(store.wordpress.queries[id].OK).toEqual(false)
-    })
+    it('returns a new object', assertState(() => failReducer(state, { id, error })))
+    it('sets error', () => expect(query.error).toEqual(error))
+    it('sets complete', () => expect(query.complete).toEqual(true))
+    it('sets OK', () => expect(query.OK).toEqual(false))
   })
 })

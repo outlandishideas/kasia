@@ -1,10 +1,9 @@
 import merge from 'lodash.merge'
 import isNode from 'is-node-fn'
 
-import ActionTypes from '../constants/ActionTypes'
-import { pickEntityIds, normalise } from '../util'
-
-const __IS_NODE__ = isNode()
+import pickEntityIds from '../util/pickEntityIds'
+import normalise from '../util/normalise'
+import { ActionTypes } from '../constants'
 
 export const INITIAL_STATE = {
   // WP-API request/response metadata are stored here
@@ -15,21 +14,24 @@ export const INITIAL_STATE = {
 
 /**
  * Merge all native and plugin reducers such that a single function reduces for a single action type.
- * @param {Object} plugins Merged plugin configurations
+ * @param {Object} reducers Plugin reducers
  * @param {Function} normaliser Function to normalise response data
  * @returns {Object} Reducer object
  */
-function mergeNativeAndThirdPartyReducers (plugins, normaliser) {
+function mergeNativeAndThirdPartyReducers (reducers, normaliser) {
   const baseReducer = {
+    [ActionTypes.AckRequest]: [acknowledgeReducer],
     [ActionTypes.RequestComplete]: [completeReducer(normaliser)],
-    [ActionTypes.RequestFail]: [failReducer],
-    [ActionTypes.DeleteQueries]: [deleteReducer]
+    [ActionTypes.RequestFail]: [failReducer]
   }
 
   // Group reducers by their action type
-  const reducersByActionType = Object.keys(plugins.reducers)
+  const reducersByActionType = Object.keys(reducers)
     .reduce(function groupByActionType (reducer, actionType) {
-      reducer[actionType] = [].concat(reducer[actionType] || [], plugins.reducers[actionType] || [])
+      reducer[actionType] = [].concat(
+        reducer[actionType] || [],
+        reducers[actionType] || []
+      )
       return reducer
     }, baseReducer)
 
@@ -51,25 +53,48 @@ function mergeNativeAndThirdPartyReducers (plugins, normaliser) {
   return reducer
 }
 
-// COMPLETE
-// Place entity on the store; update query record
-export function completeReducer (normalise) {
-  return (state, action) => merge({}, state, {
-    entities: Object.assign({},
-      state.entities,
-      normalise(action.data)
-    ),
+// ACKNOWLEDGE
+// Place record of request o
+export function acknowledgeReducer (state, action) {
+  return merge({}, state, {
     queries: {
       [action.id]: {
         id: action.id,
+        prepared: isNode(),
+        complete: false,
+        OK: null
+      }
+    }
+  })
+}
+
+// COMPLETE
+// Place entity on the store; update query record if for component (has an id)
+export function completeReducer (normalise) {
+  return (state_, action) => {
+    const state = merge({}, state_)
+
+    state.entities = merge(
+      state.entities,
+      normalise(action.data)
+    )
+
+    // The action id would be null the preloadQuery method has initiated
+    // the completeRequest action as they do not need a query in the store
+    // (there is no component to pick it up).
+    if (typeof action.id === 'number') {
+      state.queries[action.id] = {
+        id: action.id,
         entities: pickEntityIds(action.data),
         paging: action.data._paging || {},
-        prepared: __IS_NODE__,
+        prepared: isNode(),
         complete: true,
         OK: true
       }
     }
-  })
+
+    return state
+  }
 }
 
 // FAIL
@@ -79,8 +104,8 @@ export function failReducer (state, action) {
     queries: {
       [action.id]: {
         id: action.id,
-        error: String(action.error),
-        prepared: __IS_NODE__,
+        error: action.error,
+        prepared: isNode(),
         complete: true,
         OK: false
       }
@@ -88,32 +113,19 @@ export function failReducer (state, action) {
   })
 }
 
-// DELETE QUERIES
-// Remove query objects from `state.wordpress.queries`
-export function deleteReducer (state, action) {
-  const queries = Object
-    .values(state.wordpress.queries)
-    .reduce((queries, query) => {
-      if (query.id in action.ids) return queries
-      queries[query.id] = query
-      return queries
-    }, {})
-
-  return merge({}, state, { queries })
-}
-
 /**
  * Create the aggregate reducer for an instance of Kasia.
- * @param {Object} options Options object
- * @param {Object} plugins Plugin configurations
+ * @param {Object} keyEntitiesBy Entity property used as key in store
+ * @param {Object} reducers Plugin reducers
  * @returns {Object} Kasia reducer
  */
-export default function createReducer (options, plugins) {
-  const normaliser = (data) => normalise(data, options.keyEntitiesBy)
-  const reducer = mergeNativeAndThirdPartyReducers(plugins, normaliser)
+export default function createReducer ({ keyEntitiesBy, reducers }) {
+  const normaliser = (data) => normalise(data, keyEntitiesBy)
+  const reducer = mergeNativeAndThirdPartyReducers(reducers, normaliser)
+  const initialState = Object.assign({}, INITIAL_STATE, { keyEntitiesBy })
 
   return {
-    wordpress: function kasiaReducer (state = INITIAL_STATE, action) {
+    wordpress: function kasiaReducer (state = initialState, action) {
       const [ actionNamespace ] = action.type.split('/')
 
       if (actionNamespace === 'kasia' && action.type in reducer) {

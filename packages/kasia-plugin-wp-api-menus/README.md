@@ -75,6 +75,19 @@ Get a single theme menu location.
 
 Menu will be available at `store.wordpress.menuLocations[id]`.
 
+
+## Universal Applications
+
+```js
+import kasiaPluginWpApiMenus from 'kasia-plugin-wp-api-menus'
+```
+
+### `kasiaPluginWpApiMenus.preload(WP)`
+
+- __WP__ {Object} WP API instance
+
+Returns a single saga generator.
+
 ## Contributing
 
 All pull requests and issues welcome!

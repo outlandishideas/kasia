@@ -2,14 +2,11 @@ import wpFilterMixins from 'wpapi/lib/mixins/filters'
 import wpParamMixins from 'wpapi/lib/mixins/parameters'
 import humps from 'humps'
 
-import { ContentTypes, ContentTypesPlural } from '../constants/ContentTypes'
 import getWP from '../wpapi'
-import invariants from './invariants'
+import invariants from '../invariants'
+import { WpApiNamespace, ContentTypes, ContentTypesPlural } from '../constants'
 
-const contentTypes = {}
-
-export default contentTypes
-
+/** Assert that an object has all `keys`. */
 function hasKeys (obj, ...keys) {
   return keys.reduce((bool, key) => {
     if (!bool) return bool
@@ -17,63 +14,58 @@ function hasKeys (obj, ...keys) {
   }, true)
 }
 
-// Pre-populate cache with built-in content type options
-const optionsCache = Object.keys(ContentTypes).reduce((cache, key) => {
+const optionsCache = new Map()
+
+const contentTypes = { register, get, getAll, derive }
+
+export default contentTypes
+
+// Pre-populate cache with built-in content type options.
+Object.keys(ContentTypes).forEach((key) => {
   const name = ContentTypes[key]
   const plural = ContentTypesPlural[name]
   const slug = ContentTypesPlural[name]
-  cache.set(name, { name, plural, slug })
-  return cache
-}, new Map())
+  contentTypes.register({ name, plural, slug }, true)
+})
 
-/**
- * Create and set the options object for a content type in the cache
- * and register the method on the wpapi instance.
- * @param {Object} contentType Content type options object
- * @returns {Object}
- */
-contentTypes.register = function contentTypesRegister (contentType) {
+/** Create and set options object for a type in the cache and register on wpapi instance. */
+function register (contentType, builtIn) {
   invariants.isValidContentTypeObject(contentType)
   invariants.isNewContentType(contentTypes.getAll(), contentType)
 
   const {
-    namespace = 'wp/v2',
-    name, plural, slug, route: _route, methodName: _methodName
+    namespace = WpApiNamespace,
+    name, plural, slug,
+    route: _route,
+    methodName: _methodName
   } = contentType
 
-  const WP = getWP()
   const route = _route || `/${slug}/(?P<id>)`
   const methodName = humps.camelize(_methodName || plural)
   const mixins = Object.assign({}, wpFilterMixins, wpParamMixins)
   const options = Object.assign({}, contentType, { route, methodName })
 
-  WP[methodName] = WP.registerRoute(namespace, route, { mixins })
+  // Only register custom types with node-wpapi instance as built-ins are already available
+  if (!builtIn) {
+    const WP = getWP()
+    WP[methodName] = WP.registerRoute(namespace, route, { mixins })
+  }
+
   optionsCache.set(name, options)
 }
 
-/**
- * Get the options for a content type.
- * @param {String} contentType The name of the content type
- * @returns {Object}
- */
-contentTypes.get = function contentTypesGet (contentType) {
+/** Get the options for a content type. */
+function get (contentType) {
   return optionsCache.get(contentType)
 }
 
-/**
- * Get all registered content types and their options.
- * @returns {Object}
- */
-contentTypes.getAll = function contentTypesGetAll () {
+/** Get all registered content types and their options. */
+function getAll () {
   return optionsCache
 }
 
-/**
- * Derive the content type of an entity from the WP-API.
- * @param {Object} entity Content entity
- * @returns {String|null} The content type name or null if unidentifiable
- */
-contentTypes.derive = function contentTypesDerive (entity) {
+/** Derive the content type of an entity from the WP-API. */
+function derive (entity) {
   if (!entity) {
     throw new Error(`Expecting entity to be an object, got "${typeof entity}".`)
   }

@@ -4,20 +4,19 @@ import merge from 'lodash.merge'
 import schemasManager from './schemasManager'
 import contentTypesManager from './contentTypesManager'
 
-/**
- * Split a response from the WP-API into its constituent entities.
- * @param {Array|Object} response The WP API response
- * @param {String} idAttribute The property name of an entity's identifier
- * @returns {Object}
- */
+/** Split a response from the WP-API into its constituent entities. */
 export default function normalise (response, idAttribute) {
-  const schemas = schemasManager.getSchemas() || schemasManager.init(idAttribute)
+  const schemas = schemasManager.getAll() || schemasManager.init(idAttribute)
 
   return [].concat(response).reduce((entities, entity) => {
     const type = contentTypesManager.derive(entity)
 
     if (!type) {
-      throw new Error(`Could not derive entity type. Entity: ${entity ? JSON.stringify(entity) : typeof entity}`)
+      console.log(
+        `[kasia] could not derive entity type - ignoring.`,
+        `Entity: ${entity ? JSON.stringify(entity) : typeof entity}`
+      )
+      return entities
     }
 
     const contentTypeSchema = schemas[type]

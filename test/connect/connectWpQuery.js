@@ -1,91 +1,68 @@
-/* global jest:false */
+/* global jest:false, expect:false */
 
 jest.disableAutomock()
 
 import React from 'react'
+import merge from 'lodash.merge'
 import { mount } from 'enzyme'
 
-import ActionTypes from '../../src/constants/ActionTypes'
-import OperationTypes from '../../src/constants/OperationTypes'
+import queryCounter from '../../src/util/queryCounter'
+import { wrapQueryFn } from '../../src/connect'
+import { ActionTypes } from '../../src/constants'
 
 import '../__mocks__/WP'
-import stateMultipleBooks from '../__mocks__/states/multipleBooks'
-import _CustomQuery from '../__mocks__/components/CustomQuery'
-import _CustomPropsComparator from '../__mocks__/components/CustomPropsComparator'
-
+import initialState from '../__mocks__/states/initial'
+import multipleBooks from '../__mocks__/states/multipleBooks'
 import bookJson from '../__fixtures__/wp-api-responses/book'
+import CustomQueryComponent, { target, queryFn } from '../__mocks__/components/CustomQuery'
 
-const CustomQuery = (props, store) => mount(<_CustomQuery {...props} />, { context: { store } })
-const CustomPropsComparator = (props, store) => mount(<_CustomPropsComparator {...props} />, { context: { store } })
+const CustomQuery = (props, store) => mount(<CustomQueryComponent {...props} />, { context: { store } })
 
-function setup () {
+function setup (state) {
   const dispatch = jest.fn()
   const subscribe = () => {}
-  const getState = () => stateMultipleBooks
+  const getState = () => state
   const store = { dispatch, getState, subscribe }
-  const props = { store, params: { id: bookJson.id } }
-  return { store, props }
+  return { store }
 }
 
-function expectRequestCreateAction (props) {
-  const dispatch = props.store.dispatch
-  const action = dispatch.mock.calls[0][0]
-  expect(action.type).toEqual(ActionTypes.RequestCreate)
-  expect(action.request).toEqual(OperationTypes.Query)
-}
+describe('connectWpQuery', () => {
+  beforeEach(() => queryCounter.reset())
 
-describe('@connectWpQuery', () => {
-  describe('with primitive props', () => {
-    const { store, props } = setup()
-    const rendered = CustomQuery(props, store)
-
-    it('should wrap the component', () => {
-      expect(CustomQuery.__kasia).toBe(true)
-    })
-
-    it('should dispatch REQUEST_CREATE', () => {
-      expectRequestCreateAction(props)
-    })
-
-    it('should render with book slug', () => {
-      expect(rendered.html()).toContain('hello')
-    })
+  it('should wrap the component', () => {
+    expect(CustomQueryComponent.__kasia__).toBe(true)
+    expect(CustomQueryComponent.WrappedComponent).toBe(target)
   })
 
-  describe('with non-primitive props', () => {
-    const { store, props } = setup()
-
-    const rendered = CustomQuery({
-      ...props,
-      fn: () => {}
-    }, store)
-
-    it('should dispatch REQUEST_CREATE', () => {
-      expectRequestCreateAction(props)
-    })
-
-    it('should not dispatch REQUEST_CREATE if function changes on props', () => {
-      props.fn = () => {}
-      rendered.setProps(props)
-      expect(store.dispatch.mock.calls.length).toEqual(1)
-    })
+  it('should render loading message with bad query', () => {
+    const query = { prepared: true }
+    const state = merge({}, initialState('id'), { wordpress: { queries: { 0: query } } })
+    const { store } = setup(state)
+    const rendered = CustomQuery({ params: { id: 10 } }, store)
+    expect(rendered.html()).toEqual('<div>Loading...</div>')
   })
 
-  describe('with custom props comparator', () => {
-    const { store, props } = setup()
+  it('should render loading message with incomplete query', () => {
+    const query = { id: 0, complete: false, OK: null, prepared: true }
+    const state = merge({}, initialState('id'), { wordpress: { queries: { 0: query } } })
+    const { store } = setup(state)
+    const rendered = CustomQuery({ params: { id: 10 } }, store)
+    expect(rendered.html()).toEqual('<div>Loading...</div>')
+  })
 
-    const rendered = CustomPropsComparator({
-      ...props,
-      fn: () => {}
-    }, store)
+  it('should render prepared post data with complete query', () => {
+    const query = { prepared: true }
+    const { store } = setup(merge({}, multipleBooks, { wordpress: { queries: { 0: query } } }))
+    const rendered = CustomQuery({ params: { id: bookJson.id } }, store)
+    expect(rendered.html()).toEqual(`<div>${bookJson.slug}</div>`)
+  })
 
-    it('should dispatch REQUEST_CREATE', () => {
-      expectRequestCreateAction(props)
-    })
-
-    it('should not dispatch REQUEST_CREATE if function does not change on props', () => {
-      rendered.update()
-      expect(store.dispatch.mock.calls.length).toEqual(1)
-    })
+  it('should request data without query', () => {
+    const { store } = setup(initialState('id'))
+    CustomQuery({ params: { id: 10 } }, store)
+    const action = store.dispatch.mock.calls[0][0]
+    expect(action.id).toEqual(0)
+    expect(action.type).toEqual(ActionTypes.RequestCreateQuery)
+    expect(action.queryFn.toString()).toEqual(wrapQueryFn(queryFn).toString())
   })
 })

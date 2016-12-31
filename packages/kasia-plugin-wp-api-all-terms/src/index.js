@@ -4,12 +4,10 @@ import merge from 'lodash.merge'
 const REQUEST_TERMS = 'kasia/terms/REQUEST_TERMS'
 const RECEIVE_DATA = 'kasia/terms/RECEIVE_DATA'
 
+export default kasiaPluginWpApiAllTerms
+
 export const fetchTerms = () =>
   ({ type: REQUEST_TERMS })
-
-export function makePreloader (WP) {
-  return () => fetchResource(WP, fetchTerms())
-}
 
 function fetch (WP, action) {
   switch (action.type) {
@@ -26,7 +24,7 @@ function * fetchResource (WP, action) {
   yield effects.put({ type: RECEIVE_DATA, request: type, data, id })
 }
 
-export default function (WP, config) {
+function kasiaPluginWpApiAllTerms (WP, config) {
   WP.allTerms = WP.registerRoute(config.route || 'wp/v2', 'all-terms')
 
   return {
@@ -41,5 +39,11 @@ export default function (WP, config) {
         yield fetchResource(WP, action)
       }
     }]
+  }
+}
+
+kasiaPluginWpApiAllTerms.preload = function (WP) {
+  return function * () {
+    yield * fetchResource(WP, fetchTerms())
   }
 }

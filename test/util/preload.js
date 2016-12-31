@@ -1,59 +1,108 @@
-/* global jest:false */
+/* global jest:false, expect:false */
 
 jest.disableAutomock()
 
-import ActionTypes from '../../src/constants/ActionTypes'
-import { ContentTypes } from '../../src/constants/ContentTypes'
-import { fetch } from '../../src/redux/sagas'
+import { join, fork } from 'redux-saga/effects'
+import { createMockTask } from 'redux-saga/utils'
 
-import BuiltInContentType from '../__mocks__/components/BuiltInContentType'
-import BadContentType from '../__mocks__/components/BadContentType'
-import CustomQuery from '../__mocks__/components/CustomQuery'
+import '../__mocks__/WP'
+import { ActionTypes } from '../../src/constants'
+import { fetch } from '../../src/redux/sagas'
+import { preload, preloadQuery } from '../../src/util/preload'
+import { wrapQueryFn } from '../../src/connect'
+
+import ConnectPostC from '../__mocks__/components/BuiltInContentType'
+import ConnectQueryC, { queryFn } from '../__mocks__/components/CustomQuery'
 
 describe('util/preload', () => {
-  describe('connectWpPost', () => {
-    const result = BuiltInContentType.makePreloader({ params: { id: 16 } })
+  describe('#preload', () => {
+    const props = { params: { id: 16 } }
+    const components = [
+      class extends ConnectPostC {}, // test can discover wrapped kasia component
+      ConnectQueryC, // unwrapped kasia component
+      false // test ignores non-component values
+    ]
 
-    it('returns an array', () => {
-      expect(Array.isArray(result)).toEqual(true)
+    let iter
+    let res
+
+    it('throws with bad components', () => {
+      expect(() => preload({}, '')).toThrowError(/Expecting components to be array/)
     })
 
-    it('throws with bad content type', () => {
-      expect(() => BadContentType.makePreloader()).toThrowError(/not recognised/)
+    it('throws with bad renderProps', () => {
+      expect(() => preload([], '')).toThrowError(/Expecting renderProps to be an object/)
     })
 
-    it('returns an array with saga operation', () => {
-      expect(result.length).toEqual(2)
+    it('throws with bad state', () => {
+      expect(() => preload([], {}, '')).toThrowError(/Expecting state to be an object/)
     })
 
-    it('contains fetch saga fn', () => {
-      expect(result[0]).toEqual(fetch)
+    it('returns generator', () => {
+      const actual = preload(components, props)
+
+      iter = actual()
+      res = iter.next()
+
+      expect(typeof actual).toEqual('function')
     })
 
-    it('contains RequestCreatePost action', () => {
-      expect(result[1].type).toEqual(ActionTypes.RequestCreatePost)
-      expect(result[1].contentType).toEqual(ContentTypes.Post)
-      expect(result[1].identifier).toEqual(16)
+    it('that yields fork effect for each component', () => {
+      const wrappedQueryFnStr = wrapQueryFn(queryFn, props).toString()
+
+      expect(res.done).toEqual(false)
+
+      expect(res.value[0].FORK).toBeTruthy()
+      expect(res.value[0]).toEqual(fork(fetch, {
+        type: ActionTypes.RequestCreatePost,
+        id: 0,
+        contentType: 'post',
+        identifier: 16
+      }))
+
+      expect(res.value[1].FORK).toBeTruthy()
+      expect(res.value[1].FORK).toBeTruthy()
+      expect(res.value[1].FORK.args[0].id).toEqual(1)
+      expect(res.value[1].FORK.args[0].type).toEqual(ActionTypes.RequestCreateQuery)
+      expect(res.value[1].FORK.args[0].queryFn.toString()).toEqual(wrappedQueryFnStr)
+    })
+
+    it('that yields join effect', () => {
+      const tasks = [createMockTask(), createMockTask()]
+      expect(iter.next(tasks).value).toEqual(join(...tasks))
+      expect(iter.next().done).toEqual(true)
     })
   })
 
-  describe('connectWpQuery', () => {
-    const result = CustomQuery.makePreloader({ params: { id: 16 } })
+  describe('#preloadQuery', () => {
+    let iter
 
-    it('returns an array', () => {
-      expect(Array.isArray(result)).toEqual(true)
+    it('throws with bad queryFn', () => {
+      expect(() => preloadQuery('')).toThrowError(/Expecting queryFn to be a function/)
     })
 
-    it('returns an array with saga operation', () => {
-      expect(result.length).toEqual(2)
+    it('throws with bad renderProps', () => {
+      expect(() => preloadQuery(() => {}, '')).toThrowError(/Expecting renderProps to be an object/)
     })
 
-    it('contains fetch saga fn', () => {
-      expect(result[0]).toEqual(fetch)
+    it('throws with bad state', () => {
+      expect(() => preloadQuery(() => {}, {}, '')).toThrowError(/Expecting state to be an object/)
     })
 
-    it('contains RequestCreateQuery action', () => {
-      expect(result[1].type).toEqual(ActionTypes.RequestCreateQuery)
+    it('returns generator', () => {
+      expect(typeof preloadQuery(() => {})).toEqual('function')
+    })
+
+    it('yields data from given queryFn', () => {
+      iter = preloadQuery(() => 'mockResult')()
+      expect(iter.next().value).toEqual('mockResult')
+    })
+
+    it('that yields put completeRequest effect', () => {
+      const actual = iter.next('mockResult').value
+      expect(actual.PUT.action.id).toEqual(null)
+      expect(actual.PUT.action.type).toEqual(ActionTypes.RequestComplete)
+      expect(actual.PUT.action.data).toEqual('mockResult')
     })
   })
 })

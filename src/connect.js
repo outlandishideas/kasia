@@ -1,164 +1,132 @@
 import React from 'react'
 
-import { createPostRequest, createQueryRequest, deleteQueries } from './redux/actions'
-import { contentTypesManager, invariants } from './util'
+import debug from './util/debug'
+import contentTypesManager from './util/contentTypesManager'
+import invariants from './invariants'
+import queryCounter from './util/queryCounter'
+import findEntities from './util/findEntities'
+import { createPostRequest, createQueryRequest } from './redux/actions'
 import { fetch } from './redux/sagas'
-import OperationTypes from './constants/OperationTypes'
 
-// Query UID
-let queryId = 0
+const WARN_NO_ENTITIES_PROP = 0
+const WARN_NO_REWIND = 0
 
-/** Find an entity in `entities` with the given `identifier`. */
-function findEntity (entities, identifier) {
-  if (!entities) return {}
-  if (typeof identifier === 'number') return entities[String(identifier)] // Entities keyed by ID
-  const entity = Object.keys(entities).find((key) => entities[key].slug === identifier) // Entities keyed by slug
-  return entity || null
+// Is a component the first Kasia component to mount?
+let firstMount = true
+
+// What have we warned the consumer of?
+let haveWarned = []
+
+export function rewind () {
+  firstMount = true
 }
 
-/** Filter `entities` to contain only those whose ID is in `identifiers`. */
-function findEntities (entities, identifiers) {
-  identifiers = identifiers.map(String)
-
-  const reduced = {}
-
-  for (const entityTypeName in entities) {
-    for (const entityId in entities[entityTypeName]) {
-      if (identifiers.indexOf(entityId) !== -1) {
-        reduced[entityTypeName] = reduced[entityTypeName] || {}
-        reduced[entityTypeName][entityId] = entities[entityTypeName][entityId]
-      }
-    }
-  }
-
-  return reduced
-}
-
-/** Get desired entity identifier. It is either `id` as-is or the result of calling `id` with `props`. */
-function identifier (id, props) {
+/** Get entity identifier: either `id` as-is or the result of calling `id(props)`. */
+export function identifier (displayName, id, props) {
   const realId = typeof id === 'function' ? id(props) : id
-  invariants.isIdentifierValue(realId)
+  invariants.isIdentifierValue(realId, displayName)
   return realId
 }
 
-/**
- * Create a connectWp* decorator Higher Order Component.
- * @private
- * @param {String} operation Operation type, Post or Query
- * @param {Object} makePropsData Function to create partial kasia data object for props
- * @param {Object} makePreloader Function to create preloader saga given component props
- * @param {Object} [contentType] Post content type (Post operation only)
- * @param {Object} [shouldUpdate] Function to determine if query should fire again (Query operation only)
- * @param {Object} [queryFn] Query function (Query operation only)
- * @returns {Function} connectWp* decorator
- */
-export function _makeConnectWpDecorator (operation, {
-  makePropsData,
-  makePreloader,
-  contentType,
-  shouldUpdate,
-  queryFn
-} = {}) {
-  if (!(operation in OperationTypes)) {
-    throw new Error(`Unrecognised operation type "${operation}".`)
-  }
+/** Wrap `queryFn` in a function that takes the node-wpapi instance. */
+export function wrapQueryFn (queryFn, props, state) {
+  return (wpapi) => queryFn(wpapi, props, state)
+}
 
-  return (target) => {
-    const displayName = target.displayName || target.name
+const base = (target) => {
+  const displayName = target.displayName || target.name
 
-    invariants.isNotWrapped(target, displayName)
+  return class extends React.Component {
+    static __kasia__ = true
 
-    return class KasiaIntermediateComponent extends React.Component {
-      static __kasia__ = operation
-      static makePreloader = makePreloader(displayName)
-      static contextTypes = {
-        store: React.PropTypes.object.isRequired
+    static WrappedComponent = target
+
+    static contextTypes = {
+      store: React.PropTypes.object.isRequired
+    }
+
+    _getState () {
+      const state = this.context.store.getState()
+      invariants.hasWordpressObject(state.wordpress)
+      return state
+    }
+
+    /** Make request for new data from WP-API. Allow re-use of `queryId` in case of no query on mount. */
+    _requestWpData (props, queryId) {
+      const action = this._getRequestWpDataAction(props)
+      action.id = queryId
+      this.queryId = queryId
+      this.context.store.dispatch(action)
+    }
+
+    /** Find the query for this component and its corresponding data and return props object containing them. */
+    _reconcileWpData (props) {
+      const query = this._getState().wordpress.queries[this.queryId]
+      const data = this._makePropsData(query, props)
+      const fallbackQuery = { complete: false, OK: null }
+
+      if (query) {
+        invariants.queryHasError(query, displayName)
       }
 
-      constructor (props, context) {
-        super(props, context)
-        this.queryIds = []
-      }
-
-      // ---
-      // UTILITY
-      // ---
-
-      _getState () {
-        return this.context.store.getState()
-      }
-
-      _requestWpData (props) {
-        let action
-
-        if (OperationTypes.Post === operation) {
-          const identifier = identifier(props)
-          action = createPostRequest(contentType, identifier)
-        } else if (OperationTypes.Query === operation) {
-          const wrappedQueryFn = (wpapi) => queryFn(wpapi, props, this._getState())
-          action = createQueryRequest(wrappedQueryFn)
-        }
-
-        this.queryId = queryId++
-        this.queryIds.push(queryId)
-        this.context.store.dispatch(action)
-      }
-
-      _reconcileWpData () {
-        const state = this._getState()
-        const query = state.wordpress.queries[this.queryId]
-        const queryIsOk = query && !query.error
-        const dataKey = OperationTypes.Post === operation ? 'data' : contentType
-
-        if (!queryIsOk && query) {
-          invariants.queryHasError(query, displayName)
-        }
-
-        return {
-          query: queryIsOk ? query : { complete: false, OK: null },
-          [dataKey]: queryIsOk ? makePropsData(state, query) : null
+      const result = {
+        kasia: {
+          query: query || fallbackQuery,
+          [this.dataKey]: data
         }
       }
 
-      // ---
-      // LIFECYCLE
-      // ---
+      debug(`content for ${displayName} on \`props.kasia.${this.dataKey}\``)
 
-      componentWillUnmount () {
-        this.context.store.dispatch(deleteQueries(this.queryIds))
-      }
-
-      componentWillMount () {
-        const state = this._getState().wordpress
-
-        invariants.hasWordpressObject(state)
-
-        if (OperationTypes.Post === operation) {
-          invariants.isValidContentType(contentTypesManager.get(contentType), contentType, displayName)
+      return Object.defineProperty(result, 'entities', {
+        get: () => {
+          if (!haveWarned[WARN_NO_ENTITIES_PROP]) {
+            console.log('[kasia] `props.kasia.entities` is replaced by `props.kasia.data` in v4.')
+            haveWarned[WARN_NO_ENTITIES_PROP] = true
+          }
         }
+      })
+    }
 
-        const query = Object.values(state.queries).find((query) => {
-          return query.prepared && query.id === queryId && query.type === operation
-        })
+    componentWillMount () {
+      const state = this._getState().wordpress
 
-        if (query) {
-          queryId = queryId + 1
-          this.queryId = query.id
-          this.queryIds.push(queryId)
-        } else {
-          this._requestWpData(this.props)
-        }
+      // When doing SSR we need to reset the counter so that components start
+      // at queryId=0, aligned with the preloaders that have been run for them.
+      if (firstMount) {
+        queryCounter.reset()
+        firstMount = false
+      } else if (!state.queries[0] && !haveWarned[WARN_NO_REWIND]) {
+        console.log(
+          '[kasia] query count is not zero-indexed. ' +
+          'Make sure you call rewind() before running preloaders.'
+        )
+        haveWarned[WARN_NO_REWIND] = true
       }
 
-      componentWillReceiveProps (nextProps) {
-        const willUpdate = shouldUpdate(this.props, nextProps, this._reconcileWpData.bind(this))
-        if (willUpdate) this._requestWpData(nextProps)
-      }
+      const queryId = this.queryId = queryCounter.next()
+      const query = state.queries[queryId]
 
-      render () {
-        const props = Object.assign({}, this.props, this._reconcileWpData())
-        return React.createElement(target, props)
+      if (query && query.prepared) {
+        // We found a prepared query matching `queryId` - use it.
+        debug(`found prepared data for ${displayName} at queryId=${queryId}`)
+      } if (!query) {
+        // Request new data and reuse the queryId
+        this._requestWpData(this.props, queryId)
+      } else if (!query.prepared) {
+        // Request new data with new queryId
+        this._requestWpData(this.props, queryCounter.next())
       }
+    }
+
+    componentWillReceiveProps (nextProps) {
+      const willUpdate = this._shouldUpdate(this.props, nextProps)
+      if (willUpdate) this._requestWpData(nextProps, queryCounter.next())
+    }
+
+    render () {
+      const props = Object.assign({}, this.props, this._reconcileWpData(this.props))
+      return React.createElement(target, props)
     }
   }
 }
@@ -193,36 +161,58 @@ export function connectWpPost (contentType, id) {
 
   const typeConfig = contentTypesManager.get(contentType)
 
-  return _makeConnectWpDecorator(OperationTypes.Post, {
-    contentType,
-    id,
+  return (target) => {
+    const displayName = target.displayName || target.name
 
-    /** Produce the component's data object derived from entities in the store. */
-    makePropsData: function postMakePropsData (state) {
-      return findEntity(state.wordpress.entities[typeConfig.plural], id)
-    },
+    invariants.isNotWrapped(target, displayName)
 
-    /** Determine if component should request new data by inspecting current and next props. */
-    shouldUpdate: function postShouldUpdate (thisProps, nextProps, buildProps) {
-      const nextBuiltProps = buildProps(nextProps)
+    return class connectWpPostComponent extends base(target) {
+      constructor (props, context) {
+        super(props, context)
+        this.dataKey = contentType
+      }
 
-      // Make a call to the query function if..
-      return (
-        // ..we cannot find the entity in the store using next props
-        !nextBuiltProps.kasia[typeConfig.name] &&
-        // ..the identifier has changed
-        identifier(id, nextProps) !== identifier(id, thisProps)
-      )
-    },
+      static preload (props) {
+        debug(displayName, 'connectWpPost preload with props:', props)
+        invariants.isValidContentType(typeConfig, contentType, `${displayName} component`)
+        const action = createPostRequest(contentType, identifier(displayName, id, props))
+        action.id = queryCounter.next()
+        return [fetch, action]
+      }
 
-    /** Create a fn that produces the component's preloader. */
-    makePreloader: function postMakePreloader (displayName) {
-      return (renderProps) => {
-        invariants.isValidContentType(typeConfig, contentType, displayName)
-        return [fetch, createPostRequest(contentType, identifier(id, renderProps))]
+      _getRequestWpDataAction (props) {
+        debug(displayName, 'connectWpPost request with props:', props)
+        const realId = identifier(displayName, id, props)
+        return createPostRequest(contentType, realId)
+      }
+
+      _makePropsData (query, props) {
+        if (!query || !query.complete || query.error) return null
+        const realId = identifier(displayName, id, props)
+        const entities = this._getState().wordpress.entities[typeConfig.plural]
+        return entities[realId] || null
+      }
+
+      _shouldUpdate (thisProps, nextProps) {
+        const state = this._getState().wordpress
+        const query = state.queries[this.queryId]
+        const entity = this._makePropsData(query, nextProps)
+
+        // Make a request for new data if..
+        return (
+          // ..we can't find the entity in store using next props
+          !entity &&
+          // ..the identifier has changed
+          identifier(displayName, id, nextProps) !== identifier(displayName, id, thisProps)
+        )
+      }
+
+      componentWillMount () {
+        invariants.isValidContentType(typeConfig, contentType, `${displayName} component`)
+        super.componentWillMount()
       }
     }
-  })
+  }
 }
 
 /**
@@ -264,21 +254,37 @@ export function connectWpQuery (queryFn, shouldUpdate) {
   invariants.isFunction('queryFn', queryFn)
   invariants.isFunction('shouldUpdate', shouldUpdate)
 
-  return _makeConnectWpDecorator(OperationTypes.Query, {
-    queryFn,
-    shouldUpdate,
+  return (target) => {
+    const displayName = target.displayName || target.name
 
-    /** Produce the component's data object derived from entities in the store. */
-    makePropsData: function queryMakePropsData (state, query) {
-      return findEntities(state.wordpress.entities, query.entities)
-    },
+    invariants.isNotWrapped(target, displayName)
 
-    /** Create a fn that produces the component's preloader. */
-    makePreloader: function queryMakePreloader () {
-      return (renderProps, state) => {
-        const realQueryFn = (wpapi) => queryFn(wpapi, renderProps, state)
-        return [fetch, createQueryRequest(realQueryFn)]
+    return class connectWpQueryComponent extends base(target) {
+      constructor (props, context) {
+        super(props, context)
+        this.dataKey = 'data'
+        this._shouldUpdate = shouldUpdate
+      }
+
+      static preload (props, state) {
+        debug(displayName, 'connectWpQuery preload with props:', props, 'state:', state)
+        const wrappedQueryFn = wrapQueryFn(queryFn, props, state)
+        const action = createQueryRequest(wrappedQueryFn)
+        action.id = queryCounter.next()
+        return [fetch, action]
+      }
+
+      _getRequestWpDataAction (props) {
+        debug(displayName, 'connectWpQuery request with props:', props)
+        const wrappedQueryFn = wrapQueryFn(queryFn, props, this._getState())
+        return createQueryRequest(wrappedQueryFn)
+      }
+
+      _makePropsData (query) {
+        if (!query || !query.complete || query.error) return {}
+        const state = this._getState().wordpress
+        return findEntities(state.entities, state.keyEntitiesBy, query.entities)
       }
     }
-  })
+  }
 }

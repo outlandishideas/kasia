@@ -1,50 +1,33 @@
 import { Schema, arrayOf } from 'normalizr'
 
-import { ContentTypes, ContentTypesPlural } from '../constants/ContentTypes'
+import { ContentTypes, ContentTypesPlural } from '../constants'
 
-const schemasManager = {}
+const schemasManager = { __flush__, getAll, createSchema, init }
 
 export default schemasManager
 
-/**
- * Schema object cache, populated in `makeSchemas`.
- * @type {Object}
- */
+/** Schema object cache, populated in `makeSchemas`. */
 let schemas
 
-/**
- * Individual schema definitions, defined like this so we can reference one from another.
- * @tpe {Schema}
- */
+/** Individual schema definitions, defined like this so we can reference one from another. */
 let categorySchema, mediaSchema, pageSchema, postSchema, revisionSchema, tagSchema, userSchema,
   commentSchema, postTypeSchema, postStatusSchema, taxonomySchema
 
-/**
- * Invalidate the schema object cache.
- */
-schemasManager.__flush__ = function schemasManagerFlush () {
+/** Invalidate the schema object cache. */
+function __flush__ () {
   schemas = null
 }
 
-/**
- * Get the schema object cache.
- * @returns {Object} Schema object cache
- */
-schemasManager.getSchemas = function schemasManagerGetSchemas () {
+/** Get the schema object cache. */
+function getAll () {
   return schemas
 }
 
-/**
- * Create a custom schema definition (for custom content types).
- * @param {String} name Name of the schema
- * @param {String} idAttribute The key of an entity used to identify it
- * @returns {Schema} Schema instance
- */
-schemasManager.createSchema = function schemasManagerCreateSchema (name, idAttribute) {
+/** Create a custom schema definition (for custom content types). */
+function createSchema (name, idAttribute) {
   if (!schemas) {
     throw new Error('createSchema called before schema cache populated, call makeSchemas first.')
   } else if (typeof name !== 'string') {
-    console.log(name)
     throw new Error(`Expecting name to be a string, got "${typeof name}".`)
   } else if (typeof idAttribute !== 'string') {
     throw new Error(`Expecting idAttribute to be a string, got "${typeof idAttribute}".`)
@@ -61,12 +44,8 @@ schemasManager.createSchema = function schemasManagerCreateSchema (name, idAttri
   return contentTypeSchema
 }
 
-/**
- * Populate the cache of schemas for built-in content types.
- * @param {String} idAttribute The key of an entity used to identify it
- * @returns {Object} Schema cache
- */
-schemasManager.init = function schemasManagerInit (idAttribute) {
+/** Populate the cache of schemas for built-in content types. */
+function init (idAttribute) {
   if (typeof idAttribute !== 'string') {
     throw new Error(`Expecting idAttribute to be a string, got "${typeof idAttribute}".`)
   }

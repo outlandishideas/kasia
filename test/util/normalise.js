@@ -1,10 +1,12 @@
-/* global jest:false */
+/* global jest:false, expect:false */
 
 jest.disableAutomock()
 
 import '../__mocks__/WP'
-import { ContentTypes } from '../../src/constants/ContentTypes'
-import { normalise, schemasManager, contentTypesManager } from '../../src/util'
+import normalise from '../../src/util/normalise'
+import contentTypesManager from '../../src/util/contentTypesManager'
+import schemasManager from '../../src/util/schemasManager'
+import { ContentTypes } from '../../src/constants'
 
 function setup () {
   const testKeyById = true

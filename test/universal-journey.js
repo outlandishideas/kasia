@@ -1,133 +1,201 @@
-/* global jest:false, module:false */
+/* global jest:false, expect:false */
 
 jest.disableAutomock()
 
+// we mock queryBuilder after imports
+// we need to mock client and server environments
+jest.mock('is-node-fn')
+
 import React from 'react'
 import createSagaMiddleware from 'redux-saga'
-import * as effects from 'redux-saga/effects'
-import { createStore, applyMiddleware, compose, combineReducers } from 'redux'
+import isNode from 'is-node-fn'
+import Wpapi from 'wpapi'
+import { put } from 'redux-saga/effects'
+import { createStore as _createStore, applyMiddleware, compose, combineReducers } from 'redux'
 import { mount } from 'enzyme'
 
 import './__mocks__/WP'
-import { ContentTypes } from '../src/constants/ContentTypes'
+import kasia from '../src'
+import queryCounter from '../src/util/queryCounter'
+import schemasManager from '../src/util/schemasManager'
+import { ActionTypes } from '../src/constants'
 import { fetch } from '../src/redux/sagas'
-import { completeRequest as _completeRequest } from '../src/redux/actions'
-import ActionTypes from '../src/constants/ActionTypes'
-import makeReducer from '../src/redux/reducer'
-import BuiltInContentType from './__mocks__/components/BuiltInContentType'
 
-function setup () {
-  const renderProps = { params: { id: 0 } }
+import BuiltInContentType from './__mocks__/components/BuiltInContentType'
+import initialState from './__mocks__/states/initial'
+import post from './__fixtures__/wp-api-responses/post'
+
+const post1 = post
+const post2 = Object.assign({}, post, { id: 17, slug: 'post-2', title: { rendered: 'Post 2' } })
+const post3 = Object.assign({}, post, { id: 18, slug: 'post-3', title: { rendered: 'Post 3' } })
+
+// post to return from queryFn
+let returnPost
+
+// we need to mock responses from WP-API
+jest.mock('../src/util/queryBuilder', () => ({
+  buildQueryFunction: () => () => new Promise((resolve) => {
+    setTimeout(() => resolve(returnPost))
+  })
+}))
+
+function setup (keyEntitiesBy) {
+  const { kasiaReducer, kasiaSagas } = kasia({
+    wpapi: new Wpapi({ endpoint: '123' }),
+    keyEntitiesBy
+  })
 
   const sagaMiddleware = createSagaMiddleware()
+  const createStore = compose(applyMiddleware(sagaMiddleware))(_createStore)
+  const store = createStore(combineReducers(kasiaReducer), initialState(keyEntitiesBy))
+  const runSaga = sagaMiddleware.run
 
-  const _createStore = compose(
-    applyMiddleware(sagaMiddleware)
-  )(createStore)
+  sagaMiddleware.run(function * () {
+    yield kasiaSagas
+  })
 
-  const reducer = combineReducers(makeReducer(
-    { keyEntitiesBy: 'id' },
-    { reducers: {} }
-  ))
-
-  const store = _createStore(reducer, {})
-
-  return { sagaMiddleware, store, renderProps }
-}
-
-function fixtures () {
-  return {
-    expectedAction: {
-      contentType: ContentTypes.Post,
-      identifier: 0,
-      target: 'BuiltInContentType',
-      type: ActionTypes.RequestCreatePost
-    },
-    postJson1: {
-      id: 0,
-      title: 'Post Title 1',
-      type: 'post'
-    },
-    postJson2: {
-      id: 1,
-      title: 'Post Title 2',
-      type: 'post'
-    }
-  }
+  return { store, runSaga }
 }
 
 describe('Universal journey', function () {
-  const { sagaMiddleware, store, renderProps } = setup()
-  const { expectedAction, postJson1, postJson2 } = fixtures()
+  ['id', 'slug'].forEach((keyEntitiesBy) => {
+    describe('keyEntitiesBy = ' + keyEntitiesBy, () => {
+      let rendered
+      let preloader
+      let action
+      let iter
+      let store
+      let runSaga
 
-  let id = 0
+      beforeAll(() => {
+        schemasManager.__flush__()
 
-  function completeRequest (id, data, target = null) {
-    return sagaMiddleware.run(function * () {
-      yield effects.put(_completeRequest(id, data))
-    }).done
-  }
+        const s = setup(keyEntitiesBy)
+        store = s.store
+        runSaga = s.runSaga
+      })
 
-  let rendered
-  let preloader
+      it('SERVER', () => {
+        queryCounter.reset()
+        isNode.mockReturnValue(true)
+        returnPost = post1
+      })
 
-  // Server
+      it('  should have a preload static method', () => {
+        expect(typeof BuiltInContentType.preload).toEqual('function')
+      })
 
-  it('should have a makePreloader static method', () => {
-    expect(typeof BuiltInContentType.makePreloader).toEqual('function')
-  })
+      it('  ...that returns a preloader operation array', () => {
+        const renderProps = { params: { [keyEntitiesBy]: post1[keyEntitiesBy] } }
+        preloader = BuiltInContentType.preload(renderProps)
+        expect(Array.isArray(preloader)).toEqual(true)
+      })
 
-  it('that returns a preloader operation array', () => {
-    preloader = BuiltInContentType.makePreloader(renderProps)
-    expect(Array.isArray(preloader)).toEqual(true)
-  })
+      it('  ...that contains a saga function and action object', () => {
+        action = {
+          id: 0,
+          type: ActionTypes.RequestCreatePost,
+          identifier: post1[keyEntitiesBy],
+          contentType: 'post'
+        }
+        expect(preloader[0]).toEqual(fetch)
+        expect(preloader[1]).toEqual(action)
+        iter = fetch(action)
+      })
 
-  it('that contains a saga function and action object', () => {
-    expect(preloader[0]).toEqual(fetch)
-    expect(preloader[1]).toEqual(expectedAction)
-  })
+      it('  should run preloader', () => {
+        // acknowledge request
+        const ackAction = {
+          id: 0,
+          type: ActionTypes.AckRequest,
+          identifier: post1[keyEntitiesBy],
+          contentType: 'post'
+        }
+        const actual1 = iter.next().value
+        const expected1 = put(ackAction)
+        expect(actual1).toEqual(expected1)
+        return runSaga(fetch, action).done
+      })
 
-  it('that when run updates number of prepared queries', () => {
-    return completeRequest(id, postJson1, 'BuiltInContentType').then(() => {
-      expect(store.getState().wordpress.__kasia__.numPreparedQueries).toEqual(1)
+      it(`  should have entity keyed by ${keyEntitiesBy} on store`, () => {
+        const actual = store.getState().wordpress.entities.posts[post1[keyEntitiesBy]]
+        expect(actual).toEqual(post1)
+      })
+
+      it('  should render the prepared data on server', () => {
+        kasia.rewind()
+        const params = { [keyEntitiesBy]: post1[keyEntitiesBy] }
+        rendered = mount(<BuiltInContentType params={params} />, { context: { store } })
+        expect(rendered.html()).toEqual('<div>Architecto enim omnis repellendus</div>')
+      })
+
+      it('CLIENT', () => {
+        // imitate client
+        queryCounter.reset()
+        isNode.mockReturnValue(false)
+        returnPost = post2
+      })
+
+      it('  should render the prepared query data on client', () => {
+        const params = { [keyEntitiesBy]: post1[keyEntitiesBy] }
+        rendered = mount(<BuiltInContentType params={params} />, { context: { store } })
+        expect(rendered.html()).toEqual('<div>Architecto enim omnis repellendus</div>')
+      })
+
+      it('  should render loading text when props change', () => {
+        const props = { params: { [keyEntitiesBy]: post2[keyEntitiesBy] } }
+        rendered.setProps(props) // implicit update
+        expect(rendered.html()).toEqual('<div>Loading...</div>')
+      })
+
+      it('  should make a non-prepared query on props change', () => {
+        const query = store.getState().wordpress.queries[1]
+        expect(typeof query).toEqual('object')
+        expect(query.prepared).toEqual(false)
+        expect(query.complete).toEqual(false)
+      })
+
+      it('  should display new post title', (done) => {
+        // allow fetch saga to complete
+        // todo surely a better way to do this?
+        setTimeout(() => {
+          try {
+            const query = store.getState().wordpress.queries[1]
+            expect(query.complete).toEqual(true)
+            expect(rendered.update().html()).toEqual('<div>Post 2</div>')
+            done()
+          } catch (err) {
+            done(err)
+          }
+        }, 100)
+      })
+
+      it('  can make another non-prepared query', (done) => {
+        returnPost = post3
+
+        // change props
+        const props = { params: { [keyEntitiesBy]: post3[keyEntitiesBy] } }
+        rendered.setProps(props)
+        expect(rendered.html()).toEqual('<div>Loading...</div>')
+
+        // check query is acknowledged
+        const query = store.getState().wordpress.queries[2]
+        expect(typeof query).toEqual('object')
+        expect(query.prepared).toEqual(false)
+        expect(query.complete).toEqual(false)
+
+        // check renders new data
+        setTimeout(() => {
+          try {
+            const query = store.getState().wordpress.queries[2]
+            expect(query.complete).toEqual(true)
+            expect(rendered.update().html()).toEqual('<div>Post 3</div>')
+            done()
+          } catch (err) {
+            done(err)
+          }
+        }, 100)
+      })
     })
-  })
-
-  it('should render the prepared query data on server', () => {
-    rendered = mount(<BuiltInContentType params={{ id: postJson1.id }} />, { context: { store } })
-    expect(rendered.html()).toEqual(`<div>${postJson1.title}</div>`)
-  })
-
-  it('should not subtract from remaining number of prepared queries', () => {
-    expect(store.getState().wordpress.__kasia__.numPreparedQueries).toEqual(1)
-  })
-
-  // Client
-
-  it('should render the prepared query data on client', () => {
-    rendered = mount(
-      <BuiltInContentType params={{ id: postJson1.id }} />,
-      { context: { store } }
-    )
-    expect(rendered.html()).toEqual(`<div>${postJson1.title}</div>`)
-  })
-
-  it('should subtract from the remaining number of prepared queries', () => {
-    expect(store.getState().wordpress.__kasia__.numPreparedQueries).toEqual(0)
-  })
-
-  it('should make a non-prepared query on props change', () => {
-    return completeRequest(++id, postJson2).then(() => {
-      const state = store.getState().wordpress
-
-      rendered.setProps({ params: { id: 1 } })
-
-      expect(state.__kasia__.numPreparedQueries).toEqual(0)
-      expect(Object.keys(state.queries)).toContain(String(id))
-    })
-  })
-
-  it('should render result of the non-prepared query', () => {
-    expect(rendered.html()).toEqual(`<div>${postJson2.title}</div>`)
   })
 })

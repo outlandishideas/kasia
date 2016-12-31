@@ -6,18 +6,16 @@ import React, { Component } from 'react'
 
 import { connectWpQuery } from '../../../src/connect'
 
-@connectWpQuery((wpapi, props) => wpapi.books(props.params.id).get(), () => true)
-export default class Books extends Component {
+export const queryFn = (wpapi, props) => {
+  return wpapi.books(props.params.id).get()
+}
+
+export const target = class extends Component {
   render () {
-    const {
-      query,
-      entities: { books }
-    } = this.props.kasia
-
-    if (!query.complete) {
-      return <div>Loading...</div>
-    }
-
+    const { query, data: { books } } = this.props.kasia
+    if (!query.complete || !query.OK) return <div>Loading...</div>
     return <div>{books[this.props.params.id].slug}</div>
   }
 }
+
+export default connectWpQuery(queryFn, () => true)(target)

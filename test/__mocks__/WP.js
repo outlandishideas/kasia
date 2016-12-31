@@ -2,6 +2,8 @@
 
 import { setWP } from '../../src/wpapi'
 
-setWP({
+export const wpapi = {
   registerRoute: jest.fn()
-})
+}
+
+export default setWP(wpapi)
