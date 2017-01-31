@@ -34,7 +34,6 @@
   "bugs": "https://github.com/outlandishideas/kasia/issues",
   "homepage": "https://github.com/outlandishideas/kasia#readme",
   "dependencies": {
-    "coveralls": "^2.11.15",
     "humps": "^2.0.0",
     "is-node-fn": "^1.0.0",
     "lodash.merge": "^4.3.5",
