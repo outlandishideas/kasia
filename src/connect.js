@@ -17,6 +17,7 @@ let firstMount = true
 // What have we warned the consumer of?
 let haveWarned = []
 
+/** Reset first mount flag, should be called before SSR of each request. */
 export function rewind () {
   firstMount = true
 }
@@ -90,18 +91,22 @@ const base = (target) => {
 
     componentWillMount () {
       const state = this._getState().wordpress
+      const numQueries = Object.keys(state.queries).length - 1
+      const nextCounterIndex = queryCounter.current() + 1
+
+      if (numQueries > nextCounterIndex && !haveWarned[WARN_NO_REWIND]) {
+        console.log(
+          '[kasia] the query counter and queries in the store are not in sync. ' +
+          'This may be because you are not calling `kasia.rewind()` before running preloaders.'
+        )
+        haveWarned[WARN_NO_REWIND] = true
+      }
 
       // When doing SSR we need to reset the counter so that components start
       // at queryId=0, aligned with the preloaders that have been run for them.
       if (firstMount) {
         queryCounter.reset()
         firstMount = false
-      } else if (!state.queries[0] && !haveWarned[WARN_NO_REWIND]) {
-        console.log(
-          '[kasia] query count is not zero-indexed. ' +
-          'Make sure you call rewind() before running preloaders.'
-        )
-        haveWarned[WARN_NO_REWIND] = true
       }
 
       const queryId = this.queryId = queryCounter.next()

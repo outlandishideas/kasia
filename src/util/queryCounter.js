@@ -1,6 +1,9 @@
 let queryId = -1
 
 export default {
+  current () {
+    return queryId
+  },
   reset () {
     queryId = -1
   },

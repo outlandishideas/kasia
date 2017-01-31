@@ -67,15 +67,15 @@ describe('Universal journey', function () {
       let store
       let runSaga
 
-      beforeAll(() => {
-        schemasManager.__flush__()
-
+      function newStore () {
         const s = setup(keyEntitiesBy)
         store = s.store
         runSaga = s.runSaga
-      })
+      }
 
       it('SERVER', () => {
+        schemasManager.__flush__()
+        newStore() // we would create new store for each request
         queryCounter.reset()
         isNode.mockReturnValue(true)
         returnPost = post1
