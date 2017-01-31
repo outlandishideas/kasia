@@ -11,7 +11,7 @@
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "example:simple": "node examples/server.js",
-    "prepublish": "in-publish && npm run lint && npm run test && npm run build"
+    "prepublishOnly": "in-publish && npm run lint && npm run test && npm run build"
   },
   "repository": {
     "type": "git",
