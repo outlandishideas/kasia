@@ -1,0 +1,40 @@
+{
+  "name": "kasia-plugin-wp-api-response-modify",
+  "version": "4.0.0",
+  "description": "Apply wp-api-response-modify to Kasia",
+  "main": "index.js",
+  "scripts": {
+    "lint": "standard index.js",
+    "prepublish": "npm run lint"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/outlandishideas/kasia-plugin-wp-api-response-modify.git"
+  },
+  "keywords": [
+    "javascript",
+    "react",
+    "redux",
+    "wordpress",
+    "word",
+    "press",
+    "wp-api",
+    "wordpress",
+    "api",
+    "response",
+    "modify",
+    "kasia"
+  ],
+  "author": "Outlandish <hello@outlandish.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/outlandishideas/kasia-plugin-wp-api-response-modify/issues"
+  },
+  "homepage": "https://github.com/outlandishideas/kasia-plugin-wp-api-response-modify#readme",
+  "dependencies": {
+    "wp-api-response-modify": "^2.0.0"
+  },
+  "devDependencies": {
+    "standard": "^7.0.0"
+  }
+}

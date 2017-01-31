@@ -1,5 +1,18 @@
 # Kasia Changelog
 
+- __v4.0.0__
+
+  - [BREAKING] WP API responses no longer modified by `wp-api-response-modify` by default. Functionality moved into [`kasia-plugin-wp-api-response-modify`](https://github.com/outlandishideas/kasia/tree/master/packages/kasia-plugin-wp-api-response-modify) plugin.
+  - [BREAKING] Structure of `props.kasia` object changed: `entities` key is now `data`. This is to ready the library for [#30](https://github.com/outlandishideas/kasia/issues/30), where query result may not be a normalised collection of entities.
+  - [BREAKING] `shouldUpdate` function is mandatory for `connectWpQuery` decorator. 
+  - [BREAKING] `WP` config option is now `wpapi`.
+  - [BREAKING] Preloaders renamed and fn signatures changes (see docs). `makePostPreloaderSaga` removed, use `preloadQuery` instead.
+  - Provide stack trace for captured query errors. ([#37](https://github.com/outlandishideas/kasia/issues/37))
+  - Plugins can intercept native reducers, e.g. `kasia-plugin-wp-api-response-modify`. ([#40](https://github.com/outlandishideas/kasia/issues/40))
+  - `prepublish` scripts not run on `npm install`. ([#28](https://github.com/outlandishideas/kasia/issues/28))
+  - Added `debug` config option, if true lib logs useful lifecycle information to the console.
+  - Big refactor of library to make codebase more maintainable, manageable.
+
 - __v3.2.0__ - _23/09/16_
 
     - Implemented safer internal query reconciliation logic such that prepared queries 

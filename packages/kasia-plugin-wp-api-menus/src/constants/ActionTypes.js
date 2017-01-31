@@ -1,0 +1,7 @@
+export default {
+  REQUEST_MENUS: 'kasia/menus/REQUEST_MENUS',
+  REQUEST_MENU: 'kasia/menus/REQUEST_MENU',
+  REQUEST_LOCATIONS: 'kasia/menus/REQUEST_LOCATIONS',
+  REQUEST_LOCATION: 'kasia/menus/REQUEST_LOCATION',
+  RECEIVE_DATA: 'kasia/menus/RECEIVE_DATA'
+}
