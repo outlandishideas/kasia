@@ -25,6 +25,18 @@
 
 <hr/>
 
+:sparkles: We welcome contributors!
+
+:vertical_traffic_light: Issues are triaged using a traffic light system:
+
+&nbsp;&nbsp;&nbsp;![#00ff00](http://placehold.it/15/00ff00/000000?text=+) <strong>[small](https://github.com/outlandishideas/kasia/issues?q=is%3Aopen+is%3Aissue+label%3Asmall)</strong> - quick tasks, great for beginner contributors<br/>
+&nbsp;&nbsp;&nbsp;![#ffff00](http://placehold.it/15/ffff00/000000?text=+) <strong><span style="color: yellow;">[medium](https://github.com/outlandishideas/kasia/issues?q=is%3Aopen+is%3Aissue+label%3Amedium)</span></strong> - tasks with increased complexity, may take some time to implement<br/>
+&nbsp;&nbsp;&nbsp;![#ff0000](http://placehold.it/15/ff0000/000000?text=+) <strong>[large](https://github.com/outlandishideas/kasia/issues?q=is%3Aopen+is%3Aissue+label%3Alarge)</strong> - big tasks that touch many parts of the library, will require commitment
+
+[Get started contributing here.](https://github.com/outlandishideas/kasia/issues)
+
+<hr/>
+
 Get data from WordPress and into components with ease...
 
 ```js
@@ -44,17 +56,6 @@ export default class extends React.Component () {
 }
 ```
 
-<hr/>
-
-:sparkles: We welcome contributors!
-
-:vertical_traffic_light: Issues are triaged using a traffic light system:
-
-&nbsp;&nbsp;&nbsp;![#00ff00](http://placehold.it/15/00ff00/000000?text=+) <strong>[small](https://github.com/outlandishideas/kasia/issues?q=is%3Aopen+is%3Aissue+label%3Asmall)</strong> - quick tasks, great for beginner contributors<br/>
-&nbsp;&nbsp;&nbsp;![#ffff00](http://placehold.it/15/ffff00/000000?text=+) <strong><span style="color: yellow;">[medium](https://github.com/outlandishideas/kasia/issues?q=is%3Aopen+is%3Aissue+label%3Amedium)</span></strong> - tasks with increased complexity, may take some time to implement<br/>
-&nbsp;&nbsp;&nbsp;![#ff0000](http://placehold.it/15/ff0000/000000?text=+) <strong>[large](https://github.com/outlandishideas/kasia/issues?q=is%3Aopen+is%3Aissue+label%3Alarge)</strong> - big tasks that touch many parts of the library, will require commitment
-
-[Get started contributing here.](https://github.com/outlandishideas/kasia/issues)
 
 ## Features
 
