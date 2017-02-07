@@ -66,8 +66,6 @@ export default class extends React.Component () {
 - Support for universal applications.
 - Support for plugins, e.g. [`wp-api-menus`](https://github.com/outlandishideas/kasia-plugin-wp-api-menus).
 
-Check out the [Kasia boilerplate](https://github.com/outlandishideas/kasia-boilerplate)!
-
 ## Glossary
 
 - [Requirements](#requirements)
