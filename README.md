@@ -273,7 +273,7 @@ export default connectWpPost(Page, (props) => props.params.slug)(Post)
 Connect a component to the result of an arbitrary WP-API query. Query is always made with `?embed` query parameter.
 
 - __queryFn__ {Function} Function that accepts args `wpapi`, `props`, `state` and should return a WP-API query
-- __shouldUpdate__ {Function} Called on `componentWillReceiveProps`, return true to run query again
+- __shouldUpdate__ {Function} Called on `componentWillReceiveProps` with args `thisProps`, `nextProps`, `state`
 
 Returns a connected component.
 

@@ -1,4 +1,5 @@
 import React from 'react'
+import { connect as reduxConnect } from 'react-redux'
 
 import debug from './util/debug'
 import contentTypesManager from './util/contentTypesManager'
@@ -34,10 +35,18 @@ export function wrapQueryFn (queryFn, props, state) {
   return (wpapi) => queryFn(wpapi, props, state)
 }
 
+/** Wrap component in react-redux connect. */
+function connect (cls) {
+  return reduxConnect(({ wordpress }) => {
+    invariants.hasWordpressObject(wordpress)
+    return { wordpress }
+  })(cls)
+}
+
 const base = (target) => {
   const displayName = target.displayName || target.name
 
-  return class extends React.Component {
+  return class KasiaConnectedComponent extends React.Component {
     static __kasia__ = true
 
     static WrappedComponent = target
@@ -46,23 +55,17 @@ const base = (target) => {
       store: React.PropTypes.object.isRequired
     }
 
-    _getState () {
-      const state = this.context.store.getState()
-      invariants.hasWordpressObject(state.wordpress)
-      return state
-    }
-
-    /** Make request for new data from WP-API. Allow re-use of `queryId` in case of no query on mount. */
+    /** Make request for new data from WP-API. */
     _requestWpData (props, queryId) {
       const action = this._getRequestWpDataAction(props)
       action.id = queryId
       this.queryId = queryId
-      this.context.store.dispatch(action)
+      this.props.dispatch(action)
     }
 
     /** Find the query for this component and its corresponding data and return props object containing them. */
     _reconcileWpData (props) {
-      const query = this._getState().wordpress.queries[this.queryId]
+      const query = this.props.wordpress.queries[this.queryId]
       const data = this._makePropsData(query, props)
       const fallbackQuery = { complete: false, OK: null }
 
@@ -90,7 +93,7 @@ const base = (target) => {
     }
 
     componentWillMount () {
-      const state = this._getState().wordpress
+      const state = this.props.wordpress
       const numQueries = Object.keys(state.queries).length - 1
       const nextCounterIndex = queryCounter.current() + 1
 
@@ -125,7 +128,7 @@ const base = (target) => {
     }
 
     componentWillReceiveProps (nextProps) {
-      const willUpdate = this._shouldUpdate(this.props, nextProps)
+      const willUpdate = this._shouldUpdate(this.props, nextProps, this.context.store.getState())
       if (willUpdate) this._requestWpData(nextProps, queryCounter.next())
     }
 
@@ -171,7 +174,7 @@ export function connectWpPost (contentType, id) {
 
     invariants.isNotWrapped(target, displayName)
 
-    return class connectWpPostComponent extends base(target) {
+    class KasiaConnectWpPostComponent extends base(target) {
       constructor (props, context) {
         super(props, context)
         this.dataKey = contentType
@@ -194,18 +197,17 @@ export function connectWpPost (contentType, id) {
       _makePropsData (query, props) {
         if (!query || !query.complete || query.error) return null
         const realId = identifier(displayName, id, props)
-        const entities = this._getState().wordpress.entities[typeConfig.plural]
+        const entities = this.props.wordpress.entities[typeConfig.plural]
         return entities[realId] || null
       }
 
       _shouldUpdate (thisProps, nextProps) {
-        const state = this._getState().wordpress
-        const query = state.queries[this.queryId]
+        const query = this.props.wordpress.queries[this.queryId]
         const entity = this._makePropsData(query, nextProps)
 
         // Make a request for new data if..
         return (
-          // ..we can't find the entity in store using next props
+          // ..we can't find entity in store using next props
           !entity &&
           // ..the identifier has changed
           identifier(displayName, id, nextProps) !== identifier(displayName, id, thisProps)
@@ -217,6 +219,8 @@ export function connectWpPost (contentType, id) {
         super.componentWillMount()
       }
     }
+
+    return connect(KasiaConnectWpPostComponent)
   }
 }
 
@@ -264,7 +268,7 @@ export function connectWpQuery (queryFn, shouldUpdate) {
 
     invariants.isNotWrapped(target, displayName)
 
-    return class connectWpQueryComponent extends base(target) {
+    class KasiaConnectWpQueryComponent extends base(target) {
       constructor (props, context) {
         super(props, context)
         this.dataKey = 'data'
@@ -281,15 +285,17 @@ export function connectWpQuery (queryFn, shouldUpdate) {
 
       _getRequestWpDataAction (props) {
         debug(displayName, 'connectWpQuery request with props:', props)
-        const wrappedQueryFn = wrapQueryFn(queryFn, props, this._getState())
+        const wrappedQueryFn = wrapQueryFn(queryFn, props, this.context.store.getState())
         return createQueryRequest(wrappedQueryFn)
       }
 
       _makePropsData (query) {
         if (!query || !query.complete || query.error) return {}
-        const state = this._getState().wordpress
+        const state = this.props.wordpress
         return findEntities(state.entities, state.keyEntitiesBy, query.entities)
       }
     }
+
+    return connect(KasiaConnectWpQueryComponent)
   }
 }

@@ -1,4 +1,4 @@
-export default (keyEntitiesBy) => ({
+export default (keyEntitiesBy = 'id') => ({
   wordpress: {
     keyEntitiesBy,
     queries: {},

@@ -8,6 +8,7 @@ const post2 = Object.assign({}, postJson, {
 
 export default {
   wordpress: {
+    keyEntitiesBy: 'id',
     queries: {},
     entities: {
       posts: {
