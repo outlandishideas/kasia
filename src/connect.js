@@ -10,7 +10,7 @@ import { createPostRequest, createQueryRequest } from './redux/actions'
 import { fetch } from './redux/sagas'
 
 const WARN_NO_ENTITIES_PROP = 0
-const WARN_NO_REWIND = 0
+const WARN_NO_REWIND = 1
 
 // Is a component the first Kasia component to mount?
 let firstMount = true
