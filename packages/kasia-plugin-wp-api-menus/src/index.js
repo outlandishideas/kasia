@@ -53,9 +53,7 @@ function fetch (WP, action) {
     case ActionTypes.REQUEST_MENUS:
       return WP.menus().get()
     case ActionTypes.REQUEST_LOCATION:
-      return typeof action.id === 'string'
-        ? WP.locations().slug(action.id).get()
-        : WP.locations().id(action.id).get()
+      return WP.locations().id(action.id).get()
     case ActionTypes.REQUEST_LOCATIONS:
       return WP.locations().get()
     default:
