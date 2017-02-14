@@ -41,7 +41,7 @@ Get data from WordPress and into components with ease...
 
 ```js
 // e.g. Get a post by its slug
-@connectWpPost('Post', 'spongebob-squarepants')
+@connectWpPost('post', 'spongebob-squarepants')
 export default class extends React.Component () {
   render () {
     const { post: spongebob } = this.props.kasia
@@ -273,7 +273,7 @@ export default connectWpPost(Page, (props) => props.params.slug)(Post)
 Connect a component to the result of an arbitrary WP-API query. Query is always made with `?embed` query parameter.
 
 - __queryFn__ {Function} Function that accepts args `wpapi`, `props`, `state` and should return a WP-API query
-- __shouldUpdate__ {Function} Called on `componentWillReceiveProps`, return true to run query again
+- __shouldUpdate__ {Function} Called on `componentWillReceiveProps` with args `thisProps`, `nextProps`, `state`
 
 Returns a connected component.
 

@@ -79,7 +79,7 @@ export function completeReducer (normalise) {
       normalise(action.data)
     )
 
-    // The action id would be null the preloadQuery method has initiated
+    // The action id would be null if the preloadQuery method has initiated
     // the completeRequest action as they do not need a query in the store
     // (there is no component to pick it up).
     if (typeof action.id === 'number') {

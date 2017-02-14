@@ -13,7 +13,7 @@
   - Added `debug` config option, if true lib logs useful lifecycle information to the console.
   - Big refactor of library to make codebase more maintainable, manageable.
   
-  ---
+---
 
 - __v3.2.0__ - _23/09/16_
 
