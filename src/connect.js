@@ -65,8 +65,8 @@ const base = (target) => {
 
     /** Find the query for this component and its corresponding data and return props object containing them. */
     _reconcileWpData (props) {
-      const query = this.props.wordpress.queries[this.queryId]
-      const data = this._makePropsData(query, props)
+      const query = this._query()
+      const data = this._makePropsData(props)
       const fallbackQuery = { complete: false, OK: null }
 
       if (query) {
@@ -92,6 +92,10 @@ const base = (target) => {
       })
     }
 
+    _query () {
+      return this.props.wordpress.queries[this.queryId]
+    }
+
     componentWillMount () {
       const state = this.props.wordpress
       const numQueries = Object.keys(state.queries).length - 1
@@ -115,16 +119,12 @@ const base = (target) => {
       const queryId = this.queryId = queryCounter.next()
       const query = state.queries[queryId]
 
-      if (query && query.prepared) {
-        // We found a prepared query matching `queryId` - use it.
-        debug(`found prepared data for ${displayName} at queryId=${queryId}`)
-      } if (!query) {
-        // Request new data and reuse the queryId
-        this._requestWpData(this.props, queryId)
-      } else if (!query.prepared) {
-        // Request new data with new queryId
-        this._requestWpData(this.props, queryCounter.next())
-      }
+      // We found a prepared query matching `queryId` - use it.
+      if (query && query.prepared) debug(`found prepared data for ${displayName} at queryId=${queryId}`)
+      // Did not find prepared query so request new data and reuse the queryId
+      else if (!query) this._requestWpData(this.props, queryId)
+      // Request new data with new queryId
+      else if (!query.prepared) this._requestWpData(this.props, queryCounter.next())
     }
 
     componentWillReceiveProps (nextProps) {
@@ -194,24 +194,27 @@ export function connectWpPost (contentType, id) {
         return createPostRequest(contentType, realId)
       }
 
-      _makePropsData (query, props) {
+      _makePropsData (props) {
+        const query = this._query()
+
         if (!query || !query.complete || query.error) return null
-        const realId = identifier(displayName, id, props)
+
         const entities = this.props.wordpress.entities[typeConfig.plural]
-        return entities[realId] || null
+        const keys = Object.keys(entities)
+        const realId = identifier(displayName, id, props)
+
+        for (let i = 0, len = keys.length; i < len; i++) {
+          const entity = entities[keys[i]]
+          if (entity.id === realId || entity.slug === realId) return entity
+        }
+
+        return null
       }
 
       _shouldUpdate (thisProps, nextProps) {
-        const query = this.props.wordpress.queries[this.queryId]
-        const entity = this._makePropsData(query, nextProps)
-
-        // Make a request for new data if..
-        return (
-          // ..we can't find entity in store using next props
-          !entity &&
-          // ..the identifier has changed
-          identifier(displayName, id, nextProps) !== identifier(displayName, id, thisProps)
-        )
+        // Make a request for new data if entity not in store or the identifier has changed
+        const entity = this._makePropsData(nextProps)
+        return !entity && identifier(displayName, id, nextProps) !== identifier(displayName, id, thisProps)
       }
 
       componentWillMount () {
@@ -289,10 +292,11 @@ export function connectWpQuery (queryFn, shouldUpdate) {
         return createQueryRequest(wrappedQueryFn)
       }
 
-      _makePropsData (query) {
-        if (!query || !query.complete || query.error) return {}
+      _makePropsData () {
+        const query = this._query()
         const state = this.props.wordpress
-        return findEntities(state.entities, state.keyEntitiesBy, query.entities)
+        if (!query || !query.complete || query.error) return {}
+        else return findEntities(state.entities, state.keyEntitiesBy, query.entities)
       }
     }
 

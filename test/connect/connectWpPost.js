@@ -15,6 +15,7 @@ import initialState from '../__mocks__/states/initial'
 import BuiltInTypeComponent, { target } from '../__mocks__/components/BuiltInContentType'
 import CustomTypeComponent from '../__mocks__/components/CustomContentType'
 import BadContentTypeComponent from '../__mocks__/components/BadContentType'
+import ExplicitIdentifierComponent from '../__mocks__/components/ExplicitIdentifier'
 
 import postJson from '../__fixtures__/wp-api-responses/post'
 import bookJson from '../__fixtures__/wp-api-responses/book'
@@ -22,6 +23,7 @@ import bookJson from '../__fixtures__/wp-api-responses/book'
 const BuiltInType = (props, store) => mount(<BuiltInTypeComponent {...props} />, { context: { store } })
 const CustomType = (props, store) => mount(<CustomTypeComponent {...props} />, { context: { store } })
 const BadContentType = (props, store) => mount(<BadContentTypeComponent {...props} />, { context: { store } })
+const ExplicitIdentifier = (props, store) => mount(<ExplicitIdentifierComponent {...props} />, { context: { store } })
 
 let state
 
@@ -114,6 +116,36 @@ describe('connectWpPost', () => {
       state = merge({}, stateMultipleEntities, { wordpress: { queries: { 0: query } } })
       rendered.update() // Fake store update from completed request
       expect(rendered.html()).toEqual('<div>Hello</div>')
+    })
+  })
+
+  // Test that a store keyed by numeric ID can still resolve an
+  // entity that is fetched using explicit slug identifier
+  describe('with explicit slug identifier', () => {
+    let store
+    let rendered
+
+    beforeAll(() => {
+      queryCounter.reset()
+      const props = { params: { id: postJson.id } }
+      state = stateMultipleEntities
+      store = setup()
+      rendered = ExplicitIdentifier(props, store)
+    })
+
+    it('should dispatch RequestCreatePost', () => {
+      const action = store.dispatch.mock.calls[0][0]
+      expect(action.type).toEqual(ActionTypes.RequestCreatePost)
+      expect(action.contentType).toEqual('post')
+      expect(action.identifier).toEqual(postJson.slug)
+      expect(action.id).toEqual(0)
+    })
+
+    it('should render post title', () => {
+      const query = { complete: true, OK: true, entities: [postJson.id] }
+      state = merge({}, stateMultipleEntities, { wordpress: { queries: { 0: query } } })
+      rendered.update() // Fake store update from completed request
+      expect(rendered.html()).toEqual('<div>Architecto enim omnis repellendus</div>')
     })
   })
 
