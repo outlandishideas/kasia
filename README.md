@@ -41,7 +41,7 @@ Get data from WordPress and into components with ease...
 
 ```js
 // e.g. Get a post by its slug
-@connectWpPost('Post', 'spongebob-squarepants')
+@connectWpPost('post', 'spongebob-squarepants')
 export default class extends React.Component () {
   render () {
     const { post: spongebob } = this.props.kasia
