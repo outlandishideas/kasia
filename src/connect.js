@@ -200,12 +200,15 @@ export function connectWpPost (contentType, id) {
         if (!query || !query.complete || query.error) return null
 
         const entities = this.props.wordpress.entities[typeConfig.plural]
-        const keys = Object.keys(entities)
-        const realId = identifier(displayName, id, props)
 
-        for (let i = 0, len = keys.length; i < len; i++) {
-          const entity = entities[keys[i]]
-          if (entity.id === realId || entity.slug === realId) return entity
+        if (entities) {
+          const keys = Object.keys(entities)
+          const realId = identifier(displayName, id, props)
+
+          for (let i = 0, len = keys.length; i < len; i++) {
+            const entity = entities[keys[i]]
+            if (entity.id === realId || entity.slug === realId) return entity
+          }
         }
 
         return null
