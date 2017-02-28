@@ -64,7 +64,7 @@ export default class extends React.Component () {
 - Register and consume Custom Content Types with ease.
 - All WP data is normalised at `store.wordpress`, e.g. `store.wordpress.pages`.
 - Support for universal applications.
-- Support for plugins, e.g. [`wp-api-menus`](https://github.com/outlandishideas/kasia-plugin-wp-api-menus).
+- Support for plugins, e.g. [`wp-api-menus`](https://github.com/outlandishideas/kasia/tree/master/packages/kasia-plugin-wp-api-menus).
 
 ## Glossary
 
