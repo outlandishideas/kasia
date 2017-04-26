@@ -83,10 +83,10 @@ function derive (entity) {
   if (typeof entity.taxonomy !== 'undefined') {
     if (entity.taxonomy === 'post_tag') return ContentTypes.Tag
     if (entity.taxonomy === 'category') return ContentTypes.Category
+    return ContentTypes.Taxonomy
   }
 
   if (entity.avatar_urls) return ContentTypes.User
-  if (Array.isArray(entity.types)) return ContentTypes.Taxonomy
   if (hasKeys(entity, 'public', 'queryable', 'slug')) return ContentTypes.PostStatus
   if (hasKeys(entity, 'description', 'hierarchical', 'name')) return ContentTypes.PostType
 
