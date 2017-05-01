@@ -83,6 +83,7 @@ function derive (entity) {
   if (typeof entity.taxonomy !== 'undefined') {
     if (entity.taxonomy === 'post_tag') return ContentTypes.Tag
     if (entity.taxonomy === 'category') return ContentTypes.Category
+    return ContentTypes.Taxonomy
   }
 
   if (entity.avatar_urls) return ContentTypes.User
