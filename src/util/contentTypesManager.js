@@ -87,6 +87,7 @@ function derive (entity) {
   }
 
   if (entity.avatar_urls) return ContentTypes.User
+  if (Array.isArray(entity.types)) return ContentTypes.Taxonomy
   if (hasKeys(entity, 'public', 'queryable', 'slug')) return ContentTypes.PostStatus
   if (hasKeys(entity, 'description', 'hierarchical', 'name')) return ContentTypes.PostType
 
