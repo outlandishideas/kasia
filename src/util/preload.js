@@ -14,7 +14,7 @@ export function preload (components, renderProps = {}, state = {}) {
 
   return function * () {
     const tasks = yield components
-      .map((c) => typeof c.preload === 'function' ? c : false)
+      .map((c) => c && typeof c.preload === 'function' ? c : false)
       .filter(Boolean)
       .map((component) => component.preload(renderProps, state))
       .map(([ fn, action ]) => fork(fn, action))
