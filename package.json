@@ -11,7 +11,7 @@
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "example:simple": "node examples/server.js",
-    "prepublish": "check-node-version --npm 4",
+    "prepublish": "check-node-version --npm \">= 4.0.0\"",
     "prepublishOnly": "in-publish && npm run lint && npm run test && npm run build"
   },
   "repository": {
