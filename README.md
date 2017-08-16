@@ -130,9 +130,9 @@ import createSagaMiddleware from 'redux-saga'
 import kasia from 'kasia'
 import wpapi from 'wpapi'
 
-const WP = new wpapi({ endpoint: 'http://wordpress/wp-json' })
+const wpai = new wpapi({ endpoint: 'http://wordpress/wp-json' })
 
-const { kasiaReducer, kasiaSagas } = kasia({ WP })
+const { kasiaReducer, kasiaSagas } = kasia({ wpapi })
 
 const rootSaga = function * () {
   yield [...kasiaSagas]
@@ -169,7 +169,7 @@ Returns an object containing the Kasia reducer and sagas.
 
 ```js
 const { kasiaReducer, kasiaSagas } = kasia({
-  WP: new wpapi({ endpoint: 'http://wordpress/wp-json' })
+  wpapi: new wpapi({ endpoint: 'http://wordpress/wp-json' })
 })
 ```
 
@@ -360,7 +360,7 @@ Kasia exposes a simple API for third-party plugins.
 A plugin should:
 
 - be a function that accepts these arguments:
-    - __WP__ {wpapi} An instance of `wpapi`
+    - __wpapi__ {wpapi} An instance of `wpapi`
     - __pluginOptions__ {Object} The user's options for the plugin
     - __kasiaOptions__ {Object} The user's options for Kasia
 
