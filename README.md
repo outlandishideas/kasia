@@ -64,7 +64,6 @@ export default class extends React.Component () {
 - All WP data is normalised at `store.wordpress`, e.g. `store.wordpress.pages`.
 - Plugin API, e.g. [`wp-api-menus`](https://github.com/outlandishideas/kasia/tree/master/packages/kasia-plugin-wp-api-menus).
 - Supports universal applications.
-- Support to query for draft posts.
 
 ## Glossary
 
