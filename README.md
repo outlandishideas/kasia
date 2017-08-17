@@ -56,18 +56,19 @@ export default class extends React.Component () {
 }
 ```
 
-
 ## Features
 
 - Declaratively connect React components to data from WordPress.
 - Uses [`node-wpapi`](https://github.com/WP-API/node-wpapi) in order to facilitate complex queries.
 - Register and consume Custom Content Types with ease.
 - All WP data is normalised at `store.wordpress`, e.g. `store.wordpress.pages`.
-- Support for universal applications.
-- Support for plugins, e.g. [`wp-api-menus`](https://github.com/outlandishideas/kasia/tree/master/packages/kasia-plugin-wp-api-menus).
+- Plugin API, e.g. [`wp-api-menus`](https://github.com/outlandishideas/kasia/tree/master/packages/kasia-plugin-wp-api-menus).
+- Supports universal applications.
+- Support to query for draft posts.
 
 ## Glossary
 
+- [Extra Docs](#docs)
 - [Requirements](#requirements)
 - [Install](#install)
 - [Import](#import)
@@ -76,8 +77,13 @@ export default class extends React.Component () {
 - [Exports](#exports)
 - [Plugins](#plugins)
 - [Universal Applications](#universal-applications)
+- [Draft Posts](#draft-posts)
 - [Contributing](#contributing)
 - [Author & License](#author-&-license)
+
+## Docs
+
+See the [`docs/` folder](https://github.com/outlandishideas/kasia/tree/master/docs) for extra documentation.
 
 ## Requirements
 
