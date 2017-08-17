@@ -31,8 +31,8 @@ describe('connectWpQuery', () => {
 
   it('should wrap the component', () => {
     // Components are wrapped first by react-redux connect()
-    expect(CustomQueryComponent.WrappedComponent.WrappedComponent).toBe(target)
-    expect(CustomQueryComponent.WrappedComponent.__kasia__).toBe(true)
+    expect(CustomQueryComponent.WrappedComponent).toBe(target)
+    expect(CustomQueryComponent.__kasia__).toBe(true)
   })
 
   it('should render loading message with bad query', () => {

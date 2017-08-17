@@ -103,7 +103,7 @@ const base = (target) => {
       const numQueries = Object.keys(state.queries).length
       const nextCounterIndex = queryCounter.observeNext()
 
-      if (numQueries !== nextCounterIndex && !haveWarned[WARN_NO_REWIND]) {
+      if (!numQueries && nextCounterIndex > 0 && !haveWarned[WARN_NO_REWIND]) {
         console.log(
           '[kasia] the query counter and queries in the store are not in sync. ' +
           'This may be because you are not calling `kasia.rewind()` before running preloaders.'
@@ -266,7 +266,7 @@ export function connectWpPost (contentType, id) {
  * @param {Function|String} [shouldUpdate] Inspect props to determine if new data request is made
  * @returns {Function} Decorated component
  */
-export function connectWpQuery (queryFn, shouldUpdate) {
+export function connectWpQuery (queryFn, shouldUpdate = () => false) {
   invariants.isFunction('queryFn', queryFn)
   invariants.isShouldUpdate(shouldUpdate)
 

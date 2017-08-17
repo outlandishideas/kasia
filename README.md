@@ -279,14 +279,11 @@ export default connectWpPost(Page, (props) => props.params.slug)(Post)
 Connect a component to the result of an arbitrary WP-API query. Query is always made with `?embed` query parameter.
 
 - __queryFn__ {Function} Function that accepts args `wpapi`, `props`, `state` and should return a WP-API query
-- __shouldUpdate__ {Function} Called on `componentWillReceiveProps` with args `thisProps`, `nextProps`, `state`
+- __shouldUpdate__ {Function} _(optional)_ Called on `componentWillReceiveProps` with args `thisProps`, `nextProps`, `state` (default: `() => false`)
 
 Returns a connected component.
 
 The component will request new data via `queryFn` if `shouldUpdate` returns true.
-
-Entities returned from the query will be placed on `this.props.kasia.entities` under the same
-normalised structure as described in [The Shape of Things](#the-shape-of-things).
 
 Example, fetching the most recent "News" entities:
 

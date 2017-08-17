@@ -1,14 +1,13 @@
-let queryId = -1
+let queryId = 0
 
 export default {
   observeNext () {
-    return queryId + 1
+    return queryId
   },
   reset () {
-    queryId = -1
+    queryId = 0
   },
   next () {
-    queryId += 1
-    return queryId
+    return queryId++
   }
 }
