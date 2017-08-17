@@ -1,8 +1,8 @@
 let queryId = -1
 
 export default {
-  current () {
-    return queryId
+  observeNext () {
+    return queryId + 1
   },
   reset () {
     queryId = -1

@@ -100,10 +100,10 @@ const base = (target) => {
 
     componentWillMount () {
       const state = this.props.wordpress
-      const numQueries = Object.keys(state.queries).length - 1
-      const nextCounterIndex = queryCounter.current() + 1
+      const numQueries = Object.keys(state.queries).length
+      const nextCounterIndex = queryCounter.observeNext()
 
-      if (numQueries > nextCounterIndex && !haveWarned[WARN_NO_REWIND]) {
+      if (numQueries !== nextCounterIndex && !haveWarned[WARN_NO_REWIND]) {
         console.log(
           '[kasia] the query counter and queries in the store are not in sync. ' +
           'This may be because you are not calling `kasia.rewind()` before running preloaders.'
