@@ -91,12 +91,6 @@ export default {
     `See documentation ${KASIA_URL}.`,
     typeof wordpress
   ),
-  queryHasError: (query, displayName) => {
-    if (query && query.error) {
-      console.log(`[kasia] error in query for ${displayName}:`)
-      console.log(query.error)
-    }
-  },
   isKeyEntitiesByOption: (keyEntitiesBy) => invariant(
     keyEntitiesBy === 'slug' || keyEntitiesBy === 'id',
     'Expecting keyEntitiesBy to be "slug" or "id", got "%s".',
