@@ -67,8 +67,11 @@ const base = (target) => {
     /** Find the query for this component and its corresponding data and return props object containing them. */
     _reconcileWpData (props) {
       const query = this._query()
-      const data = this._makePropsData(props)
       const fallbackQuery = { complete: false, OK: null }
+
+      const data = query && query.preserve
+        ? query.result
+        : this._makePropsData(props)
 
       if (query && query.error) {
         console.log(`[kasia] error in query for ${displayName}:`)
@@ -199,7 +202,13 @@ export function connectWpPost (contentType, id) {
       _makePropsData (props) {
         const query = this._query()
 
-        if (!query || !query.complete || query.error) return null
+        if (!query || !query.complete || query.error) {
+          return null
+        }
+
+        if (query.preserve) {
+          return query.result
+        }
 
         const entities = this.props.wordpress.entities[typeConfig.plural]
 
@@ -209,7 +218,9 @@ export function connectWpPost (contentType, id) {
 
           for (let i = 0, len = keys.length; i < len; i++) {
             const entity = entities[keys[i]]
-            if (entity.id === realId || entity.slug === realId) return entity
+            if (entity.id === realId || entity.slug === realId) {
+              return entity
+            }
           }
         }
 
@@ -263,10 +274,21 @@ export function connectWpPost (contentType, id) {
  * ```
  *
  * @param {Function} queryFn Function that returns a wpapi query
- * @param {Function|String} [shouldUpdate] Inspect props to determine if new data request is made
+ * @param {Function|String|Object} [shouldUpdate] Inspect props to determine if new data request is made
+ * @param {Object} [opts] Options object
+ * @param {Function|String|Object} [opts.shouldUpdate] See `shouldUpdate` docs
+ * @param {Boolean} [opts.preserve] Preserve result of query and pass this untouched to component (no normalisation)
  * @returns {Function} Decorated component
  */
-export function connectWpQuery (queryFn, shouldUpdate = () => false) {
+export function connectWpQuery (queryFn, shouldUpdate, opts = {}) {
+  if (typeof shouldUpdate === 'object') {
+    opts = shouldUpdate
+    shouldUpdate = opts.shouldUpdate
+  }
+
+  shouldUpdate = shouldUpdate || (() => false)
+
+  invariants.isObject('opts', opts)
   invariants.isFunction('queryFn', queryFn)
   invariants.isShouldUpdate(shouldUpdate)
 
@@ -291,7 +313,7 @@ export function connectWpQuery (queryFn, shouldUpdate = () => false) {
       static preload (props, state) {
         debug(displayName, 'connectWpQuery preload with props:', props, 'state:', state)
         const wrappedQueryFn = wrapQueryFn(queryFn, props, state)
-        const action = createQueryRequest(wrappedQueryFn)
+        const action = createQueryRequest(wrappedQueryFn, opts.preserve)
         action.id = queryCounter.next()
         return [fetch, action]
       }
@@ -299,14 +321,19 @@ export function connectWpQuery (queryFn, shouldUpdate = () => false) {
       _getRequestWpDataAction (props) {
         debug(displayName, 'connectWpQuery request with props:', props)
         const wrappedQueryFn = wrapQueryFn(queryFn, props, this.context.store.getState())
-        return createQueryRequest(wrappedQueryFn)
+        return createQueryRequest(wrappedQueryFn, opts.preserve)
       }
 
       _makePropsData () {
         const query = this._query()
         const state = this.props.wordpress
-        if (!query || !query.complete || query.error) return {}
-        else return findEntities(state.entities, state.keyEntitiesBy, query.entities)
+        if (!query || !query.complete || query.error) {
+          return {}
+        } else if (opts.preserve) {
+          return query.result
+        } else {
+          return findEntities(state.entities, state.keyEntitiesBy, query.entities)
+        }
       }
     }
 

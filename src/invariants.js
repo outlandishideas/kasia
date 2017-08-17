@@ -11,6 +11,11 @@ function invariant (predicate, message, ...args) {
 }
 
 export default {
+  isObject: (name, value) => invariant(
+    typeof value === 'object',
+    'Expecting %s to be object, got "%s".',
+    name, typeof value
+  ),
   isString: (name, value) => invariant(
     typeof value === 'string',
     'Expecting %s to be string, got "%s".',

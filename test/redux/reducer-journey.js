@@ -16,7 +16,7 @@ import queryCounter from '../../src/util/query-counter'
 import pickEntityIds from '../../src/util/pick-entity-ids'
 import schemasManager from '../../src/util/schemas-manager'
 import { ContentTypes } from '../../src/constants'
-import { createPostRequest, completeRequest, failRequest } from '../../src/redux/actions'
+import { createPostRequest, acknowledgeRequest, completeRequest, failRequest } from '../../src/redux/actions'
 
 function setup (keyEntitiesBy) {
   const { kasiaReducer } = kasia({
@@ -44,6 +44,7 @@ describe('reducer journey', () => {
   tests.forEach(([ keyEntitiesBy, param ]) => {
     describe('keyEntitiesBy = ' + keyEntitiesBy, () => {
       const { store, initialState } = setup(keyEntitiesBy)
+      let createAction
 
       it('has initial state on store', () => {
         expect(store.getState()).toEqual(initialState)
@@ -55,7 +56,13 @@ describe('reducer journey', () => {
       })
 
       it('can Request*Create', () => {
-        store.dispatch(createPostRequest(ContentTypes.Post, param))
+        createAction = createPostRequest(ContentTypes.Post, param)
+        createAction.id = queryCounter.next() // usually done by component
+        store.dispatch(createAction)
+      })
+
+      it('can RequestAck', () => {
+        store.dispatch(acknowledgeRequest(createAction))
       })
 
       it('can RequestComplete', () => {
