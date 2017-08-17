@@ -6,7 +6,7 @@ export const ActionTypes = {
   RequestCreatePost: 'kasia/REQUEST_CREATE_POST',
   RequestCreateQuery: 'kasia/REQUEST_CREATE_QUERY',
   // Place record of a request in the store
-  AckRequest: 'kasia/ACK_REQUEST',
+  RequestAck: 'kasia/REQUEST_ACK',
   // Place the result of a request on the store
   RequestComplete: 'kasia/REQUEST_COMPLETE',
   // Record the failure of a request on the store

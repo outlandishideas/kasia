@@ -10,7 +10,7 @@ export const createQueryRequest = (queryFn) =>
 
 /** Acknowledge a create* request by placing record of it on the store. */
 export const acknowledgeRequest = (action) =>
-  ({ ...action, type: ActionTypes.AckRequest })
+  ({ ...action, type: ActionTypes.RequestAck })
 
 /** Place the result of a successful request on the store */
 export const completeRequest = (id, data) =>

@@ -107,7 +107,7 @@ describe('Universal journey', function () {
         // acknowledge request
         const ackAction = {
           id: 0,
-          type: ActionTypes.AckRequest,
+          type: ActionTypes.RequestAck,
           identifier: post1[keyEntitiesBy],
           contentType: 'post'
         }
