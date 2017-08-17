@@ -256,10 +256,9 @@ export function connectWpPost (contentType, id) {
  *
  * @example Update only when `props.id` changes:
  * ```js
- * connectWpQuery(
- *   (wpapi, props) => wpapi.page().id(props.identifier()).embed().get(),
- *   (thisProps, nextProps) => thisProps.id !== nextProps.id
- * )
+ * connectWpQuery((wpapi, props) => {
+ *   return wpapi.page().id(props.identifier()).embed().get()
+ * }, 'id')
  * ```
  *
  * @param {Function} queryFn Function that returns a wpapi query
