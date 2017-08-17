@@ -12,9 +12,9 @@ import initialState from '../__mocks__/states/initial'
 
 import kasia from '../../src'
 import normalise from '../../src/util/normalise'
-import queryCounter from '../../src/util/queryCounter'
-import pickEntityIds from '../../src/util/pickEntityIds'
-import schemasManager from '../../src/util/schemasManager'
+import queryCounter from '../../src/util/query-counter'
+import pickEntityIds from '../../src/util/pick-entity-ids'
+import schemasManager from '../../src/util/schemas-manager'
 import { ContentTypes } from '../../src/constants'
 import { createPostRequest, completeRequest, failRequest } from '../../src/redux/actions'
 

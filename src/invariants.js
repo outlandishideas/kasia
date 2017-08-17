@@ -38,13 +38,18 @@ export default {
     'Expecting %s to be boolean, got "%s".',
     name, typeof value
   ),
+  isShouldUpdate: (value) => invariant(
+    typeof value === 'function' || (typeof value === 'string' && value.length),
+    'Expecting shouldUpdate to be function or non-empty string, got "%s".',
+    typeof value
+  ),
   isWpApiInstance: (value = {}) => invariant(
     typeof value.registerRoute === 'function',
     'Expecting WP to be instance of `node-wpapi`. ' +
     `See documentation: ${NODE_WPAPI_GITHUB_URL}.`
   ),
   isIdentifierArg: (identifier) => invariant(
-    typeof identifier === 'function' || typeof identifier === 'string' || typeof identifier === 'number',
+    ['function', 'string', 'number'].indexOf(typeof identifier) > -1,
     'Expecting id given to connectWpPost to be function/string/number, got "%s".',
     typeof identifier
   ),
@@ -88,7 +93,8 @@ export default {
   ),
   queryHasError: (query, displayName) => {
     if (query && query.error) {
-      console.log(`[kasia] error in query for ${displayName || 'unknown component'}:\n` + query.error)
+      console.log(`[kasia] error in query for ${displayName}:`)
+      console.log(query.error)
     }
   },
   isKeyEntitiesByOption: (keyEntitiesBy) => invariant(

@@ -1,6 +1,6 @@
 import pickToArray from 'pick-to-array'
 
-import contentTypesManager from './contentTypesManager'
+import contentTypesManager from './content-types-manager'
 import { ContentTypesWithoutId } from '../constants'
 
 /**

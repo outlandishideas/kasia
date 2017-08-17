@@ -1,11 +1,12 @@
 import React from 'react'
+import { get } from 'lodash.get'
 import { connect as reduxConnect } from 'react-redux'
 
 import debug from './util/debug'
-import contentTypesManager from './util/contentTypesManager'
+import contentTypesManager from './util/content-types-manager'
 import invariants from './invariants'
-import queryCounter from './util/queryCounter'
-import findEntities from './util/findEntities'
+import queryCounter from './util/query-counter'
+import findEntities from './util/find-entities'
 import { createPostRequest, createQueryRequest } from './redux/actions'
 import { fetch } from './redux/sagas'
 
@@ -262,12 +263,18 @@ export function connectWpPost (contentType, id) {
  * ```
  *
  * @param {Function} queryFn Function that returns a wpapi query
- * @param {Function} shouldUpdate Inspect props to determine if new data request is made
+ * @param {Function|String} [shouldUpdate] Inspect props to determine if new data request is made
  * @returns {Function} Decorated component
  */
 export function connectWpQuery (queryFn, shouldUpdate) {
   invariants.isFunction('queryFn', queryFn)
-  invariants.isFunction('shouldUpdate', shouldUpdate)
+  invariants.isShouldUpdate(shouldUpdate)
+
+  if (typeof shouldUpdate === 'string') {
+    shouldUpdate = (thisProps, nextProps) => {
+      return get(thisProps, shouldUpdate) !== get(nextProps, shouldUpdate)
+    }
+  }
 
   return (target) => {
     const displayName = target.displayName || target.name

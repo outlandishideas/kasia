@@ -1,7 +1,7 @@
 import merge from 'lodash.merge'
 import isNode from 'is-node-fn'
 
-import pickEntityIds from '../util/pickEntityIds'
+import pickEntityIds from '../util/pick-entity-ids'
 import normalise from '../util/normalise'
 import { ActionTypes } from '../constants'
 

@@ -6,7 +6,7 @@ import { put, call } from 'redux-saga/effects'
 
 import '../__mocks__/WP'
 import getWP from '../../src/wpapi'
-import { buildQueryFunction } from '../../src/util/queryBuilder'
+import { buildQueryFunction } from '../../src/util/query-builder'
 import { createPostRequest, createQueryRequest } from '../../src/redux/actions'
 import { fetch } from '../../src/redux/sagas'
 import { ActionTypes, ContentTypes } from '../../src/constants'

@@ -3,7 +3,7 @@
 jest.disableAutomock()
 
 import getWP, { setWP } from '../../src/wpapi'
-import { deriveQueryFunction } from '../../src/util/queryBuilder'
+import { deriveQueryFunction } from '../../src/util/query-builder'
 
 setWP({
   posts: () => ({

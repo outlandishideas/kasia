@@ -6,7 +6,7 @@ import React from 'react'
 import merge from 'lodash.merge'
 import { mount } from 'enzyme'
 
-import queryCounter from '../../src/util/queryCounter'
+import queryCounter from '../../src/util/query-counter'
 import { ActionTypes } from '../../src/constants'
 
 import '../__mocks__/WP'

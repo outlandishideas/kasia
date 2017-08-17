@@ -18,4 +18,5 @@ export class target extends Component {
   }
 }
 
-export default connectWpQuery(queryFn, () => true)(target)
+export default connectWpQuery(queryFn, 'params.id')(target)
+

@@ -4,7 +4,7 @@ jest.disableAutomock()
 
 import React, { Component } from 'react'
 
-import contentTypesManager from '../../../src/util/contentTypesManager'
+import contentTypesManager from '../../../src/util/content-types-manager'
 import { connectWpPost } from '../../../src/connect'
 
 contentTypesManager.register({
