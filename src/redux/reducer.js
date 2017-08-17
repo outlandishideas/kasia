@@ -54,7 +54,7 @@ function mergeNativeAndThirdPartyReducers (reducers, normaliser) {
 }
 
 // ACKNOWLEDGE
-// Place record of request o
+// Place record of request on store
 export function acknowledgeReducer (state, action) {
   return merge({}, state, {
     queries: {
