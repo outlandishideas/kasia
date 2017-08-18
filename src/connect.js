@@ -1,5 +1,6 @@
 import React from 'react'
 import { connect as reduxConnect } from 'react-redux'
+import { call } from 'redux-saga/effects';
 
 import debug from './util/debug'
 import contentTypesManager from './util/contentTypesManager'
@@ -32,7 +33,7 @@ export function identifier (displayName, id, props) {
 
 /** Wrap `queryFn` in a function that takes the node-wpapi instance. */
 export function wrapQueryFn (queryFn, props, state) {
-  return (wpapi) => queryFn(wpapi, props, state)
+  return function * (wpapi) { yield call(queryFn, wpapi, props, state) }
 }
 
 /** Wrap component in react-redux connect. */
