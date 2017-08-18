@@ -130,9 +130,9 @@ import createSagaMiddleware from 'redux-saga'
 import kasia from 'kasia'
 import wpapi from 'wpapi'
 
-const WP = new wpapi({ endpoint: 'http://wordpress/wp-json' })
+const wpai = new wpapi({ endpoint: 'http://wordpress/wp-json' })
 
-const { kasiaReducer, kasiaSagas } = kasia({ WP })
+const { kasiaReducer, kasiaSagas } = kasia({ wpapi })
 
 const rootSaga = function * () {
   yield [...kasiaSagas]
@@ -169,7 +169,7 @@ Returns an object containing the Kasia reducer and sagas.
 
 ```js
 const { kasiaReducer, kasiaSagas } = kasia({
-  WP: new wpapi({ endpoint: 'http://wordpress/wp-json' })
+  wpapi: new wpapi({ endpoint: 'http://wordpress/wp-json' })
 })
 ```
 
@@ -268,7 +268,7 @@ export default class Page extends Component {
 export default connectWpPost(Page, (props) => props.params.slug)(Post)
 ```
 
-#### `@connectWpQuery(queryFn[, shouldUpdate]) : Component`
+#### `@connectWpQuery(queryFn, shouldUpdate) : Component`
 
 Connect a component to the result of an arbitrary WP-API query. Query is always made with `?embed` query parameter.
 
@@ -292,7 +292,7 @@ import { connectWpPost } from 'kasia/connect'
 // Note the invocation of `embed` in the query chain
 @connectWpQuery((wpapi, props) => {
   return wpapi.news().month(props.month).embed().get()
-})
+}, (thisProps, nextProps) => thisProps.month != nextProps.month)
 export default class RecentNews extends Component {
   render () {
     const {
@@ -360,7 +360,7 @@ Kasia exposes a simple API for third-party plugins.
 A plugin should:
 
 - be a function that accepts these arguments:
-    - __WP__ {wpapi} An instance of `wpapi`
+    - __wpapi__ {wpapi} An instance of `wpapi`
     - __pluginOptions__ {Object} The user's options for the plugin
     - __kasiaOptions__ {Object} The user's options for Kasia
 
@@ -490,6 +490,28 @@ export default function renderPage (res, location) {
   })  
 }
 ```
+
+## Testing
+
+Kasia components can be tested by:
+- lifting the query function from the connectWpQuery decorator and exporting it
+- lifting the should update function from the connectWpQuery deocrating and exporting it
+- making your component available as a named export prior to decoration
+
+An example:
+```js
+export function postQuery (wpapi) {...}
+
+export function shouldUpdate (thisProps, nextProps, state) {...}
+
+export class Post extends Component {...}
+
+@connectWpQuery(postQuery, shouldUpdate)
+export default Post
+```
+
+You can then test the component without decoration, the query and the shouldUpdate function
+in isolation.
 
 ## Contributing
 
