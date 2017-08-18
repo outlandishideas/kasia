@@ -273,7 +273,7 @@ export default class Page extends Component {
 export default connectWpPost(Page, (props) => props.params.slug)(Post)
 ```
 
-#### `@connectWpQuery(queryFn[, shouldUpdate]) : Component`
+#### `@connectWpQuery(queryFn, shouldUpdate) : Component`
 
 Connect a component to the result of an arbitrary WP-API query. Query is always made with `?embed` query parameter.
 
@@ -294,7 +294,7 @@ import { connectWpPost } from 'kasia/connect'
 // Note the invocation of `embed` in the query chain
 @connectWpQuery((wpapi, props) => {
   return wpapi.news().month(props.month).embed().get()
-})
+}, (thisProps, nextProps) => thisProps.month != nextProps.month)
 export default class RecentNews extends Component {
   render () {
     const {
@@ -492,6 +492,28 @@ export default function renderPage (res, location) {
   })  
 }
 ```
+
+## Testing
+
+Kasia components can be tested by:
+- lifting the query function from the connectWpQuery decorator and exporting it
+- lifting the should update function from the connectWpQuery deocrating and exporting it
+- making your component available as a named export prior to decoration
+
+An example:
+```js
+export function postQuery (wpapi) {...}
+
+export function shouldUpdate (thisProps, nextProps, state) {...}
+
+export class Post extends Component {...}
+
+@connectWpQuery(postQuery, shouldUpdate)
+export default Post
+```
+
+You can then test the component without decoration, the query and the shouldUpdate function
+in isolation.
 
 ## Contributing
 
