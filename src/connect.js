@@ -1,5 +1,6 @@
 import React from 'react'
 import { get } from 'lodash.get'
+import PropTypes from 'prop-types'
 import { connect as reduxConnect } from 'react-redux'
 import { call } from 'redux-saga/effects'
 
@@ -56,7 +57,7 @@ const base = (target) => {
     static WrappedComponent = target
 
     static contextTypes = {
-      store: React.PropTypes.object.isRequired
+      store: PropTypes.object.isRequired
     }
 
     /** Make request for new data from WP-API. */
