@@ -322,6 +322,37 @@ export default connectWpQuery((wpapi) => {
 })(Post)
 ```
 
+### Using sagas as queries
+
+Because kasia uses redux-saga to power the queries it is possible to use a saga as a query.
+This is particularly valuable for making more complex multi-step queries.
+
+For example, to grab all posts within a given tag, you first need to get the tag and then
+you can grab the posts in that tag.
+
+```js
+export function getTagsBySlug(wpapi, slug) {
+  return wpapi.tags().embed().slug(slug).get()
+}
+
+export function getPostsByTagId(wpapi, id) {
+  return wpapi.posts().embed().tag(id).get()
+}
+
+function * topicsByTag(wpapi, props, state) {
+    const tag = yield call(getTagsBySlug, wpapi, props.location.query.tag)
+    let stories
+    if (tag.length) {
+      stories = yield call(getPostsByTagId, wpapi, tag[0].id)
+    } else {
+      stories = []
+    }
+    return stories
+}
+
+@connectWpQuery(topicsByTag, 'location.query.tag')
+```
+
 ## Exports
 
 ### `kasia`
