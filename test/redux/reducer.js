@@ -1,10 +1,12 @@
 /* global jest:false, expect:false */
 
-jest.disableAutomock()
+// jest.disableAutomock() hoisted here by babel-jest
 
 import '../__mocks__/WP'
 import postJson from '../__fixtures__/wp-api-responses/post'
 import { INITIAL_STATE, acknowledgeReducer, completeReducer, failReducer } from '../../src/redux/reducer'
+
+jest.disableAutomock()
 
 describe('redux/reducer', () => {
   const id = 0

@@ -1,6 +1,6 @@
-/* global jest:false, expect:false */
+/* global jest:false, expect:false *
 
-jest.disableAutomock()
+// jest.disableAutomock() hoisted here by babel-jest
 
 import { join, fork } from 'redux-saga/effects'
 import { createMockTask } from 'redux-saga/utils'
@@ -13,6 +13,8 @@ import { wrapQueryFn } from '../../src/connect'
 
 import ConnectPostC from '../__mocks__/components/BuiltInContentType'
 import ConnectQueryC, { queryFn } from '../__mocks__/components/CustomQuery'
+
+jest.disableAutomock()
 
 describe('util/preload', () => {
   describe('#preload', () => {

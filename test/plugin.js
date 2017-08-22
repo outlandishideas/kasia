@@ -1,6 +1,6 @@
 /* global jest:false, expect:false */
 
-jest.disableAutomock()
+// jest.disableAutomock() hoisted here by babel-jest
 
 import Wpapi from 'wpapi'
 import { combineReducers, createStore } from 'redux'
@@ -10,6 +10,8 @@ import kasia from '../src'
 import { ActionTypes } from '../src/constants'
 import { acknowledgeRequest, completeRequest } from '../src/redux/actions'
 import postJson from './__fixtures__/wp-api-responses/post'
+
+jest.disableAutomock()
 
 const testActionType = 'kasia/TEST_ACTION'
 

@@ -1,10 +1,12 @@
 /* global jest:false */
 
-jest.disableAutomock()
+// jest.disableAutomock() hoisted here by babel-jest
 
 import React, { Component } from 'react'
 
 import { connectWpQuery } from '../../../src/connect'
+
+jest.disableAutomock()
 
 export const queryFn = (wpapi, props) => {
   return wpapi.books(props.params.id).get()

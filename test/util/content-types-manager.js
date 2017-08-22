@@ -1,10 +1,12 @@
 /* global jest:false, expect:false */
 
-jest.disableAutomock()
+// jest.disableAutomock() hoisted here by babel-jest
 
 import '../__mocks__/WP'
 import contentTypesManager from '../../src/util/content-types-manager'
 import { ContentTypes } from '../../src/constants'
+
+jest.disableAutomock()
 
 describe('util/contentTypesManager', () => {
   describe('#getAll', () => {

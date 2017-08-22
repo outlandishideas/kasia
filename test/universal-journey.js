@@ -1,10 +1,6 @@
 /* global jest:false, expect:false */
 
-jest.disableAutomock()
-
-// we mock queryBuilder after imports
-// we need to mock client and server environments
-jest.mock('is-node-fn')
+// jest.disableAutomock() hoisted here by babel-jest
 
 import React from 'react'
 import createSagaMiddleware from 'redux-saga'
@@ -24,6 +20,12 @@ import { fetch } from '../src/redux/sagas'
 import BuiltInContentType from './__mocks__/components/BuiltInContentType'
 import initialState from './__mocks__/states/initial'
 import post from './__fixtures__/wp-api-responses/post'
+
+jest.disableAutomock()
+
+// we mock queryBuilder after imports
+// we need to mock client and server environments
+jest.mock('is-node-fn')
 
 const post1 = post
 const post2 = Object.assign({}, post, { id: 17, slug: 'post-2', title: { rendered: 'Post 2' } })
