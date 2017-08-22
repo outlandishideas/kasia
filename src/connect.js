@@ -35,7 +35,7 @@ export function identifier (displayName, id, props) {
 /** Wrap `queryFn` in a function that takes the node-wpapi instance. */
 export function wrapQueryFn (queryFn, props, state) {
   return function * (wpapi) {
-    yield call(queryFn, wpapi, props, state)
+    return yield call(queryFn, wpapi, props, state)
   }
 }
 
