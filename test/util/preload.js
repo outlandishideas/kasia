@@ -1,4 +1,4 @@
-/* global jest:false, expect:false *
+/* global jest:false, expect:false */
 
 // jest.disableAutomock() hoisted here by babel-jest
 
