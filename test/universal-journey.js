@@ -16,8 +16,8 @@ import { mount } from 'enzyme'
 
 import './__mocks__/WP'
 import kasia from '../src'
-import queryCounter from '../src/util/queryCounter'
-import schemasManager from '../src/util/schemasManager'
+import queryCounter from '../src/util/query-counter'
+import schemasManager from '../src/util/schemas-manager'
 import { ActionTypes } from '../src/constants'
 import { fetch } from '../src/redux/sagas'
 
@@ -33,7 +33,7 @@ const post3 = Object.assign({}, post, { id: 18, slug: 'post-3', title: { rendere
 let returnPost
 
 // we need to mock responses from WP-API
-jest.mock('../src/util/queryBuilder', () => ({
+jest.mock('../src/util/query-builder', () => ({
   buildQueryFunction: () => () => new Promise((resolve) => {
     setTimeout(() => resolve(returnPost))
   })
@@ -107,7 +107,7 @@ describe('Universal journey', function () {
         // acknowledge request
         const ackAction = {
           id: 0,
-          type: ActionTypes.AckRequest,
+          type: ActionTypes.RequestAck,
           identifier: post1[keyEntitiesBy],
           contentType: 'post'
         }

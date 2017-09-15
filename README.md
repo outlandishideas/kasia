@@ -56,18 +56,18 @@ export default class extends React.Component () {
 }
 ```
 
-
 ## Features
 
 - Declaratively connect React components to data from WordPress.
 - Uses [`node-wpapi`](https://github.com/WP-API/node-wpapi) in order to facilitate complex queries.
 - Register and consume Custom Content Types with ease.
 - All WP data is normalised at `store.wordpress`, e.g. `store.wordpress.pages`.
-- Support for universal applications.
-- Support for plugins, e.g. [`wp-api-menus`](https://github.com/outlandishideas/kasia/tree/master/packages/kasia-plugin-wp-api-menus).
+- Plugin API, e.g. [`wp-api-menus`](https://github.com/outlandishideas/kasia/tree/master/packages/kasia-plugin-wp-api-menus).
+- Supports universal applications.
 
 ## Glossary
 
+- [Extra Docs](#docs)
 - [Requirements](#requirements)
 - [Install](#install)
 - [Import](#import)
@@ -76,8 +76,13 @@ export default class extends React.Component () {
 - [Exports](#exports)
 - [Plugins](#plugins)
 - [Universal Applications](#universal-applications)
+- [Draft Posts](#draft-posts)
 - [Contributing](#contributing)
 - [Author & License](#author-&-license)
+
+## Docs
+
+See the [`docs/` folder](https://github.com/outlandishideas/kasia/tree/master/docs) for extra documentation.
 
 ## Requirements
 
@@ -273,14 +278,11 @@ export default connectWpPost(Page, (props) => props.params.slug)(Post)
 Connect a component to the result of an arbitrary WP-API query. Query is always made with `?embed` query parameter.
 
 - __queryFn__ {Function} Function that accepts args `wpapi`, `props`, `state` and should return a WP-API query
-- __shouldUpdate__ {Function} Called on `componentWillReceiveProps` with args `thisProps`, `nextProps`, `state`
+- __shouldUpdate__ {Function} _(optional)_ Called on `componentWillReceiveProps` with args `thisProps`, `nextProps`, `state` (default: `() => false`)
 
 Returns a connected component.
 
 The component will request new data via `queryFn` if `shouldUpdate` returns true.
-
-Entities returned from the query will be placed on `this.props.kasia.entities` under the same
-normalised structure as described in [The Shape of Things](#the-shape-of-things).
 
 Example, fetching the most recent "News" entities:
 

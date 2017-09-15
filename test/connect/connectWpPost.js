@@ -6,7 +6,7 @@ import React from 'react'
 import merge from 'lodash.merge'
 import { mount } from 'enzyme'
 
-import queryCounter from '../../src/util/queryCounter'
+import queryCounter from '../../src/util/query-counter'
 import { ActionTypes } from '../../src/constants'
 
 import '../__mocks__/WP'
@@ -49,8 +49,8 @@ describe('connectWpPost', () => {
 
     it('should wrap the component', () => {
       // Components are wrapped first by react-redux connect()
-      expect(BuiltInTypeComponent.WrappedComponent.WrappedComponent).toBe(target)
-      expect(BuiltInTypeComponent.WrappedComponent.__kasia__).toBe(true)
+      expect(BuiltInTypeComponent.WrappedComponent).toBe(target)
+      expect(BuiltInTypeComponent.__kasia__).toBe(true)
     })
 
     it('should render loading', () => {

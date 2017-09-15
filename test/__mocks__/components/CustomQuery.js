@@ -10,7 +10,7 @@ export const queryFn = (wpapi, props) => {
   return wpapi.books(props.params.id).get()
 }
 
-export const target = class extends Component {
+export class target extends Component {
   render () {
     const { query, data: { books } } = this.props.kasia
     if (!query.complete || !query.OK) return <div>Loading...</div>

@@ -1,11 +1,13 @@
 import React from 'react'
+import get from 'lodash.get'
 import { connect as reduxConnect } from 'react-redux'
+import { call } from 'redux-saga/effects'
 
 import debug from './util/debug'
-import contentTypesManager from './util/contentTypesManager'
+import contentTypesManager from './util/content-types-manager'
 import invariants from './invariants'
-import queryCounter from './util/queryCounter'
-import findEntities from './util/findEntities'
+import queryCounter from './util/query-counter'
+import findEntities from './util/find-entities'
 import { createPostRequest, createQueryRequest } from './redux/actions'
 import { fetch } from './redux/sagas'
 
@@ -32,7 +34,9 @@ export function identifier (displayName, id, props) {
 
 /** Wrap `queryFn` in a function that takes the node-wpapi instance. */
 export function wrapQueryFn (queryFn, props, state) {
-  return (wpapi) => queryFn(wpapi, props, state)
+  return function * (wpapi) {
+    yield call(queryFn, wpapi, props, state)
+  }
 }
 
 /** Wrap component in react-redux connect. */
@@ -66,11 +70,15 @@ const base = (target) => {
     /** Find the query for this component and its corresponding data and return props object containing them. */
     _reconcileWpData (props) {
       const query = this._query()
-      const data = this._makePropsData(props)
       const fallbackQuery = { complete: false, OK: null }
 
-      if (query) {
-        invariants.queryHasError(query, displayName)
+      const data = query && query.preserve
+        ? query.result
+        : this._makePropsData(props)
+
+      if (query && query.error) {
+        console.log(`[kasia] error in query for ${displayName}:`)
+        console.log(query.error)
       }
 
       const result = {
@@ -98,10 +106,10 @@ const base = (target) => {
 
     componentWillMount () {
       const state = this.props.wordpress
-      const numQueries = Object.keys(state.queries).length - 1
-      const nextCounterIndex = queryCounter.current() + 1
+      const numQueries = Object.keys(state.queries).length
+      const nextCounterIndex = queryCounter.observeNext()
 
-      if (numQueries > nextCounterIndex && !haveWarned[WARN_NO_REWIND]) {
+      if (!numQueries && nextCounterIndex > 0 && !haveWarned[WARN_NO_REWIND]) {
         console.log(
           '[kasia] the query counter and queries in the store are not in sync. ' +
           'This may be because you are not calling `kasia.rewind()` before running preloaders.'
@@ -197,7 +205,13 @@ export function connectWpPost (contentType, id) {
       _makePropsData (props) {
         const query = this._query()
 
-        if (!query || !query.complete || query.error) return null
+        if (!query || !query.complete || query.error) {
+          return null
+        }
+
+        if (query.preserve) {
+          return query.result
+        }
 
         const entities = this.props.wordpress.entities[typeConfig.plural]
 
@@ -207,7 +221,9 @@ export function connectWpPost (contentType, id) {
 
           for (let i = 0, len = keys.length; i < len; i++) {
             const entity = entities[keys[i]]
-            if (entity.id === realId || entity.slug === realId) return entity
+            if (entity.id === realId || entity.slug === realId) {
+              return entity
+            }
           }
         }
 
@@ -255,19 +271,35 @@ export function connectWpPost (contentType, id) {
  *
  * @example Update only when `props.id` changes:
  * ```js
- * connectWpQuery(
- *   (wpapi, props) => wpapi.page().id(props.identifier()).embed().get(),
- *   (thisProps, nextProps) => thisProps.id !== nextProps.id
- * )
+ * connectWpQuery((wpapi, props) => {
+ *   return wpapi.page().id(props.identifier()).embed().get()
+ * }, 'id')
  * ```
  *
  * @param {Function} queryFn Function that returns a wpapi query
- * @param {Function} shouldUpdate Inspect props to determine if new data request is made
+ * @param {Function|String|Object} [shouldUpdate] Inspect props to determine if new data request is made
+ * @param {Object} [opts] Options object
+ * @param {Function|String|Object} [opts.shouldUpdate] See `shouldUpdate` docs
+ * @param {Boolean} [opts.preserve] Preserve result of query and pass this untouched to component (no normalisation)
  * @returns {Function} Decorated component
  */
-export function connectWpQuery (queryFn, shouldUpdate) {
+export function connectWpQuery (queryFn, shouldUpdate, opts = {}) {
+  if (typeof shouldUpdate === 'object') {
+    opts = shouldUpdate
+    shouldUpdate = opts.shouldUpdate
+  }
+
+  shouldUpdate = shouldUpdate || (() => false)
+
+  invariants.isObject('opts', opts)
   invariants.isFunction('queryFn', queryFn)
-  invariants.isFunction('shouldUpdate', shouldUpdate)
+  invariants.isShouldUpdate(shouldUpdate)
+
+  if (typeof shouldUpdate === 'string') {
+    shouldUpdate = (thisProps, nextProps) => {
+      return get(thisProps, shouldUpdate) !== get(nextProps, shouldUpdate)
+    }
+  }
 
   return (target) => {
     const displayName = target.displayName || target.name
@@ -284,7 +316,7 @@ export function connectWpQuery (queryFn, shouldUpdate) {
       static preload (props, state) {
         debug(displayName, 'connectWpQuery preload with props:', props, 'state:', state)
         const wrappedQueryFn = wrapQueryFn(queryFn, props, state)
-        const action = createQueryRequest(wrappedQueryFn)
+        const action = createQueryRequest(wrappedQueryFn, opts.preserve)
         action.id = queryCounter.next()
         return [fetch, action]
       }
@@ -292,14 +324,19 @@ export function connectWpQuery (queryFn, shouldUpdate) {
       _getRequestWpDataAction (props) {
         debug(displayName, 'connectWpQuery request with props:', props)
         const wrappedQueryFn = wrapQueryFn(queryFn, props, this.context.store.getState())
-        return createQueryRequest(wrappedQueryFn)
+        return createQueryRequest(wrappedQueryFn, opts.preserve)
       }
 
       _makePropsData () {
         const query = this._query()
         const state = this.props.wordpress
-        if (!query || !query.complete || query.error) return {}
-        else return findEntities(state.entities, state.keyEntitiesBy, query.entities)
+        if (!query || !query.complete || query.error) {
+          return {}
+        } else if (opts.preserve) {
+          return query.result
+        } else {
+          return findEntities(state.entities, state.keyEntitiesBy, query.entities)
+        }
       }
     }
 

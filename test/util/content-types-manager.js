@@ -3,7 +3,7 @@
 jest.disableAutomock()
 
 import '../__mocks__/WP'
-import contentTypesManager from '../../src/util/contentTypesManager'
+import contentTypesManager from '../../src/util/content-types-manager'
 import { ContentTypes } from '../../src/constants'
 
 describe('util/contentTypesManager', () => {

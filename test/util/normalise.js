@@ -4,8 +4,8 @@ jest.disableAutomock()
 
 import '../__mocks__/WP'
 import normalise from '../../src/util/normalise'
-import contentTypesManager from '../../src/util/contentTypesManager'
-import schemasManager from '../../src/util/schemasManager'
+import contentTypesManager from '../../src/util/content-types-manager'
+import schemasManager from '../../src/util/schemas-manager'
 import { ContentTypes } from '../../src/constants'
 
 function setup () {

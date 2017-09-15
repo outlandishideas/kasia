@@ -1,14 +1,15 @@
 import { normalize, arrayOf } from 'normalizr'
 import merge from 'lodash.merge'
+import array from 'castarray'
 
-import schemasManager from './schemasManager'
-import contentTypesManager from './contentTypesManager'
+import schemasManager from './schemas-manager'
+import contentTypesManager from './content-types-manager'
 
 /** Split a response from the WP-API into its constituent entities. */
 export default function normalise (response, idAttribute) {
   const schemas = schemasManager.getAll() || schemasManager.init(idAttribute)
 
-  return [].concat(response).reduce((entities, entity) => {
+  return array(response).reduce((entities, entity) => {
     const type = contentTypesManager.derive(entity)
 
     if (!type) {

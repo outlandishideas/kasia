@@ -2,7 +2,7 @@
 
 jest.disableAutomock()
 
-import findEntities from '../../src/util/findEntities'
+import findEntities from '../../src/util/find-entities'
 
 describe('util/findEntities', () => {
   it('should be a function', () => {

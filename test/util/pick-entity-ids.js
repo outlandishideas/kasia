@@ -2,7 +2,7 @@
 
 jest.disableAutomock()
 
-import pickEntityIds from '../../src/util/pickEntityIds'
+import pickEntityIds from '../../src/util/pick-entity-ids'
 
 describe('util/pickEntityIds', () => {
   it('picks an id', () => {
