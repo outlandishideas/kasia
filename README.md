@@ -15,12 +15,8 @@
     <a href='https://coveralls.io/github/outlandishideas/kasia?branch=master'><img src='https://coveralls.io/repos/github/outlandishideas/kasia/badge.svg?branch=master' alt='Coverage Status' /></a>
 </p>
 
-<hr/>
-
 <p align="center">
-  <strong>
-  v4 introduces breaking changes. Please read the <a href="https://github.com/outlandishideas/kasia/blob/master/CHANGELOG.md">CHANGELOG</a> for more details.
-  </strong>
+  <a href="https://gitter.im/kasia-lib/Lobby"><img src="https://badges.gitter.im/gitterHQ/gitter.png" /></a>
 </p>
 
 <hr/>
