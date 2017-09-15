@@ -1,5 +1,5 @@
 import React from 'react'
-import { get } from 'lodash.get'
+import get from 'lodash.get'
 import PropTypes from 'prop-types'
 import { connect as reduxConnect } from 'react-redux'
 import { call } from 'redux-saga/effects'
