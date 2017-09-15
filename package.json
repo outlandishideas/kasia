@@ -41,7 +41,7 @@
     "is-node-fn": "^1.0.0",
     "lodash.get": "^4.4.2",
     "lodash.merge": "^4.6.0",
-    "normalizr": "^3.2.3",
+    "normalizr": "^2.3.1",
     "pick-to-array": "^1.1.0",
     "react": "^15.6.1",
     "react-dom": "^15.6.1",
