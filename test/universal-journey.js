@@ -31,15 +31,19 @@ const post1 = post
 const post2 = Object.assign({}, post, { id: 17, slug: 'post-2', title: { rendered: 'Post 2' } })
 const post3 = Object.assign({}, post, { id: 18, slug: 'post-3', title: { rendered: 'Post 3' } })
 
-// post to return from queryFn
-let returnPost
 
 // we need to mock responses from WP-API
-jest.mock('../src/util/query-builder', () => ({
-  buildQueryFunction: () => () => new Promise((resolve) => {
+jest.mock('../src/util/query-builder', () => ({ buildQueryFunction: jest.fn() }));
+import { buildQueryFunction } from '../src/util/query-builder'
+
+let returnPost
+
+buildQueryFunction.mockImplementation(() => () =>
+  new Promise((resolve) => {
     setTimeout(() => resolve(returnPost))
   })
-}))
+);
+
 
 function setup (keyEntitiesBy) {
   const { kasiaReducer, kasiaSagas } = kasia({

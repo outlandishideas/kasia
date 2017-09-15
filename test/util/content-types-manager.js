@@ -29,14 +29,15 @@ describe('util/contentTypesManager', () => {
       expect(fn).toThrowError(/Invalid content type object/)
     })
 
-    Object.values(ContentTypes).forEach((builtInType) => {
-      it('throws when name is ' + builtInType, () => {
-        const opts = { name: builtInType, plural: builtInType, slug: builtInType }
+    for (var builtInType in ContentTypes) {
+      const typeName = ContentTypes[builtInType]
+      it('throws when name is ' + typeName, () => {
+        const opts = { name: typeName, plural: typeName, slug: typeName }
         const fn = () => contentTypesManager.register(opts)
-        const expected = `Content type with name "${builtInType}" already exists.`
+        const expected = `Content type with name "${typeName}" already exists.`
         expect(fn).toThrowError(expected)
       })
-    })
+    }
 
     it('adds custom content type to cache', () => {
       const opts = { name: 'article', plural: 'articles', slug: 'articles' }
