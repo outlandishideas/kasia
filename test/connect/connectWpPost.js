@@ -1,6 +1,6 @@
 /* global jest:false, expect:false */
 
-jest.disableAutomock()
+// jest.disableAutomock() hoisted here by babel-jest
 
 import React from 'react'
 import merge from 'lodash.merge'
@@ -19,6 +19,8 @@ import ExplicitIdentifierComponent from '../__mocks__/components/ExplicitIdentif
 
 import postJson from '../__fixtures__/wp-api-responses/post'
 import bookJson from '../__fixtures__/wp-api-responses/book'
+
+jest.disableAutomock()
 
 const BuiltInType = (props, store) => mount(<BuiltInTypeComponent {...props} />, { context: { store } })
 const CustomType = (props, store) => mount(<CustomTypeComponent {...props} />, { context: { store } })

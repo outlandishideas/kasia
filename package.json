@@ -6,7 +6,8 @@
   "jsnext:main": "src/index.js",
   "scripts": {
     "build": "rimraf lib && babel -d lib/ src/",
-    "lint": "snazzy",
+    "lint": "standard | snazzy",
+    "lint:fix": "standard --fix | snazzy",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",

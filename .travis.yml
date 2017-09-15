@@ -3,5 +3,5 @@ node_js:
   - "6"
 # https://github.com/travis-ci/travis-ci/issues/4653#issuecomment-194051953
 before_install: "if [[ `npm -v` != 4* ]]; then npm i -g npm@4; fi"
-script: "npm run test:coverage"
+script: "npm run lint && npm run test:coverage"
 after_script: "cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js"

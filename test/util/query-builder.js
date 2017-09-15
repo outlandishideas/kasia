@@ -1,9 +1,11 @@
 /* global jest:false, expect:false */
 
-jest.disableAutomock()
+// jest.disableAutomock() hoisted here by babel-jest
 
 import getWP, { setWP } from '../../src/wpapi'
 import { deriveQueryFunction } from '../../src/util/query-builder'
+
+jest.disableAutomock()
 
 setWP({
   posts: () => ({

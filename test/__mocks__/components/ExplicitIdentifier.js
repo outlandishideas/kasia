@@ -1,11 +1,13 @@
 /* global jest:false */
 
-jest.disableAutomock()
+// jest.disableAutomock() hoisted here by babel-jest
 
 import React, { Component } from 'react'
 
 import { ContentTypes } from '../../../src/constants'
 import { connectWpPost } from '../../../src/connect'
+
+jest.disableAutomock()
 
 export class target extends Component {
   render () {

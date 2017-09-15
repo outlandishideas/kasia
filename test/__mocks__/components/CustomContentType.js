@@ -1,11 +1,13 @@
 /* global jest:false */
 
-jest.disableAutomock()
+// jest.disableAutomock() hoisted here by babel-jest
 
 import React, { Component } from 'react'
 
 import contentTypesManager from '../../../src/util/content-types-manager'
 import { connectWpPost } from '../../../src/connect'
+
+jest.disableAutomock()
 
 contentTypesManager.register({
   name: 'book',

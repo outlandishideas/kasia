@@ -1,12 +1,14 @@
 /* global jest:false, expect:false */
 
-jest.disableAutomock()
+// jest.disableAutomock() hoisted here by babel-jest
 
 import '../__mocks__/WP'
 import normalise from '../../src/util/normalise'
 import contentTypesManager from '../../src/util/content-types-manager'
 import schemasManager from '../../src/util/schemas-manager'
 import { ContentTypes } from '../../src/constants'
+
+jest.disableAutomock()
 
 function setup () {
   const testKeyById = true

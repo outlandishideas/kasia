@@ -1,6 +1,6 @@
 /* global jest:false, expect:false */
 
-jest.disableAutomock()
+// jest.disableAutomock() hoisted here by babel-jest
 
 import React from 'react'
 import merge from 'lodash.merge'
@@ -16,6 +16,8 @@ import multipleBooks from '../__mocks__/states/multipleBooks'
 import bookJson from '../__fixtures__/wp-api-responses/book'
 import CustomQueryComponent, { target, queryFn } from '../__mocks__/components/CustomQuery'
 import PreserveQueryComponent from '../__mocks__/components/CustomQueryPreserve'
+
+jest.disableAutomock()
 
 const CustomQuery = (props, store) => mount(<CustomQueryComponent {...props} />, { context: { store } })
 const PreserveQuery = (props, store) => mount(<PreserveQueryComponent {...props} />, { context: { store } })

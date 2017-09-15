@@ -1,8 +1,7 @@
 /* global jest:false, expect:false */
 
-jest.disableAutomock()
-
-jest.mock('redux-saga')
+// jest.disableAutomock() hoisted here by babel-jest
+// jest.mock('redux-saga') hoisted here by babel-jest
 
 import { combineReducers, createStore } from 'redux'
 import Wpapi from 'wpapi'
@@ -17,6 +16,10 @@ import pickEntityIds from '../../src/util/pick-entity-ids'
 import schemasManager from '../../src/util/schemas-manager'
 import { ContentTypes } from '../../src/constants'
 import { createPostRequest, acknowledgeRequest, completeRequest, failRequest } from '../../src/redux/actions'
+
+jest.disableAutomock()
+
+jest.mock('redux-saga')
 
 function setup (keyEntitiesBy) {
   const { kasiaReducer } = kasia({

@@ -1,6 +1,6 @@
 /* global jest:false, expect:false */
 
-jest.disableAutomock()
+// jest.disableAutomock() hoisted here by babel-jest
 
 import { put, call } from 'redux-saga/effects'
 
@@ -10,6 +10,8 @@ import { buildQueryFunction } from '../../src/util/query-builder'
 import { createPostRequest, createQueryRequest } from '../../src/redux/actions'
 import { fetch } from '../../src/redux/sagas'
 import { ActionTypes, ContentTypes } from '../../src/constants'
+
+jest.disableAutomock()
 
 describe('redux/sagas', () => {
   describe('createPostRequest', () => {
