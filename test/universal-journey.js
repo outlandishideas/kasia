@@ -21,6 +21,8 @@ import BuiltInContentType from './__mocks__/components/BuiltInContentType'
 import initialState from './__mocks__/states/initial'
 import post from './__fixtures__/wp-api-responses/post'
 
+import { buildQueryFunction } from '../src/util/query-builder'
+
 jest.disableAutomock()
 
 // we mock queryBuilder after imports
@@ -31,10 +33,8 @@ const post1 = post
 const post2 = Object.assign({}, post, { id: 17, slug: 'post-2', title: { rendered: 'Post 2' } })
 const post3 = Object.assign({}, post, { id: 18, slug: 'post-3', title: { rendered: 'Post 3' } })
 
-
 // we need to mock responses from WP-API
-jest.mock('../src/util/query-builder', () => ({ buildQueryFunction: jest.fn() }));
-import { buildQueryFunction } from '../src/util/query-builder'
+jest.mock('../src/util/query-builder', () => ({ buildQueryFunction: jest.fn() }))
 
 let returnPost
 
@@ -42,8 +42,7 @@ buildQueryFunction.mockImplementation(() => () =>
   new Promise((resolve) => {
     setTimeout(() => resolve(returnPost))
   })
-);
-
+)
 
 function setup (keyEntitiesBy) {
   const { kasiaReducer, kasiaSagas } = kasia({
