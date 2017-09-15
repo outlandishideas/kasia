@@ -94,6 +94,9 @@ Kasia suits applications that are built using these technologies:
 - WordPress
 - [WP-API plugin](http://v2.wp-api.org/)
 - [`node-wpapi`](https://github.com/WP-API/node-wpapi)
+- Node (>= 6)
+
+Please note that in v4.2 the required Node version has been raised to 6.
 
 ## Install
 
