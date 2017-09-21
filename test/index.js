@@ -1,9 +1,11 @@
 /* global jest:false, expect:false */
 
-jest.disableAutomock()
+// jest.disableAutomock() hoisted here by babel-jest
 
 import { wpapi } from './__mocks__/WP'
 import kasia, { preload, preloadQuery } from '../src'
+
+jest.disableAutomock()
 
 describe('Kasia', () => {
   it('exports a function', () => {

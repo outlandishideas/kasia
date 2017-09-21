@@ -1,8 +1,10 @@
 /* global jest:false, expect:false */
 
-jest.disableAutomock()
+// jest.disableAutomock() hoisted here by babel-jest
 
-import findEntities from '../../src/util/findEntities'
+import findEntities from '../../src/util/find-entities'
+
+jest.disableAutomock()
 
 describe('util/findEntities', () => {
   it('should be a function', () => {

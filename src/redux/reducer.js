@@ -1,7 +1,7 @@
 import merge from 'lodash.merge'
 import isNode from 'is-node-fn'
 
-import pickEntityIds from '../util/pickEntityIds'
+import pickEntityIds from '../util/pick-entity-ids'
 import normalise from '../util/normalise'
 import { ActionTypes } from '../constants'
 
@@ -20,7 +20,7 @@ export const INITIAL_STATE = {
  */
 function mergeNativeAndThirdPartyReducers (reducers, normaliser) {
   const baseReducer = {
-    [ActionTypes.AckRequest]: [acknowledgeReducer],
+    [ActionTypes.RequestAck]: [acknowledgeReducer],
     [ActionTypes.RequestComplete]: [completeReducer(normaliser)],
     [ActionTypes.RequestFail]: [failReducer]
   }
@@ -54,7 +54,7 @@ function mergeNativeAndThirdPartyReducers (reducers, normaliser) {
 }
 
 // ACKNOWLEDGE
-// Place record of request o
+// Place record of request on store
 export function acknowledgeReducer (state, action) {
   return merge({}, state, {
     queries: {
@@ -73,6 +73,11 @@ export function acknowledgeReducer (state, action) {
 export function completeReducer (normalise) {
   return (state_, action) => {
     const state = merge({}, state_)
+    const query = state.queries[action.id]
+
+    if (!query) {
+      throw new Error('cannot complete non-existent query')
+    }
 
     state.entities = merge(
       state.entities,
@@ -83,14 +88,22 @@ export function completeReducer (normalise) {
     // the completeRequest action as they do not need a query in the store
     // (there is no component to pick it up).
     if (typeof action.id === 'number') {
-      state.queries[action.id] = {
+      let updated = {
         id: action.id,
-        entities: pickEntityIds(action.data),
-        paging: action.data._paging || {},
         prepared: isNode(),
         complete: true,
         OK: true
       }
+
+      if (query.preserve) {
+        updated.result = action.data
+        updated.paging = null
+      } else {
+        updated.entities = pickEntityIds(action.data)
+        updated.paging = action.data._paging || {}
+      }
+
+      state.queries[action.id] = updated
     }
 
     return state

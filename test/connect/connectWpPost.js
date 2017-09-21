@@ -1,12 +1,12 @@
 /* global jest:false, expect:false */
 
-jest.disableAutomock()
+// jest.disableAutomock() hoisted here by babel-jest
 
 import React from 'react'
 import merge from 'lodash.merge'
 import { mount } from 'enzyme'
 
-import queryCounter from '../../src/util/queryCounter'
+import queryCounter from '../../src/util/query-counter'
 import { ActionTypes } from '../../src/constants'
 
 import '../__mocks__/WP'
@@ -19,6 +19,8 @@ import ExplicitIdentifierComponent from '../__mocks__/components/ExplicitIdentif
 
 import postJson from '../__fixtures__/wp-api-responses/post'
 import bookJson from '../__fixtures__/wp-api-responses/book'
+
+jest.disableAutomock()
 
 const BuiltInType = (props, store) => mount(<BuiltInTypeComponent {...props} />, { context: { store } })
 const CustomType = (props, store) => mount(<CustomTypeComponent {...props} />, { context: { store } })
@@ -49,8 +51,8 @@ describe('connectWpPost', () => {
 
     it('should wrap the component', () => {
       // Components are wrapped first by react-redux connect()
-      expect(BuiltInTypeComponent.WrappedComponent.WrappedComponent).toBe(target)
-      expect(BuiltInTypeComponent.WrappedComponent.__kasia__).toBe(true)
+      expect(BuiltInTypeComponent.WrappedComponent).toBe(target)
+      expect(BuiltInTypeComponent.__kasia__).toBe(true)
     })
 
     it('should render loading', () => {

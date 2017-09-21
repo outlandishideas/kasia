@@ -4,7 +4,7 @@ import { call, put } from 'redux-saga/effects'
 import getWP from '../wpapi'
 import { ActionTypes } from '../constants'
 import { acknowledgeRequest, completeRequest, failRequest } from './actions'
-import { buildQueryFunction } from '../util/queryBuilder'
+import { buildQueryFunction } from '../util/query-builder'
 
 /**
  * Make a fetch request to the WP-API according to the action

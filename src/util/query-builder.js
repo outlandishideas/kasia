@@ -1,4 +1,4 @@
-import contentTypesManager from './contentTypesManager'
+import contentTypesManager from './content-types-manager'
 
 /** Fetch data for a single post via the `wpapi` instance. */
 function queryFn (wpapi, contentTypeMethodName, idTypeMethodName, id) {

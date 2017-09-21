@@ -5,12 +5,12 @@ export const createPostRequest = (contentType, identifier) =>
   ({ type: ActionTypes.RequestCreatePost, contentType, identifier })
 
 /** Initiate an arbitrary request to the WP-API. */
-export const createQueryRequest = (queryFn) =>
-  ({ type: ActionTypes.RequestCreateQuery, queryFn })
+export const createQueryRequest = (queryFn, preserve) =>
+  ({ type: ActionTypes.RequestCreateQuery, queryFn, preserve })
 
 /** Acknowledge a create* request by placing record of it on the store. */
 export const acknowledgeRequest = (action) =>
-  ({ ...action, type: ActionTypes.AckRequest })
+  ({ ...action, type: ActionTypes.RequestAck })
 
 /** Place the result of a successful request on the store */
 export const completeRequest = (id, data) =>

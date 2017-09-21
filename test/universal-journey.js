@@ -1,10 +1,6 @@
 /* global jest:false, expect:false */
 
-jest.disableAutomock()
-
-// we mock queryBuilder after imports
-// we need to mock client and server environments
-jest.mock('is-node-fn')
+// jest.disableAutomock() hoisted here by babel-jest
 
 import React from 'react'
 import createSagaMiddleware from 'redux-saga'
@@ -16,8 +12,8 @@ import { mount } from 'enzyme'
 
 import './__mocks__/WP'
 import kasia from '../src'
-import queryCounter from '../src/util/queryCounter'
-import schemasManager from '../src/util/schemasManager'
+import queryCounter from '../src/util/query-counter'
+import schemasManager from '../src/util/schemas-manager'
 import { ActionTypes } from '../src/constants'
 import { fetch } from '../src/redux/sagas'
 
@@ -25,19 +21,28 @@ import BuiltInContentType from './__mocks__/components/BuiltInContentType'
 import initialState from './__mocks__/states/initial'
 import post from './__fixtures__/wp-api-responses/post'
 
+import { buildQueryFunction } from '../src/util/query-builder'
+
+jest.disableAutomock()
+
+// we mock queryBuilder after imports
+// we need to mock client and server environments
+jest.mock('is-node-fn')
+
 const post1 = post
 const post2 = Object.assign({}, post, { id: 17, slug: 'post-2', title: { rendered: 'Post 2' } })
 const post3 = Object.assign({}, post, { id: 18, slug: 'post-3', title: { rendered: 'Post 3' } })
 
-// post to return from queryFn
+// we need to mock responses from WP-API
+jest.mock('../src/util/query-builder', () => ({ buildQueryFunction: jest.fn() }))
+
 let returnPost
 
-// we need to mock responses from WP-API
-jest.mock('../src/util/queryBuilder', () => ({
-  buildQueryFunction: () => () => new Promise((resolve) => {
+buildQueryFunction.mockImplementation(() => () =>
+  new Promise((resolve) => {
     setTimeout(() => resolve(returnPost))
   })
-}))
+)
 
 function setup (keyEntitiesBy) {
   const { kasiaReducer, kasiaSagas } = kasia({
@@ -107,7 +112,7 @@ describe('Universal journey', function () {
         // acknowledge request
         const ackAction = {
           id: 0,
-          type: ActionTypes.AckRequest,
+          type: ActionTypes.RequestAck,
           identifier: post1[keyEntitiesBy],
           contentType: 'post'
         }

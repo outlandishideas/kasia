@@ -1,14 +1,16 @@
 /* global jest:false, expect:false */
 
-jest.disableAutomock()
+// jest.disableAutomock() hoisted here by babel-jest
 
-import queryCounter from '../../src/util/queryCounter'
+import queryCounter from '../../src/util/query-counter'
 import { ActionTypes, ContentTypes } from '../../src/constants'
 import { fetch } from '../../src/redux/sagas'
 
 import BuiltInContentType from '../__mocks__/components/BuiltInContentType'
 import BadContentType from '../__mocks__/components/BadContentType'
 import CustomQuery from '../__mocks__/components/CustomQuery'
+
+jest.disableAutomock()
 
 describe('connect/preload', () => {
   const props = { params: { id: 16 } }

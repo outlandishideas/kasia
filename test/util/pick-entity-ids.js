@@ -1,8 +1,10 @@
 /* global jest:false, expect:false */
 
-jest.disableAutomock()
+// jest.disableAutomock() hoisted here by babel-jest
 
-import pickEntityIds from '../../src/util/pickEntityIds'
+import pickEntityIds from '../../src/util/pick-entity-ids'
+
+jest.disableAutomock()
 
 describe('util/pickEntityIds', () => {
   it('picks an id', () => {
