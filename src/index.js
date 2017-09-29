@@ -9,6 +9,7 @@ import { default as _runSagas } from './util/run-sagas'
 import { setWP } from './wpapi'
 import { watchRequests } from './redux/sagas'
 import { rewind as connectRewind } from './connect'
+import { createQueryRequest, createPostRequest } from './redux/actions'
 
 export * from './util/preload'
 
@@ -80,6 +81,7 @@ function kasia (opts = {}) {
 
   return {
     kasiaReducer: makeReducer({ keyEntitiesBy, reducers }),
-    kasiaSagas: sagas.map((saga) => effects.spawn(saga))
+    kasiaSagas: sagas.map((saga) => effects.spawn(saga)),
+    kasiaActions: { createQueryRequest, createPostRequest }
   }
 }

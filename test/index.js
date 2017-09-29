@@ -12,6 +12,16 @@ describe('Kasia', () => {
     expect(typeof kasia).toEqual('function')
   })
 
+  it('returns the right things', () => {
+    const { kasiaActions, kasiaReducer, kasiaSagas } = kasia({ wpapi })
+    expect(typeof kasiaActions).toEqual('object')
+    expect(typeof kasiaActions.createQueryRequest).toEqual('function')
+    expect(typeof kasiaActions.createPostRequest).toEqual('function')
+    expect(typeof kasiaReducer).toEqual('object')
+    expect(typeof kasiaReducer.wordpress).toEqual('function')
+    expect(typeof kasiaSagas).toEqual('object')
+  })
+
   it('exports preloaders', () => {
     expect(typeof preload).toEqual('function')
     expect(typeof preloadQuery).toEqual('function')
