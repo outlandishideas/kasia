@@ -8,7 +8,6 @@ import queryCounter from './util/query-counter'
 import { default as _runSagas } from './util/run-sagas'
 import { setWP } from './wpapi'
 import { watchRequests } from './redux/sagas'
-import { rewind as connectRewind } from './connect'
 import { createQueryRequest, createPostRequest } from './redux/actions'
 
 export * from './util/preload'
@@ -24,13 +23,12 @@ const COMPONENTS_BASE = {
 /** Reset the internal query counter and first mount bool.
  *  Should be called before each SSR. */
 kasia.rewind = function rewind () {
-  connectRewind()
   queryCounter.reset()
 }
 
 /** Run all `sagas` until they are complete. */
 export function runSagas (store, sagas) {
-  kasia.rewind()
+  queryCounter.reset()
   return _runSagas(store, sagas)
 }
 
