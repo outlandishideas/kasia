@@ -75,7 +75,8 @@ export function completeReducer (normalise) {
     const state = merge({}, state_)
     const query = state.queries[action.id]
 
-    if (!query) {
+    // action.id === null when created via util/preloadQuery
+    if (action.id !== null && !query) {
       throw new Error('cannot complete non-existent query')
     }
 
