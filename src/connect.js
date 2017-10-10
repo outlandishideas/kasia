@@ -15,16 +15,8 @@ import { fetch } from './redux/sagas'
 const WARN_NO_ENTITIES_PROP = 0
 const WARN_NO_REWIND = 1
 
-// Is a component the first Kasia component to mount?
-let firstMount = true
-
 // What have we warned the consumer of?
 let haveWarned = []
-
-/** Reset first mount flag, should be called before SSR of each request. */
-export function rewind () {
-  firstMount = true
-}
 
 /** Get entity identifier: either `id` as-is or the result of calling `id(props)`. */
 export function identifier (displayName, id, props) {
@@ -108,21 +100,13 @@ const base = (target) => {
     componentWillMount () {
       const state = this.props.wordpress
       const numQueries = Object.keys(state.queries).length
-      const nextCounterIndex = queryCounter.observeNext()
 
-      if (!numQueries && nextCounterIndex > 0 && !haveWarned[WARN_NO_REWIND]) {
+      if (!numQueries && queryCounter.value > 0 && !haveWarned[WARN_NO_REWIND]) {
         console.log(
           '[kasia] the query counter and queries in the store are not in sync. ' +
           'This may be because you are not calling `kasia.rewind()` before running preloaders.'
         )
         haveWarned[WARN_NO_REWIND] = true
-      }
-
-      // When doing SSR we need to reset the counter so that components start
-      // at queryId=0, aligned with the preloaders that have been run for them.
-      if (firstMount) {
-        queryCounter.reset()
-        firstMount = false
       }
 
       const queryId = this.queryId = queryCounter.next()

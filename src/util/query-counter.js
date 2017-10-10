@@ -1,7 +1,7 @@
 let queryId = 0
 
 export default {
-  observeNext () {
+  get value () {
     return queryId
   },
   reset () {
