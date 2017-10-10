@@ -1,5 +1,4 @@
-import { takeEvery } from 'redux-saga'
-import { call, put } from 'redux-saga/effects'
+import { takeEvery, call, put } from 'redux-saga/effects'
 
 import getWP from '../wpapi'
 import { ActionTypes } from '../constants'
