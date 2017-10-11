@@ -137,7 +137,10 @@ const base = (target) => {
 
     componentWillReceiveProps (nextProps) {
       const willUpdate = this._shouldUpdate(this.props, nextProps, this.context.store.getState())
-      if (willUpdate) this._requestWpData(nextProps, queryCounter.next())
+      if (willUpdate) {
+        debug(displayName, 'sending request for new data with props:', nextProps)
+        this._requestWpData(nextProps, queryCounter.next())
+      }
     }
 
     render () {
