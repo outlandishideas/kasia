@@ -131,15 +131,13 @@ const base = (target) => {
       // We found a prepared query matching `queryId` - use it.
       if (query && query.prepared) {
         debug(`found prepared data for ${displayName} at queryId=${queryId}`)
-      }
-      // No prepared query found
-      else if (!isNode()) {
-        // No query found, request data and reuse the queryId
+      } else if (!isNode()) {
+        // No prepared query found
         if (!query) {
+          // No query found, request data and reuse the queryId
           this._requestWpData(this.props, queryId)
-        }
-        // Query found but it is not prepared, request data with new queryId
-        else if (!query.prepared) {
+        } else if (!query.prepared) {
+          // Query found but it is not prepared, request data with new queryId
           this._requestWpData(this.props, queryCounter.next())
         }
       }
