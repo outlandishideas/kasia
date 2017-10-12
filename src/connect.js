@@ -112,8 +112,9 @@ const base = (target) => {
 
       if (!numQueries && queryCounter.value > 0 && !haveWarned[WARN_NO_REWIND]) {
         console.log(
-          '[kasia] the query counter and queries in the store are not in sync. ' +
-          'This may be because you are not calling `kasia.rewind()` before running preloaders.'
+          '[kasia] query counter and queries in store are not in sync. ' +
+          'Are you calling `kasia.rewind()` before running preloaders?\n' +
+          `numQueries=${numQueries}, currentQueryId=${queryCounter.value}`
         )
         haveWarned[WARN_NO_REWIND] = true
       }
@@ -121,6 +122,7 @@ const base = (target) => {
       // When doing SSR we need to reset the counter so that components start
       // at queryId=0, aligned with the preloaders that have been run for them.
       if (firstMount) {
+        debug(`${displayName} componentWillMount queryCounter reset`)
         queryCounter.reset()
         firstMount = false
       }

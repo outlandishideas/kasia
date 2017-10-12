@@ -24,6 +24,7 @@ const COMPONENTS_BASE = {
 /** Reset the internal query counter and first mount bool.
  *  Should be called before each SSR. */
 kasia.rewind = function rewind () {
+  debug(`ssr rewind`)
   connectRewind()
   queryCounter.reset()
 }
