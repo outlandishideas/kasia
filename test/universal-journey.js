@@ -12,8 +12,8 @@ import { mount } from 'enzyme'
 
 import './__mocks__/WP'
 import kasia from '../src'
-import queryCounter from '../src/util/query-counter'
 import schemasManager from '../src/util/schemas-manager'
+import { rewind } from '../src/connect'
 import { ActionTypes } from '../src/constants'
 import { fetch } from '../src/redux/sagas'
 
@@ -81,7 +81,7 @@ describe('Universal journey', function () {
       it('SERVER', () => {
         schemasManager.__flush__()
         newStore() // we would create new store for each request
-        queryCounter.reset()
+        rewind()
         isNode.mockReturnValue(true)
         returnPost = post1
       })
@@ -98,7 +98,6 @@ describe('Universal journey', function () {
 
       it('  ...that contains a saga function and action object', () => {
         action = {
-          id: 0,
           type: ActionTypes.RequestCreatePost,
           identifier: post1[keyEntitiesBy],
           contentType: 'post'
@@ -111,7 +110,6 @@ describe('Universal journey', function () {
       it('  should run preloader', () => {
         // acknowledge request
         const ackAction = {
-          id: 0,
           type: ActionTypes.RequestAck,
           identifier: post1[keyEntitiesBy],
           contentType: 'post'
@@ -136,7 +134,7 @@ describe('Universal journey', function () {
 
       it('CLIENT', () => {
         // imitate client
-        queryCounter.reset()
+        rewind()
         isNode.mockReturnValue(false)
         returnPost = post2
       })

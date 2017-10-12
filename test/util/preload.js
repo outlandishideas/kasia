@@ -57,14 +57,12 @@ describe('util/preload', () => {
       expect(res.value[0].FORK).toBeTruthy()
       expect(res.value[0]).toEqual(fork(fetch, {
         type: ActionTypes.RequestCreatePost,
-        id: 0,
         contentType: 'post',
         identifier: 16
       }))
 
       expect(res.value[1].FORK).toBeTruthy()
       expect(res.value[1].FORK).toBeTruthy()
-      expect(res.value[1].FORK.args[0].id).toEqual(1)
       expect(res.value[1].FORK.args[0].type).toEqual(ActionTypes.RequestCreateQuery)
       expect(res.value[1].FORK.args[0].queryFn.toString()).toEqual(wrappedQueryFnStr)
     })

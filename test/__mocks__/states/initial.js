@@ -1,6 +1,7 @@
 export default (keyEntitiesBy = 'id') => ({
   wordpress: {
-    keyEntitiesBy,
+    __keyEntitiesBy: keyEntitiesBy,
+    __nextQueryId: 0,
     queries: {},
     entities: {}
   }

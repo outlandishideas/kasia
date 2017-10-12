@@ -7,7 +7,7 @@ import merge from 'lodash.merge'
 import isNode from 'is-node-fn'
 import { mount } from 'enzyme'
 
-import queryCounter from '../../src/util/query-counter'
+import { rewind } from '../../src/connect'
 import { ActionTypes } from '../../src/constants'
 
 import '../__mocks__/WP'
@@ -46,7 +46,7 @@ describe('connectWpPost', () => {
     let rendered
 
     beforeAll(() => {
-      queryCounter.reset()
+      rewind()
       const props = { params: { id: postJson.id } }
       state = initialState()
       store = setup()
@@ -68,7 +68,6 @@ describe('connectWpPost', () => {
       expect(action.type).toEqual(ActionTypes.RequestCreatePost)
       expect(action.contentType).toEqual('post')
       expect(action.identifier).toEqual(postJson.id)
-      expect(action.id).toEqual(0)
     })
 
     it('should render post title', () => {
@@ -93,7 +92,6 @@ describe('connectWpPost', () => {
       expect(action.type).toEqual(ActionTypes.RequestCreatePost)
       expect(action.contentType).toEqual('post')
       expect(action.identifier).toEqual(100)
-      expect(action.id).toEqual(1)
     })
   })
 
@@ -102,7 +100,7 @@ describe('connectWpPost', () => {
     let rendered
 
     beforeAll(() => {
-      queryCounter.reset()
+      rewind()
       const props = { params: { id: bookJson.id } }
       state = stateMultipleEntities
       store = setup()
@@ -114,7 +112,6 @@ describe('connectWpPost', () => {
       expect(action.type).toEqual(ActionTypes.RequestCreatePost)
       expect(action.contentType).toEqual('book')
       expect(action.identifier).toEqual(bookJson.id)
-      expect(action.id).toEqual(0)
     })
 
     it('should render book title', () => {
@@ -132,7 +129,7 @@ describe('connectWpPost', () => {
     let rendered
 
     beforeAll(() => {
-      queryCounter.reset()
+      rewind()
       const props = { params: { id: postJson.id } }
       state = stateMultipleEntities
       store = setup()
@@ -144,7 +141,6 @@ describe('connectWpPost', () => {
       expect(action.type).toEqual(ActionTypes.RequestCreatePost)
       expect(action.contentType).toEqual('post')
       expect(action.identifier).toEqual(postJson.slug)
-      expect(action.id).toEqual(0)
     })
 
     it('should render post title', () => {

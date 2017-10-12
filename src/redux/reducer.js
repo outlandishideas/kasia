@@ -6,6 +6,8 @@ import normalise from '../util/normalise'
 import { ActionTypes } from '../constants'
 
 export const INITIAL_STATE = {
+  __nextQueryId: 0,
+  __keyEntitiesBy: 'id',
   // WP-API request/response metadata are stored here
   queries: {},
   // Entities are normalised and stored here
@@ -55,11 +57,12 @@ function mergeNativeAndThirdPartyReducers (reducers, normaliser) {
 
 // ACKNOWLEDGE
 // Place record of request on store
-export function acknowledgeReducer (state, action) {
+export function acknowledgeReducer (state) {
   return merge({}, state, {
+    __nextQueryId: state.__nextQueryId + 1,
     queries: {
-      [action.id]: {
-        id: action.id,
+      [state.__nextQueryId]: {
+        id: state.__nextQueryId,
         prepared: isNode(),
         complete: false,
         OK: null
@@ -136,7 +139,11 @@ export function failReducer (state, action) {
 export default function createReducer ({ keyEntitiesBy, reducers }) {
   const normaliser = (data) => normalise(data, keyEntitiesBy)
   const reducer = mergeNativeAndThirdPartyReducers(reducers, normaliser)
-  const initialState = Object.assign({}, INITIAL_STATE, { keyEntitiesBy })
+
+  const initialState = Object.assign({},
+    INITIAL_STATE,
+    { __keyEntitiesBy: keyEntitiesBy }
+  )
 
   return {
     wordpress: function kasiaReducer (state = initialState, action) {

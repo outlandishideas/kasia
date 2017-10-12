@@ -11,9 +11,9 @@ import initialState from '../__mocks__/states/initial'
 
 import kasia from '../../src'
 import normalise from '../../src/util/normalise'
-import queryCounter from '../../src/util/query-counter'
 import pickEntityIds from '../../src/util/pick-entity-ids'
 import schemasManager from '../../src/util/schemas-manager'
+import { rewind } from '../../src/connect'
 import { ContentTypes } from '../../src/constants'
 import { createPostRequest, acknowledgeRequest, completeRequest, failRequest } from '../../src/redux/actions'
 
@@ -40,7 +40,7 @@ describe('reducer journey', () => {
   ]
 
   beforeEach(() => {
-    queryCounter.reset()
+    rewind()
     schemasManager.__flush__()
   })
 
@@ -60,7 +60,6 @@ describe('reducer journey', () => {
 
       it('can Request*Create', () => {
         createAction = createPostRequest(ContentTypes.Post, param)
-        createAction.id = queryCounter.next() // usually done by component
         store.dispatch(createAction)
       })
 

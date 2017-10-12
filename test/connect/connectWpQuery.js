@@ -7,8 +7,7 @@ import merge from 'lodash.merge'
 import isNode from 'is-node-fn'
 import { mount } from 'enzyme'
 
-import queryCounter from '../../src/util/query-counter'
-import { wrapQueryFn } from '../../src/connect'
+import { wrapQueryFn, rewind } from '../../src/connect'
 import { ActionTypes } from '../../src/constants'
 
 import '../__mocks__/WP'
@@ -35,7 +34,7 @@ jest.mock('is-node-fn')
 isNode.mockReturnValue(false)
 
 describe('connectWpQuery', () => {
-  beforeEach(() => queryCounter.reset())
+  beforeEach(() => rewind())
 
   describe('non-preserved query', () => {
     it('should wrap the component', () => {
@@ -71,7 +70,6 @@ describe('connectWpQuery', () => {
       const { store } = setup(initialState('id'))
       CustomQuery({ params: { id: 10 } }, store)
       const action = store.dispatch.mock.calls[0][0]
-      expect(action.id).toEqual(0)
       expect(action.type).toEqual(ActionTypes.RequestCreateQuery)
       expect(action.queryFn.toString()).toEqual(wrapQueryFn(queryFn).toString())
     })

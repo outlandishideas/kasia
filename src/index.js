@@ -4,11 +4,10 @@ import debug, { toggleDebug } from './util/debug'
 import makeReducer from './redux/reducer'
 import invariants from './invariants'
 import contentTypesManager from './util/content-types-manager'
-import queryCounter from './util/query-counter'
+import { rewind } from './connect'
 import { default as _runSagas } from './util/run-sagas'
 import { setWP } from './wpapi'
 import { watchRequests } from './redux/sagas'
-import { rewind as connectRewind } from './connect'
 import { createQueryRequest, createPostRequest } from './redux/actions'
 
 export * from './util/preload'
@@ -21,16 +20,13 @@ const COMPONENTS_BASE = {
   reducers: {}
 }
 
-/** Reset the internal query counter and first mount bool.
+/** Reset the connect internal query counter.
  *  Should be called before each SSR. */
-kasia.rewind = function rewind () {
-  connectRewind()
-  queryCounter.reset()
-}
+kasia.rewind = rewind
 
 /** Run all `sagas` until they are complete. */
 export function runSagas (store, sagas) {
-  kasia.rewind()
+  rewind()
   return _runSagas(store, sagas)
 }
 

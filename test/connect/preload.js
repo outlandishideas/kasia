@@ -2,7 +2,7 @@
 
 // jest.disableAutomock() hoisted here by babel-jest
 
-import queryCounter from '../../src/util/query-counter'
+import { rewind } from '../../src/connect'
 import { ActionTypes, ContentTypes } from '../../src/constants'
 import { fetch } from '../../src/redux/sagas'
 
@@ -15,7 +15,7 @@ jest.disableAutomock()
 describe('connect/preload', () => {
   const props = { params: { id: 16 } }
 
-  beforeAll(() => queryCounter.reset())
+  beforeAll(() => rewind())
 
   describe('connectWpPost', () => {
     const preloader = BuiltInContentType.preload

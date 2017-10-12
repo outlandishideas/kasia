@@ -8,23 +8,16 @@ import { call } from 'redux-saga/effects'
 import debug from './util/debug'
 import contentTypesManager from './util/content-types-manager'
 import invariants from './invariants'
-import queryCounter from './util/query-counter'
 import findEntities from './util/find-entities'
 import { createPostRequest, createQueryRequest } from './redux/actions'
 import { fetch } from './redux/sagas'
 
-const WARN_NO_ENTITIES_PROP = 0
-const WARN_NO_REWIND = 1
-
 // Is a component the first Kasia component to mount?
-let firstMount = true
-
-// What have we warned the consumer of?
-let haveWarned = []
+let nextQueryId = 0
 
 /** Reset first mount flag, should be called before SSR of each request. */
 export function rewind () {
-  firstMount = true
+  nextQueryId = 0
 }
 
 /** Get entity identifier: either `id` as-is or the result of calling `id(props)`. */
@@ -62,14 +55,13 @@ const base = (target) => {
     }
 
     /** Make request for new data from WP-API. */
-    _requestWpData (props, queryId) {
+    _requestWpData (props) {
       const action = this._getRequestWpDataAction(props)
-      action.id = queryId
-      this.queryId = queryId
       this.props.dispatch(action)
     }
 
-    /** Find the query for this component and its corresponding data and return props object containing them. */
+    /** Find the query for this component and its corresponding data
+     *  and return props object containing them. */
     _reconcileWpData (props) {
       const query = this._query()
       const fallbackQuery = { complete: false, OK: null }
@@ -83,23 +75,14 @@ const base = (target) => {
         console.log(query.error)
       }
 
-      const result = {
+      debug(`content for ${displayName} on \`props.kasia.${this.dataKey}\``)
+
+      return {
         kasia: {
           query: query || fallbackQuery,
           [this.dataKey]: data
         }
       }
-
-      debug(`content for ${displayName} on \`props.kasia.${this.dataKey}\``)
-
-      return Object.defineProperty(result, 'entities', {
-        get: () => {
-          if (!haveWarned[WARN_NO_ENTITIES_PROP]) {
-            console.log('[kasia] `props.kasia.entities` is replaced by `props.kasia.data` in v4.')
-            haveWarned[WARN_NO_ENTITIES_PROP] = true
-          }
-        }
-      })
     }
 
     _query () {
@@ -108,38 +91,15 @@ const base = (target) => {
 
     componentWillMount () {
       const state = this.props.wordpress
-      const numQueries = Object.keys(state.queries).length
-
-      if (!numQueries && queryCounter.value > 0 && !haveWarned[WARN_NO_REWIND]) {
-        console.log(
-          '[kasia] the query counter and queries in the store are not in sync. ' +
-          'This may be because you are not calling `kasia.rewind()` before running preloaders.'
-        )
-        haveWarned[WARN_NO_REWIND] = true
-      }
-
-      // When doing SSR we need to reset the counter so that components start
-      // at queryId=0, aligned with the preloaders that have been run for them.
-      if (firstMount) {
-        queryCounter.reset()
-        firstMount = false
-      }
-
-      const queryId = this.queryId = queryCounter.next()
+      const queryId = this.queryId = nextQueryId++
       const query = state.queries[queryId]
 
-      // We found a prepared query matching `queryId` - use it.
+      // We found a prepared query matching queryId, use it
       if (query && query.prepared) {
         debug(`found prepared data for ${displayName} at queryId=${queryId}`)
       } else if (!isNode()) {
-        // No prepared query found
-        if (!query) {
-          // No query found, request data and reuse the queryId
-          this._requestWpData(this.props, queryId)
-        } else if (!query.prepared) {
-          // Query found but it is not prepared, request data with new queryId
-          this._requestWpData(this.props, queryCounter.next())
-        }
+        // Query found but it is not prepared, request data with new queryId
+        this._requestWpData(this.props)
       }
     }
 
@@ -147,7 +107,8 @@ const base = (target) => {
       const willUpdate = this._shouldUpdate(this.props, nextProps, this.context.store.getState())
       if (willUpdate) {
         debug(displayName, 'sending request for new data with props:', nextProps)
-        this._requestWpData(nextProps, queryCounter.next())
+        this.queryId = this.props.wordpress.__nextQueryId
+        this._requestWpData(nextProps)
       }
     }
 
@@ -206,7 +167,6 @@ export function connectWpPost (contentType, id) {
         debug(displayName, 'connectWpPost preload with props:', props)
         invariants.isValidContentType(typeConfig, contentType, `${displayName} component`)
         const action = createPostRequest(contentType, identifier(displayName, id, props))
-        action.id = queryCounter.next()
         return [fetch, action]
       }
 
@@ -232,6 +192,9 @@ export function connectWpPost (contentType, id) {
         if (entities) {
           const keys = Object.keys(entities)
           const realId = identifier(displayName, id, props)
+          //
+          // console.log(entities)
+          // console.log(realId)
 
           for (let i = 0, len = keys.length; i < len; i++) {
             const entity = entities[keys[i]]
@@ -332,7 +295,6 @@ export function connectWpQuery (queryFn, shouldUpdate, opts = {}) {
         debug(displayName, 'connectWpQuery preload with props:', props, 'state:', state)
         const wrappedQueryFn = wrapQueryFn(queryFn, props, state)
         const action = createQueryRequest(wrappedQueryFn, opts.preserve)
-        action.id = queryCounter.next()
         return [fetch, action]
       }
 
@@ -350,7 +312,11 @@ export function connectWpQuery (queryFn, shouldUpdate, opts = {}) {
         } else if (opts.preserve) {
           return query.result
         } else {
-          return findEntities(state.entities, state.keyEntitiesBy, query.entities)
+          return findEntities(
+            state.entities,
+            state.__keyEntitiesBy,
+            query.entities
+          )
         }
       }
     }

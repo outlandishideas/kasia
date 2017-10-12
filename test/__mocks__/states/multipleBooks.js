@@ -4,7 +4,7 @@ import bookJson from '../../__fixtures__/wp-api-responses/book'
 
 export default {
   wordpress: {
-    keyEntitiesBy: 'id',
+    __keyEntitiesBy: 'id',
     queries: {
       '0': {
         id: 0,

@@ -2,10 +2,11 @@
 
 // jest.disableAutomock() hoisted here by babel-jest
 
-import { put, call } from 'redux-saga/effects'
+import { put, call, select } from 'redux-saga/effects'
 
 import '../__mocks__/WP'
 import getWP from '../../src/wpapi'
+import { _getLastQueryId } from '../../src/redux/sagas';
 import { buildQueryFunction } from '../../src/util/query-builder'
 import { createPostRequest, createQueryRequest } from '../../src/redux/actions'
 import { fetch } from '../../src/redux/sagas'
@@ -22,6 +23,12 @@ describe('redux/sagas', () => {
       const actual = generator.next().value
       const expected = put({ ...action, type: ActionTypes.RequestAck })
       expect(actual).toEqual(expected)
+    })
+
+    it('yields a select for last query id', () => {
+      const actual = generator.next().value
+      const expected = select(_getLastQueryId)
+      expect(actual.SELECT.selector).toEqual(expected.SELECT.selector)
     })
 
     it('yields a call to result of buildQueryFunction', () => {
@@ -48,6 +55,12 @@ describe('redux/sagas', () => {
       const actual = generator.next().value
       const expected = put({ ...action, type: ActionTypes.RequestAck })
       expect(actual).toEqual(expected)
+    })
+
+    it('yields a select for last query id', () => {
+      const actual = generator.next().value
+      const expected = select(_getLastQueryId)
+      expect(actual.SELECT.selector).toEqual(expected.SELECT.selector)
     })
 
     it('yields a call to queryFn', () => {
