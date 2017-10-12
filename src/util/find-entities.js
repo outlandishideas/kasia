@@ -1,5 +1,3 @@
-const isDef = (v) => typeof v !== 'undefined'
-
 /** Filter `entities` to contain only those whose `keyToInspect` is in `identifiers`. */
 export default function findEntities (entities, keyToInspect, identifiers) {
   identifiers = identifiers.map(String)
@@ -15,9 +13,15 @@ export default function findEntities (entities, keyToInspect, identifiers) {
       // Try to find entity by `keyToInspect` but fall back on id and then slug as
       // for entities that don't have an `id` identifiers will contain their slug
       // and vice-versa for entities that don't have a `slug`
-      let entityId = isDef(entity[keyToInspect])
-        ? entity[keyToInspect]
-        : isDef(entity.id) ? entity.id : entity.slug
+      let entityId
+
+      if (typeof entity[keyToInspect] !== 'undefined') {
+        entityId = entity[keyToInspect]
+      } else if (typeof entity.id !== 'undefined') {
+        entityId = entity.id
+      } else {
+        entityId = entity.slug
+      }
 
       entityId = String(entityId)
 

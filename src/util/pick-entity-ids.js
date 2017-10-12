@@ -12,12 +12,13 @@ export default function pickEntityIds (data) {
   const entityIdentifiers = pickToArray(data, 'id')
 
   // Accommodate content types that do not have an `id` property
-  ;[].concat(data).forEach((entity) => {
+  for (let i = 0, len = data.length; i < len; i++) {
+    const entity = data[i]
     const type = contentTypesManager.derive(entity)
     if (ContentTypesWithoutId.includes(type)) {
       entityIdentifiers.push(...pickToArray(entity, 'slug'))
     }
-  })
+  }
 
   return entityIdentifiers
 }
