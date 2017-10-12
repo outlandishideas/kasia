@@ -4,6 +4,7 @@
 
 import React from 'react'
 import merge from 'lodash.merge'
+import isNode from 'is-node-fn'
 import { mount } from 'enzyme'
 
 import queryCounter from '../../src/util/query-counter'
@@ -29,6 +30,9 @@ function setup (state) {
   const store = { dispatch, getState, subscribe }
   return { store }
 }
+
+jest.mock('is-node-fn')
+isNode.mockReturnValue(false)
 
 describe('connectWpQuery', () => {
   beforeEach(() => queryCounter.reset())

@@ -1,6 +1,7 @@
 import React from 'react'
 import get from 'lodash.get'
 import PropTypes from 'prop-types'
+import isNode from 'is-node-fn'
 import { connect as reduxConnect } from 'react-redux'
 import { call } from 'redux-saga/effects'
 
@@ -128,11 +129,20 @@ const base = (target) => {
       const query = state.queries[queryId]
 
       // We found a prepared query matching `queryId` - use it.
-      if (query && query.prepared) debug(`found prepared data for ${displayName} at queryId=${queryId}`)
-      // Did not find prepared query so request new data and reuse the queryId
-      else if (!query) this._requestWpData(this.props, queryId)
-      // Request new data with new queryId
-      else if (!query.prepared) this._requestWpData(this.props, queryCounter.next())
+      if (query && query.prepared) {
+        debug(`found prepared data for ${displayName} at queryId=${queryId}`)
+      }
+      // No prepared query found
+      else if (!isNode()) {
+        // No query found, request data and reuse the queryId
+        if (!query) {
+          this._requestWpData(this.props, queryId)
+        }
+        // Query found but it is not prepared, request data with new queryId
+        else if (!query.prepared) {
+          this._requestWpData(this.props, queryCounter.next())
+        }
+      }
     }
 
     componentWillReceiveProps (nextProps) {
@@ -144,7 +154,10 @@ const base = (target) => {
     }
 
     render () {
-      const props = Object.assign({}, this.props, this._reconcileWpData(this.props))
+      const props = Object.assign({},
+        this.props,
+        this._reconcileWpData(this.props)
+      )
       return React.createElement(target, props)
     }
   }
@@ -236,7 +249,8 @@ export function connectWpPost (contentType, id) {
       _shouldUpdate (thisProps, nextProps) {
         // Make a request for new data if entity not in store or the identifier has changed
         const entity = this._makePropsData(nextProps)
-        return !entity && identifier(displayName, id, nextProps) !== identifier(displayName, id, thisProps)
+        const identChanged = identifier(displayName, id, nextProps) !== identifier(displayName, id, thisProps)
+        return !entity && identChanged
       }
 
       componentWillMount () {

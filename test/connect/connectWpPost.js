@@ -4,6 +4,7 @@
 
 import React from 'react'
 import merge from 'lodash.merge'
+import isNode from 'is-node-fn'
 import { mount } from 'enzyme'
 
 import queryCounter from '../../src/util/query-counter'
@@ -35,6 +36,9 @@ function setup () {
   const getState = () => state
   return { dispatch, getState, subscribe }
 }
+
+jest.mock('is-node-fn')
+isNode.mockReturnValue(false)
 
 describe('connectWpPost', () => {
   describe('with built-in content type', () => {
