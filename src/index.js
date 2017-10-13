@@ -1,14 +1,17 @@
 import * as effects from 'redux-saga/effects'
 
 import debug, { toggleDebug } from './util/debug'
-import makeReducer from './redux/reducer'
+import createReducer from './redux/reducer'
 import invariants from './invariants'
 import contentTypesManager from './util/content-types-manager'
-import { rewind } from './connect/util'
 import { default as _runSagas } from './util/run-sagas'
 import { setWP } from './wpapi'
 import { watchRequests } from './redux/sagas'
-import { createQueryRequest, createPostRequest } from './redux/actions'
+import {
+  createQueryRequest,
+  createPostRequest,
+  rewind
+} from './redux/actions'
 
 export * from './util/preload'
 
@@ -22,11 +25,16 @@ const COMPONENTS_BASE = {
 
 /** Reset the connect internal query counter.
  *  Should be called before each SSR. */
-kasia.rewind = rewind
+kasia.rewind = function (store) {
+  store.dispatch(rewind())
+}
 
 /** Run all `sagas` until they are complete. */
 export function runSagas (store, sagas) {
-  rewind()
+  kasia.rewind(store) // begin with a rewind
+  sagas.push(() => function * () { // and end with a rewind
+    store.dispatch(rewind())
+  })
   return _runSagas(store, sagas)
 }
 
@@ -76,7 +84,7 @@ function kasia (opts = {}) {
   }, COMPONENTS_BASE)
 
   return {
-    kasiaReducer: makeReducer({ keyEntitiesBy, reducers }),
+    kasiaReducer: createReducer({ keyEntitiesBy, reducers }),
     kasiaSagas: sagas.map((saga) => effects.spawn(saga)),
     kasiaActions: { createQueryRequest, createPostRequest }
   }

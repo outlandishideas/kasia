@@ -8,7 +8,9 @@ import connectWpQuery from '../../../src/connect/connectWpQuery'
 
 jest.disableAutomock()
 
-export const queryFn = () => ({title: 'Preserved Title'})
+export const queryFn = () => ({
+  title: 'Preserved Title'
+})
 
 export class target extends Component {
   static queryFn = queryFn

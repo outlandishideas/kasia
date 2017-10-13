@@ -70,12 +70,7 @@ export default function connectWpQuery (queryFn, shouldUpdate, opts = {}) {
 
     invariants.isNotWrapped(target, displayName)
 
-    class KasiaConnectWpQueryComponent extends base(target) {
-      constructor (props, context) {
-        super(props, context)
-        this.dataKey = 'data'
-      }
-
+    class KasiaConnectWpQueryComponent extends base(target, 'data', {}) {
       static preload (props, state) {
         debug(displayName, 'connectWpQuery preload with props:', props, 'state:', state)
         const wrappedQueryFn = wrapQueryFn(queryFn, props, state)
@@ -89,22 +84,12 @@ export default function connectWpQuery (queryFn, shouldUpdate, opts = {}) {
         return createQueryRequest(wrappedQueryFn, opts.preserve)
       }
 
-      _makePropsData () {
-        const query = this._query()
+      _makePropsData (_, query) {
         const state = this.props.wordpress
-
-        if (!query || !query.complete || query.error) {
-          return {}
-        }
-
-        if (opts.preserve) {
-          return query.result
-        }
-
         return findEntities(
           state.entities,
-          state.__keyEntitiesBy,
-          query.entities
+          query.entities,
+          state.__keyEntitiesBy
         )
       }
 

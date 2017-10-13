@@ -9,14 +9,18 @@ import connectWpQuery from '../../../src/connect/connectWpQuery'
 jest.disableAutomock()
 
 export const queryFn = (wpapi, props) => {
-  return wpapi.books(props.params.id).get()
+  return wpapi.books(props.id).get()
 }
 
 export class target extends Component {
   render () {
     const { query, data: { books } } = this.props.kasia
-    if (!query.complete || !query.OK) return <div>Loading...</div>
-    return <div>{books[this.props.params.id].slug}</div>
+
+    if (!query.complete || !query.OK) {
+      return <div>Loading...</div>
+    }
+
+    return <div>{books[this.props.id].slug}</div>
   }
 }
 

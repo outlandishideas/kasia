@@ -106,13 +106,13 @@ describe('util/normalise', () => {
 
       if (testKeyById) {
         it(`should normalise single "${contentType}" by id`, () => {
-          const result = normalise(first, 'id')
+          const result = normalise(first, {idAttribute: 'id'})
           const actual = Object.keys(result)
           expect(actual).toEqual(collections)
         })
 
         it(`should normalise multiple "${contentType}" by id`, () => {
-          const result = normalise(multiple, 'id')
+          const result = normalise(multiple, {idAttribute: 'id'})
           const actual = Object.keys(result[plural])
           const expected = [first.id, second.id].map(String)
           expect(actual).toEqual(expected)
@@ -121,13 +121,13 @@ describe('util/normalise', () => {
 
       if (testKeyBySlug) {
         it(`should normalise single "${contentType}" by slug`, () => {
-          const result = normalise(first, 'slug')
+          const result = normalise(first, {idAttribute: 'slug'})
           const actual = Object.keys(result)
           expect(actual).toEqual(collections)
         })
 
         it(`should normalise multiple "${contentType}" by slug`, () => {
-          const result = normalise(multiple, 'slug')
+          const result = normalise(multiple, {idAttribute: 'slug'})
           const actual = Object.keys(result[plural])
           const expected = [first.slug, second.slug]
           expect(actual).toEqual(expected)

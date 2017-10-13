@@ -12,7 +12,11 @@ jest.disableAutomock()
 export class target extends Component {
   render () {
     const { query, post } = this.props.kasia
-    if (!query.complete || !query.OK) return <div>Loading...</div>
+
+    if (!query.complete || !query.OK) {
+      return <div>Loading...</div>
+    }
+
     return <div>{post.title.rendered}</div>
   }
 }

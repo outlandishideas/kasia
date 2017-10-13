@@ -428,7 +428,7 @@ Please create a pull request to get your own added to the list.
 
 __Important...__ 
 
-  - __before calling the preloaders for SSR you must call `kasia.rewind()`__
+  - __before calling the preloaders for SSR you must call `kasia.rewind(store)`__
   - __or if you call `runSagas()` from the utilities then this is done for you.__
 
 ### Utilities
@@ -505,9 +505,9 @@ export default function renderPage (res, location) {
     if (redirect) return res.redirect(302, redirect.pathname + redirect.search)
     
     // We are using `runSagas` which rewinds for us, but if we weren't then
-    // we would call `kasia.rewind()` here instead:
+    // we would call `kasia.rewind(store)` here instead:
     //
-    // kasia.rewind()
+    // kasia.rewind(store)
     
     // Each preloader accepts the state that may/may not have been modified by
     // the saga before it, so the order might be important depending on your use-case!

@@ -15,11 +15,15 @@ contentTypesManager.register({
   slug: 'books'
 })
 
-@connectWpPost('book', (props) => props.params.id)
+@connectWpPost('book', (props) => props.id)
 export default class Book extends Component {
   render () {
     const { query, book } = this.props.kasia
-    if (!query.complete) return <div>Loading...</div>
+
+    if (!query.complete) {
+      return <div>Loading...</div>
+    }
+
     return <div>{book.title.rendered}</div>
   }
 }

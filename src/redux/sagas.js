@@ -5,8 +5,8 @@ import { ActionTypes } from '../constants'
 import { acknowledgeRequest, completeRequest, failRequest } from './actions'
 import { buildQueryFunction } from '../util/query-builder'
 
-export function _getLastQueryId (state) {
-  return state.wordpress.__nextQueryId - 1
+export function _getCurrentQueryId (state) {
+  return state.wordpress.__nextQueryId
 }
 
 /**
@@ -14,16 +14,16 @@ export function _getLastQueryId (state) {
  * object and record the result in the store.
  * @param {Object} action Action object
  */
-export function * fetch (action) {
+export function * fetch ({ request }) {
   try {
-    yield put(acknowledgeRequest(action))
-    var actionId = yield select(_getLastQueryId)
+    request.id = yield select(_getCurrentQueryId)
+    yield put(acknowledgeRequest(request))
     const wpapi = getWP()
-    const fn = action.queryFn || buildQueryFunction(action)
+    const fn = request.queryFn || buildQueryFunction(request)
     const data = yield call(fn, wpapi)
-    yield put(completeRequest(actionId, data))
+    yield put(completeRequest(request.id, data))
   } catch (error) {
-    yield put(failRequest(actionId, error.stack || error.message))
+    yield put(failRequest(request.id, error.stack || error.message))
   }
 }
 

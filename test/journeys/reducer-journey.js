@@ -13,7 +13,6 @@ import kasia from '../../src'
 import normalise from '../../src/util/normalise'
 import pickEntityIds from '../../src/util/pick-entity-ids'
 import schemasManager from '../../src/util/schemas-manager'
-import { rewind } from '../../src/connect/util'
 import { ContentTypes } from '../../src/constants'
 import { createPostRequest, acknowledgeRequest, completeRequest, failRequest } from '../../src/redux/actions'
 
@@ -27,8 +26,10 @@ function setup (keyEntitiesBy) {
     keyEntitiesBy
   })
   const rootReducer = combineReducers(kasiaReducer)
-  const store = createStore(rootReducer)
-  return { store, initialState: initialState(keyEntitiesBy) }
+  return {
+    store: createStore(rootReducer),
+    initialState: initialState(keyEntitiesBy)
+  }
 }
 
 describe('reducer journey', () => {
@@ -40,43 +41,67 @@ describe('reducer journey', () => {
   ]
 
   beforeEach(() => {
-    rewind()
     schemasManager.__flush__()
   })
 
   tests.forEach(([ keyEntitiesBy, param ]) => {
     describe('keyEntitiesBy = ' + keyEntitiesBy, () => {
       const { store, initialState } = setup(keyEntitiesBy)
-      let createAction
+      let request
 
       it('has initial state on store', () => {
         expect(store.getState()).toEqual(initialState)
       })
 
       it('does not modify store without action namespace', () => {
-        store.dispatch({ type: 'REQUEST_COMPLETE', id: 0, entities: [''] })
+        store.dispatch({
+          type: 'REQUEST_COMPLETE',
+          request: {
+            id: 0,
+            entities: ['']
+          }
+        })
         expect(store.getState()).toEqual(initialState)
       })
 
       it('can Request*Create', () => {
-        createAction = createPostRequest(ContentTypes.Post, param)
-        store.dispatch(createAction)
+        const action = createPostRequest(ContentTypes.Post, param)
+        request = action.request
+        store.dispatch(action)
       })
 
       it('can RequestAck', () => {
-        store.dispatch(acknowledgeRequest(createAction))
+        request.id = 0
+        store.dispatch(acknowledgeRequest(request))
+      })
+
+      it('places query on store', () => {
+        const expected = {
+          id: 0,
+          complete: false,
+          OK: null,
+          prepared: true
+        }
+        const actual = store.getState().wordpress.queries[0]
+        expect(actual).toEqual(expected)
       })
 
       it('can RequestComplete', () => {
         store.dispatch(completeRequest(0, postJson))
-        const expected = normalise(postJson, keyEntitiesBy)
+        const expected = normalise(postJson, {idAttribute: keyEntitiesBy})
         const actual = store.getState().wordpress.entities
         expect(actual).toEqual(expected)
       })
 
-      it('places query on store', () => {
-        const entities = pickEntityIds(postJson)
-        const expected = { id: 0, complete: true, OK: true, paging: {}, entities, prepared: true }
+      it('updates query on store', () => {
+        const expected = {
+          id: 0,
+          complete: true,
+          OK: true,
+          paging: {},
+          entities: pickEntityIds(postJson),
+          prepared: true
+        }
         const actual = store.getState().wordpress.queries[0]
         expect(actual).toEqual(expected)
       })

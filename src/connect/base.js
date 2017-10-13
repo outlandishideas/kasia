@@ -3,12 +3,19 @@ import PropTypes from 'prop-types'
 import isNode from 'is-node-fn'
 
 import debug from '../util/debug'
-import { nextQueryId } from './util'
+import { incrementNextQueryId } from '../redux/actions'
 
-export default function base (target) {
+/**
+ * Base connect component.
+ * @param {Function} target
+ * @param {String} dataKey
+ * @param {*} fallbackDataValue
+ * @returns {KasiaConnectedComponent}
+ */
+export default function base (target, dataKey, fallbackDataValue) {
   const displayName = target.displayName || target.name
 
-  return class KasiaConnectedComponent extends React.Component {
+  return class KasiaConnectedComponent extends React.PureComponent {
     static __kasia__ = true
 
     static WrappedComponent = target
@@ -25,43 +32,45 @@ export default function base (target) {
 
     /** Find the query for this component and its corresponding data
      *  and return props object containing them. */
-    _reconcileWpData (props) {
-      const query = this._query()
-      const fallbackQuery = { complete: false, OK: null }
+    _reconcileWpData (props, query) {
+      let data = fallbackDataValue
 
-      const data = query && query.preserve
-        ? query.result
-        : this._makePropsData(props)
-
-      if (query && query.error) {
-        console.log(`[kasia] error in query for ${displayName}:`)
-        console.log(query.error)
-      }
-
-      debug(`content for ${displayName} on \`props.kasia.${this.dataKey}\``)
-
-      return {
-        kasia: {
-          query: query || fallbackQuery,
-          [this.dataKey]: data
+      if (query) {
+        if (query.complete && query.OK) {
+          if (query.preserve) {
+            data = query.result
+          } else {
+            data = this._makePropsData(props, query)
+          }
+        } else if (query.error) {
+          console.log(`[kasia] error in query for ${displayName}:`)
+          console.log(query.error)
         }
       }
-    }
 
-    _query () {
-      return this.props.wordpress.queries[this.queryId]
+      debug(`${displayName} has content on \`props.kasia.${dataKey}\``)
+
+      return {
+        query: query || {
+          complete: false,
+          OK: null
+        },
+        [dataKey]: data
+      }
     }
 
     componentWillMount () {
       const state = this.props.wordpress
-      const queryId = this.queryId = nextQueryId()
+      const queryId = this.queryId = state.__nextQueryId
       const query = state.queries[queryId]
 
-      // We found a prepared query matching queryId, use it
+      debug(`${displayName} will mount with queryId=${queryId}`)
+
       if (query && query.prepared) {
-        debug(`found prepared data for ${displayName} at queryId=${queryId}`)
+        debug(`${displayName} has prepared data at queryId=${queryId}`)
+        this.props.dispatch(incrementNextQueryId())
       } else if (!isNode()) {
-        // Query found but it is not prepared, request data with new queryId
+        debug(`${displayName} initiating request in componentWillMount`)
         this._requestWpData(this.props)
       }
     }
@@ -69,17 +78,16 @@ export default function base (target) {
     componentWillReceiveProps (nextProps) {
       const willUpdate = this._shouldUpdate(this.props, nextProps, this.context.store.getState())
       if (willUpdate) {
-        debug(displayName, 'sending request for new data with props:', nextProps)
         this.queryId = this.props.wordpress.__nextQueryId
+        debug(`${displayName} initiating request: queryId=${this.queryId}, props: ${nextProps}`)
         this._requestWpData(nextProps)
       }
     }
 
     render () {
-      const props = Object.assign({},
-        this.props,
-        this._reconcileWpData(this.props)
-      )
+      const query = this.props.wordpress.queries[this.queryId]
+      const kasia = this._reconcileWpData(this.props, query)
+      const props = Object.assign({}, this.props, { kasia })
       return React.createElement(target, props)
     }
   }

@@ -1,6 +1,6 @@
-export default (keyEntitiesBy = 'id') => ({
+export default (__keyEntitiesBy = 'id') => ({
   wordpress: {
-    __keyEntitiesBy: keyEntitiesBy,
+    __keyEntitiesBy,
     __nextQueryId: 0,
     queries: {},
     entities: {}

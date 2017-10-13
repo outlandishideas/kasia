@@ -6,22 +6,25 @@ import React from 'react'
 import createSagaMiddleware from 'redux-saga'
 import isNode from 'is-node-fn'
 import Wpapi from 'wpapi'
-import { put } from 'redux-saga/effects'
-import { createStore as _createStore, applyMiddleware, compose, combineReducers } from 'redux'
+import { select, put } from 'redux-saga/effects'
 import { mount } from 'enzyme'
+import {
+  createStore,
+  applyMiddleware,
+  compose,
+  combineReducers
+} from 'redux'
 
-import './__mocks__/WP'
-import kasia from '../src'
-import schemasManager from '../src/util/schemas-manager'
-import { rewind } from '../src/connect/util'
-import { ActionTypes } from '../src/constants'
-import { fetch } from '../src/redux/sagas'
+import kasia from '../../src'
+import schemasManager from '../../src/util/schemas-manager'
+import { ActionTypes } from '../../src/constants'
+import { fetch, _getCurrentQueryId } from '../../src/redux/sagas'
+import { buildQueryFunction } from '../../src/util/query-builder'
 
-import BuiltInContentType from './__mocks__/components/BuiltInContentType'
-import initialState from './__mocks__/states/initial'
-import post from './__fixtures__/wp-api-responses/post'
-
-import { buildQueryFunction } from '../src/util/query-builder'
+import '../__mocks__/WP'
+import BuiltInContentType from '../__mocks__/components/BuiltInContentType'
+import initialState from '../__mocks__/states/initial'
+import post from '../__fixtures__/wp-api-responses/post'
 
 jest.disableAutomock()
 
@@ -34,7 +37,7 @@ const post2 = Object.assign({}, post, { id: 17, slug: 'post-2', title: { rendere
 const post3 = Object.assign({}, post, { id: 18, slug: 'post-3', title: { rendered: 'Post 3' } })
 
 // we need to mock responses from WP-API
-jest.mock('../src/util/query-builder', () => ({ buildQueryFunction: jest.fn() }))
+jest.mock('../../src/util/query-builder', () => ({ buildQueryFunction: jest.fn() }))
 
 let returnPost
 
@@ -51,8 +54,13 @@ function setup (keyEntitiesBy) {
   })
 
   const sagaMiddleware = createSagaMiddleware()
-  const createStore = compose(applyMiddleware(sagaMiddleware))(_createStore)
-  const store = createStore(combineReducers(kasiaReducer), initialState(keyEntitiesBy))
+  const newStore = compose(
+    applyMiddleware(sagaMiddleware)
+  )(createStore)
+  const store = newStore(
+    combineReducers(kasiaReducer),
+    initialState(keyEntitiesBy)
+  )
   const runSaga = sagaMiddleware.run
 
   sagaMiddleware.run(function * () {
@@ -65,12 +73,7 @@ function setup (keyEntitiesBy) {
 describe('Universal journey', function () {
   ['id', 'slug'].forEach((keyEntitiesBy) => {
     describe('keyEntitiesBy = ' + keyEntitiesBy, () => {
-      let rendered
-      let preloader
-      let action
-      let iter
-      let store
-      let runSaga
+      let rendered, preloader, action, iter, store, runSaga
 
       function newStore () {
         const s = setup(keyEntitiesBy)
@@ -81,7 +84,6 @@ describe('Universal journey', function () {
       it('SERVER', () => {
         schemasManager.__flush__()
         newStore() // we would create new store for each request
-        rewind()
         isNode.mockReturnValue(true)
         returnPost = post1
       })
@@ -91,7 +93,7 @@ describe('Universal journey', function () {
       })
 
       it('  ...that returns a preloader operation array', () => {
-        const renderProps = { params: { [keyEntitiesBy]: post1[keyEntitiesBy] } }
+        const renderProps = { [keyEntitiesBy]: post1[keyEntitiesBy] }
         preloader = BuiltInContentType.preload(renderProps)
         expect(Array.isArray(preloader)).toEqual(true)
       })
@@ -99,8 +101,10 @@ describe('Universal journey', function () {
       it('  ...that contains a saga function and action object', () => {
         action = {
           type: ActionTypes.RequestCreatePost,
-          identifier: post1[keyEntitiesBy],
-          contentType: 'post'
+          request: {
+            identifier: post1[keyEntitiesBy],
+            contentType: 'post'
+          }
         }
         expect(preloader[0]).toEqual(fetch)
         expect(preloader[1]).toEqual(action)
@@ -111,42 +115,50 @@ describe('Universal journey', function () {
         // acknowledge request
         const ackAction = {
           type: ActionTypes.RequestAck,
-          identifier: post1[keyEntitiesBy],
-          contentType: 'post'
+          request: {
+            identifier: post1[keyEntitiesBy],
+            contentType: 'post'
+          }
         }
+
         const actual1 = iter.next().value
-        const expected1 = put(ackAction)
+        const expected1 = select(_getCurrentQueryId)
         expect(actual1).toEqual(expected1)
+
+        const actual2 = iter.next().value
+        const expected2 = put(ackAction)
+        expect(actual2).toEqual(expected2)
+
         return runSaga(fetch, action).done
       })
 
       it(`  should have entity keyed by ${keyEntitiesBy} on store`, () => {
-        const actual = store.getState().wordpress.entities.posts[post1[keyEntitiesBy]]
+        const { entities } = store.getState().wordpress
+        const actual = entities.posts[post1[keyEntitiesBy]]
         expect(actual).toEqual(post1)
       })
 
       it('  should render the prepared data on server', () => {
-        kasia.rewind()
-        const params = { [keyEntitiesBy]: post1[keyEntitiesBy] }
-        rendered = mount(<BuiltInContentType params={params} />, { context: { store } })
+        kasia.rewind(store)
+        const props = { [keyEntitiesBy]: post1[keyEntitiesBy] }
+        rendered = mount(<BuiltInContentType {...props} />, { context: { store } })
         expect(rendered.html()).toEqual('<div>Architecto enim omnis repellendus</div>')
       })
 
       it('CLIENT', () => {
-        // imitate client
-        rewind()
+        kasia.rewind(store)
         isNode.mockReturnValue(false)
         returnPost = post2
       })
 
       it('  should render the prepared query data on client', () => {
-        const params = { [keyEntitiesBy]: post1[keyEntitiesBy] }
-        rendered = mount(<BuiltInContentType params={params} />, { context: { store } })
+        const props = { [keyEntitiesBy]: post1[keyEntitiesBy] }
+        rendered = mount(<BuiltInContentType {...props} />, { context: { store } })
         expect(rendered.html()).toEqual('<div>Architecto enim omnis repellendus</div>')
       })
 
       it('  should render loading text when props change', () => {
-        const props = { params: { [keyEntitiesBy]: post2[keyEntitiesBy] } }
+        const props = { [keyEntitiesBy]: post2[keyEntitiesBy] }
         rendered.setProps(props) // implicit update
         expect(rendered.html()).toEqual('<div>Loading...</div>')
       })
@@ -177,7 +189,7 @@ describe('Universal journey', function () {
         returnPost = post3
 
         // change props
-        const props = { params: { [keyEntitiesBy]: post3[keyEntitiesBy] } }
+        const props = { [keyEntitiesBy]: post3[keyEntitiesBy] }
         rendered.setProps(props)
         expect(rendered.html()).toEqual('<div>Loading...</div>')
 

@@ -6,7 +6,7 @@ import { join, fork } from 'redux-saga/effects'
 import { createMockTask } from 'redux-saga/utils'
 
 import '../__mocks__/WP'
-import { ActionTypes } from '../../src/constants'
+import { ActionTypes, PreloadQueryId } from '../../src/constants'
 import { fetch } from '../../src/redux/sagas'
 import { preload, preloadQuery } from '../../src/util/preload'
 import { wrapQueryFn } from '../../src/connect/util'
@@ -18,7 +18,7 @@ jest.disableAutomock()
 
 describe('util/preload', () => {
   describe('#preload', () => {
-    const props = { params: { id: 16 } }
+    const props = { id: 16 }
     const components = [
       class extends ConnectPostC {}, // test can discover wrapped kasia component
       ConnectQueryC, // unwrapped kasia component
@@ -57,14 +57,16 @@ describe('util/preload', () => {
       expect(res.value[0].FORK).toBeTruthy()
       expect(res.value[0]).toEqual(fork(fetch, {
         type: ActionTypes.RequestCreatePost,
-        contentType: 'post',
-        identifier: 16
+        request: {
+          contentType: 'post',
+          identifier: 16
+        }
       }))
 
       expect(res.value[1].FORK).toBeTruthy()
       expect(res.value[1].FORK).toBeTruthy()
       expect(res.value[1].FORK.args[0].type).toEqual(ActionTypes.RequestCreateQuery)
-      expect(res.value[1].FORK.args[0].queryFn.toString()).toEqual(wrappedQueryFnStr)
+      expect(res.value[1].FORK.args[0].request.queryFn.toString()).toEqual(wrappedQueryFnStr)
     })
 
     it('that yields join effect', () => {
@@ -100,9 +102,9 @@ describe('util/preload', () => {
 
     it('that yields put completeRequest effect', () => {
       const actual = iter.next('mockResult').value
-      expect(actual.PUT.action.id).toEqual(null)
       expect(actual.PUT.action.type).toEqual(ActionTypes.RequestComplete)
-      expect(actual.PUT.action.data).toEqual('mockResult')
+      expect(actual.PUT.action.request.id).toEqual(PreloadQueryId)
+      expect(actual.PUT.action.request.result).toEqual('mockResult')
     })
   })
 })

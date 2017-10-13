@@ -1,6 +1,7 @@
 import { put, join, fork } from 'redux-saga/effects'
 
 import { completeRequest } from '../redux/actions'
+import { PreloadQueryId } from '../constants'
 
 /** Make a preloader saga for all Kasia components within the `components` array. */
 export function preload (components, renderProps = {}, state = {}) {
@@ -37,6 +38,6 @@ export function preloadQuery (queryFn, renderProps = {}, state = {}) {
 
   return function * () {
     const data = yield queryFn(renderProps, state)
-    yield put(completeRequest(null, data))
+    yield put(completeRequest(PreloadQueryId, data))
   }
 }

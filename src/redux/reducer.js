@@ -1,9 +1,10 @@
 import merge from 'lodash.merge'
 import isNode from 'is-node-fn'
 
+import debug from '../util/debug'
 import pickEntityIds from '../util/pick-entity-ids'
 import normalise from '../util/normalise'
-import { ActionTypes } from '../constants'
+import { ActionTypes, PreloadQueryId } from '../constants'
 
 export const INITIAL_STATE = {
   __nextQueryId: 0,
@@ -24,7 +25,9 @@ function mergeNativeAndThirdPartyReducers (reducers, normaliser) {
   const baseReducer = {
     [ActionTypes.RequestAck]: [acknowledgeReducer],
     [ActionTypes.RequestComplete]: [completeReducer(normaliser)],
-    [ActionTypes.RequestFail]: [failReducer]
+    [ActionTypes.RequestFail]: [failReducer],
+    [ActionTypes.RewindQueryCounter]: [rewindReducer],
+    [ActionTypes.IncrementNextQueryId]: [incrementNextQueryIdReducer]
   }
 
   // Group reducers by their action type
@@ -57,12 +60,12 @@ function mergeNativeAndThirdPartyReducers (reducers, normaliser) {
 
 // ACKNOWLEDGE
 // Place record of request on store
-export function acknowledgeReducer (state) {
+export function acknowledgeReducer (state, {request}) {
   return merge({}, state, {
-    __nextQueryId: state.__nextQueryId + 1,
+    __nextQueryId: request.id + 1,
     queries: {
-      [state.__nextQueryId]: {
-        id: state.__nextQueryId,
+      [request.id]: {
+        id: request.id,
         prepared: isNode(),
         complete: false,
         OK: null
@@ -74,59 +77,71 @@ export function acknowledgeReducer (state) {
 // COMPLETE
 // Place entity on the store; update query record if for component (has an id)
 export function completeReducer (normalise) {
-  return (state_, action) => {
-    const state = merge({}, state_)
-    const query = state.queries[action.id]
+  return (state, {request}) => {
+    const {__keyEntitiesBy: idAttribute} = state
+    const query = state.queries[request.id]
+    const newState = merge({}, state)
 
-    // action.id === null when created via util/preloadQuery
-    if (action.id !== null && !query) {
-      throw new Error('cannot complete non-existent query')
+    if (request.id !== PreloadQueryId && !query) {
+      console.log('[kasia] attempt to complete non-existent query. Ignoring. Request:', {request})
+      return newState
     }
 
-    state.entities = merge(
-      state.entities,
-      normalise(action.data)
+    newState.entities = merge(
+      newState.entities,
+      normalise(request.result, {idAttribute})
     )
 
-    // The action id would be null if the preloadQuery method has initiated
-    // the completeRequest action as they do not need a query in the store
-    // (there is no component to pick it up).
-    if (typeof action.id === 'number') {
-      let updated = {
-        id: action.id,
-        prepared: isNode(),
-        complete: true,
-        OK: true
-      }
-
-      if (query.preserve) {
-        updated.result = action.data
-        updated.paging = null
-      } else {
-        updated.entities = pickEntityIds(action.data)
-        updated.paging = action.data._paging || {}
-      }
-
-      state.queries[action.id] = updated
+    if (request.id === PreloadQueryId) {
+      return newState
     }
 
-    return state
+    const newQuery = {
+      id: request.id,
+      prepared: isNode(),
+      complete: true,
+      OK: true
+    }
+
+    if (query.preserve) {
+      newQuery.result = request.result
+      newQuery.paging = null
+    } else {
+      newQuery.entities = pickEntityIds(request.result)
+      newQuery.paging = request.result._paging || {}
+    }
+
+    newState.queries[request.id] = newQuery
+
+    return newState
   }
 }
 
 // FAIL
 // Update query record only
-export function failReducer (state, action) {
+export function failReducer (state, {request}) {
   return merge({}, state, {
     queries: {
-      [action.id]: {
-        id: action.id,
-        error: action.error,
+      [request.id]: {
+        id: request.id,
+        error: request.error,
         prepared: isNode(),
         complete: true,
         OK: false
       }
     }
+  })
+}
+
+export function rewindReducer (state) {
+  return merge({}, state, {
+    __nextQueryId: 0
+  })
+}
+
+export function incrementNextQueryIdReducer (state) {
+  return merge({}, state, {
+    __nextQueryId: state.__nextQueryId + 1
   })
 }
 
@@ -137,7 +152,7 @@ export function failReducer (state, action) {
  * @returns {Object} Kasia reducer
  */
 export default function createReducer ({ keyEntitiesBy, reducers }) {
-  const normaliser = (data) => normalise(data, keyEntitiesBy)
+  const normaliser = (data) => normalise(data, {idAttribute: keyEntitiesBy})
   const reducer = mergeNativeAndThirdPartyReducers(reducers, normaliser)
 
   const initialState = Object.assign({},

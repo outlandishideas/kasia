@@ -83,9 +83,9 @@ export default {
     '%s is already wrapped by Kasia.',
     displayName
   ),
-  isIdentifierValue: (id) => invariant(
+  isIdentifierValue: (id, displayName) => invariant(
     typeof id === 'string' || typeof id === 'number',
-    'The final identifier is invalid. ' +
+    `The final identifier for ${displayName} is invalid. ` +
     'Expecting a string or number, got "%s".',
     typeof id
   ),

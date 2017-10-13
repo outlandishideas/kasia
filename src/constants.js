@@ -1,6 +1,8 @@
 // WP-API namespace (`wp-json/${namespace}`)
 export const WpApiNamespace = 'wp/v2'
 
+export const PreloadQueryId = 'PRELOAD_QUERY_ID'
+
 export const ActionTypes = {
   // Initiate a request to the WP API
   RequestCreatePost: 'kasia/REQUEST_CREATE_POST',
@@ -10,7 +12,11 @@ export const ActionTypes = {
   // Place the result of a request on the store
   RequestComplete: 'kasia/REQUEST_COMPLETE',
   // Record the failure of a request on the store
-  RequestFail: 'kasia/REQUEST_FAILED'
+  RequestFail: 'kasia/REQUEST_FAILED',
+  // Reset the queryId counter to zero
+  RewindQueryCounter: 'kasia/REWIND_QUERY_COUNTER',
+  // Increment the next query ID
+  IncrementNextQueryId: 'kasia/INCREMENT_NEXT_QUERY_ID'
 }
 
 // The built-in content types available in WordPress.

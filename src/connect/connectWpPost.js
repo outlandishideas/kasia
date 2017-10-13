@@ -47,12 +47,7 @@ export default function connectWpPost (contentType, id, shouldUpdate) {
 
     invariants.isNotWrapped(target, displayName)
 
-    class KasiaConnectWpPostComponent extends base(target) {
-      constructor (props, context) {
-        super(props, context)
-        this.dataKey = contentType
-      }
-
+    class KasiaConnectWpPostComponent extends base(target, contentType, null) {
       static preload (props) {
         debug(displayName, 'connectWpPost preload with props:', props)
         invariants.isValidContentType(typeConfig, contentType, `${displayName} component`)
@@ -67,25 +62,21 @@ export default function connectWpPost (contentType, id, shouldUpdate) {
       }
 
       _makePropsData (props) {
-        const query = this._query()
-
-        if (!query || !query.complete || query.error) {
-          return null
-        }
-
-        if (query.preserve) {
-          return query.result
-        }
-
         const entities = this.props.wordpress.entities[typeConfig.plural]
 
         if (entities) {
-          const keys = Object.keys(entities)
-          const realId = identifier(displayName, id, props)
+          const lookupId = identifier(displayName, id, props)
+          let idKey
 
-          for (let i = 0, len = keys.length; i < len; i++) {
-            const entity = entities[keys[i]]
-            if (entity.id === realId || entity.slug === realId) {
+          if (typeof lookupId === 'string') {
+            idKey = 'slug'
+          } else {
+            idKey = 'id'
+          }
+
+          for (const key in entities) {
+            const entity = entities[key]
+            if (entity[idKey] == lookupId) {
               return entity
             }
           }

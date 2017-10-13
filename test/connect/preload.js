@@ -2,7 +2,6 @@
 
 // jest.disableAutomock() hoisted here by babel-jest
 
-import { rewind } from '../../src/connect/util'
 import { ActionTypes, ContentTypes } from '../../src/constants'
 import { fetch } from '../../src/redux/sagas'
 
@@ -13,9 +12,7 @@ import CustomQuery from '../__mocks__/components/CustomQuery'
 jest.disableAutomock()
 
 describe('connect/preload', () => {
-  const props = { params: { id: 16 } }
-
-  beforeAll(() => rewind())
+  const props = { id: 16 }
 
   describe('connectWpPost', () => {
     const preloader = BuiltInContentType.preload
@@ -45,8 +42,8 @@ describe('connect/preload', () => {
 
     it('contains RequestCreatePost action', () => {
       expect(result[1].type).toEqual(ActionTypes.RequestCreatePost)
-      expect(result[1].contentType).toEqual(ContentTypes.Post)
-      expect(result[1].identifier).toEqual(16)
+      expect(result[1].request.contentType).toEqual(ContentTypes.Post)
+      expect(result[1].request.identifier).toEqual(16)
     })
   })
 

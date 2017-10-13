@@ -3,18 +3,6 @@ import { connect as reduxConnect } from 'react-redux'
 
 import invariants from '../invariants'
 
-let queryId = 0
-
-/** Get the next query ID. */
-export function nextQueryId () {
-  return queryId++
-}
-
-/** Reset first mount flag, should be called before SSR of each request. */
-export function rewind () {
-  queryId = 0
-}
-
 /** Get entity identifier: either `id` as-is or the result of calling `id(props)`. */
 export function identifier (displayName, id, props) {
   const realId = typeof id === 'function' ? id(props) : id

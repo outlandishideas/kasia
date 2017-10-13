@@ -9,13 +9,5 @@ export default {
     '24': 'http://0.gravatar.com/avatar/3eb34c383eaebf4c71409ba2a95fc34a?s=24&d=mm&r=g',
     '48': 'http://0.gravatar.com/avatar/3eb34c383eaebf4c71409ba2a95fc34a?s=48&d=mm&r=g',
     '96': 'http://0.gravatar.com/avatar/3eb34c383eaebf4c71409ba2a95fc34a?s=96&d=mm&r=g'
-  },
-  '_links': {
-    'self': [{
-      'href': 'http://demo.wp-api.org/wp-json/wp/v2/users/95'
-    }],
-    'collection': [{
-      'href': 'http://demo.wp-api.org/wp-json/wp/v2/users'
-    }]
   }
 }

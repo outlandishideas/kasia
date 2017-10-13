@@ -15,7 +15,7 @@ describe('util/findEntities', () => {
     const actual = findEntities({
       posts: { 0: { id: 0, slug: 'post', title: 'post' } },
       pages: { 1: { id: 1, slug: 'page', title: 'page' } }
-    }, 'id', [0])
+    }, [0], 'id')
     const expected = {
       posts: { 0: { id: 0, slug: 'post', title: 'post' } }
     }
@@ -26,7 +26,7 @@ describe('util/findEntities', () => {
     const actual = findEntities({
       posts: { 0: { id: 0, slug: 'post', title: 'post' } },
       pages: { 1: { id: 1, slug: 'page', title: 'page' } }
-    }, 'slug', ['page'])
+    }, ['page'], 'slug')
     const expected = {
       pages: { 1: { id: 1, slug: 'page', title: 'page' } }
     }
@@ -37,7 +37,7 @@ describe('util/findEntities', () => {
     const actual = findEntities({
       posts: { 0: { slug: 'post', title: 'post' } },
       pages: { 1: { id: 1, slug: 'page', title: 'page' } }
-    }, 'id', ['post'])
+    }, ['post'], 'id')
     const expected = {
       posts: { 0: { slug: 'post', title: 'post' } }
     }
@@ -48,7 +48,7 @@ describe('util/findEntities', () => {
     const actual = findEntities({
       posts: { 0: { id: 0, slug: 'post', title: 'post' } },
       pages: { 1: { id: 1, title: 'page' } }
-    }, 'slug', [1])
+    }, [1], 'slug')
     const expected = {
       pages: { 1: { id: 1, title: 'page' } }
     }

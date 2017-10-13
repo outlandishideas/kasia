@@ -1,5 +1,5 @@
 /** Filter `entities` to contain only those whose `keyToInspect` is in `identifiers`. */
-export default function findEntities (entities, keyToInspect, identifiers) {
+export default function findEntities (entities, identifiers, keyToInspect) {
   identifiers = identifiers.map(String)
 
   const reduced = {}

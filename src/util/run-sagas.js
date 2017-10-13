@@ -9,10 +9,10 @@ export default function runSagas (store, sagas) {
     throw new Error('Expecting store to be redux store with runSaga enhancer method.')
   }
 
-  return sagas.reduce((promise, saga) => {
+  return sagas.reduce((promise, getSaga) => {
     return promise.then(() => {
       const state = store.getState()
-      return store.runSaga(saga(state)).done
+      return store.runSaga(getSaga(state)).done
     })
   }, Promise.resolve())
 }

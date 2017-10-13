@@ -7,7 +7,6 @@ import merge from 'lodash.merge'
 import isNode from 'is-node-fn'
 import { mount } from 'enzyme'
 
-import { rewind } from '../../src/connect/util'
 import { ActionTypes } from '../../src/constants'
 
 import '../__mocks__/WP'
@@ -46,11 +45,9 @@ describe('connectWpPost', () => {
     let rendered
 
     beforeAll(() => {
-      rewind()
-      const props = { params: { id: postJson.id } }
       state = initialState()
       store = setup()
-      rendered = BuiltInType(props, store)
+      rendered = BuiltInType({ id: postJson.id }, store)
     })
 
     it('should wrap the component', () => {
@@ -66,8 +63,8 @@ describe('connectWpPost', () => {
     it('should dispatch RequestCreatePost', () => {
       const action = store.dispatch.mock.calls[0][0]
       expect(action.type).toEqual(ActionTypes.RequestCreatePost)
-      expect(action.contentType).toEqual('post')
-      expect(action.identifier).toEqual(postJson.id)
+      expect(action.request.contentType).toEqual('post')
+      expect(action.request.identifier).toEqual(postJson.id)
     })
 
     it('should render post title', () => {
@@ -75,23 +72,24 @@ describe('connectWpPost', () => {
       state = merge({}, stateMultipleEntities, { wordpress: { queries: { 0: query } } })
       rendered.update() // Fake store update from completed request
       expect(rendered.html()).toEqual('<div>Architecto enim omnis repellendus</div>')
+      state.wordpress.__nextQueryId = 1
     })
 
     it('should update to new entity that exists in store straight away', () => {
-      const nextProps = { params: { id: postJson.id + 1 } }
+      const nextProps = { id: postJson.id + 1 }
       rendered.setProps(nextProps)
       expect(rendered.html()).toEqual('<div>new title</div>')
     })
 
     it('should dispatch RequestCreatePost for entity that is not in store', () => {
-      const nextProps = { params: { id: 100 } }
+      const nextProps = { id: 100 }
       rendered.setProps(nextProps)
       expect(rendered.html()).toEqual('<div>Loading...</div>')
 
       const action = store.dispatch.mock.calls[1][0]
       expect(action.type).toEqual(ActionTypes.RequestCreatePost)
-      expect(action.contentType).toEqual('post')
-      expect(action.identifier).toEqual(100)
+      expect(action.request.contentType).toEqual('post')
+      expect(action.request.identifier).toEqual(100)
     })
   })
 
@@ -100,8 +98,7 @@ describe('connectWpPost', () => {
     let rendered
 
     beforeAll(() => {
-      rewind()
-      const props = { params: { id: bookJson.id } }
+      const props = { id: bookJson.id }
       state = stateMultipleEntities
       store = setup()
       rendered = CustomType(props, store)
@@ -110,8 +107,8 @@ describe('connectWpPost', () => {
     it('should dispatch RequestCreatePost', () => {
       const action = store.dispatch.mock.calls[0][0]
       expect(action.type).toEqual(ActionTypes.RequestCreatePost)
-      expect(action.contentType).toEqual('book')
-      expect(action.identifier).toEqual(bookJson.id)
+      expect(action.request.contentType).toEqual('book')
+      expect(action.request.identifier).toEqual(bookJson.id)
     })
 
     it('should render book title', () => {
@@ -129,8 +126,7 @@ describe('connectWpPost', () => {
     let rendered
 
     beforeAll(() => {
-      rewind()
-      const props = { params: { id: postJson.id } }
+      const props =  { id: postJson.id }
       state = stateMultipleEntities
       store = setup()
       rendered = ExplicitIdentifier(props, store)
@@ -139,8 +135,8 @@ describe('connectWpPost', () => {
     it('should dispatch RequestCreatePost', () => {
       const action = store.dispatch.mock.calls[0][0]
       expect(action.type).toEqual(ActionTypes.RequestCreatePost)
-      expect(action.contentType).toEqual('post')
-      expect(action.identifier).toEqual(postJson.slug)
+      expect(action.request.contentType).toEqual('post')
+      expect(action.request.identifier).toEqual(postJson.slug)
     })
 
     it('should render post title', () => {
@@ -154,7 +150,7 @@ describe('connectWpPost', () => {
   describe('with bad content type', () => {
     it('should throw "content type is not recognised" error', () => {
       const store = setup(stateMultipleEntities)
-      const props = { params: { id: postJson.id } }
+      const props = { id: postJson.id }
       expect(() => BadContentType(props, store)).toThrowError(/is not recognised/)
     })
   })

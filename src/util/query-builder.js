@@ -13,9 +13,9 @@ function queryFn (wpapi, contentTypeMethodName, idTypeMethodName, id) {
  * and given identifier (ID or slug depending on its type).
  *
  * @example
- * Returned fn for contentTypeMethodName="posts" identifier=16:
  * ```js
- * () => WP.posts().id(16).embed().get()
+ * deriveQueryFunction("posts", 16)
+ * //=> () => WP.posts().id(16).embed().get()
  * ```
  *
  * @param {Object} contentTypeMethodName The method name on wpapi instance
@@ -28,7 +28,7 @@ export function deriveQueryFunction (contentTypeMethodName, identifier) {
 }
 
 /** Given an `action` produce a function that will query the WP-API. */
-export function buildQueryFunction (action) {
-  const options = contentTypesManager.get(action.contentType)
-  return deriveQueryFunction(options.methodName, action.identifier)
+export function buildQueryFunction (request) {
+  const options = contentTypesManager.get(request.contentType)
+  return deriveQueryFunction(options.methodName, request.identifier)
 }
