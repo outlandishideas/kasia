@@ -34,6 +34,13 @@ export function wrapQueryFn (queryFn, props, state) {
   }
 }
 
+/** Make a request for new data if entity not in store or the identifier has changed. */
+function defaultConnectWpPostShouldUpdate (thisProps, nextProps, { id, displayName }) {
+  const entity = this._makePropsData(nextProps)
+  const identChanged = identifier(displayName, id, nextProps) !== identifier(displayName, id, thisProps)
+  return !entity && identChanged
+}
+
 /** Wrap component in react-redux connect. */
 function connect (cls) {
   return reduxConnect(({ wordpress }) => {
@@ -144,11 +151,14 @@ const base = (target) => {
  *
  * @param {String} contentType Content type of the WP entity to fetch
  * @param {Function|String|Number} id Entity's ID/slug/a function that derives either from props
+ * @param {Function} [shouldUpdate] Receives thisProps & nextProps and returns
+ *                                  bool indicating whether data should be re-fetched
  * @returns {Function} Decorated component
  */
-export function connectWpPost (contentType, id) {
+export function connectWpPost (contentType, id, shouldUpdate = defaultConnectWpPostShouldUpdate) {
   invariants.isString('contentType', contentType)
   invariants.isIdentifierArg(id)
+  invariants.isShouldUpdate(shouldUpdate)
 
   const typeConfig = contentTypesManager.get(contentType)
 
@@ -192,9 +202,6 @@ export function connectWpPost (contentType, id) {
         if (entities) {
           const keys = Object.keys(entities)
           const realId = identifier(displayName, id, props)
-          //
-          // console.log(entities)
-          // console.log(realId)
 
           for (let i = 0, len = keys.length; i < len; i++) {
             const entity = entities[keys[i]]
@@ -208,10 +215,7 @@ export function connectWpPost (contentType, id) {
       }
 
       _shouldUpdate (thisProps, nextProps) {
-        // Make a request for new data if entity not in store or the identifier has changed
-        const entity = this._makePropsData(nextProps)
-        const identChanged = identifier(displayName, id, nextProps) !== identifier(displayName, id, thisProps)
-        return !entity && identChanged
+        return shouldUpdate(thisProps, nextProps, { id, displayName })
       }
 
       componentWillMount () {
@@ -261,13 +265,11 @@ export function connectWpPost (contentType, id) {
  * @param {Boolean} [opts.preserve] Preserve result of query and pass this untouched to component (no normalisation)
  * @returns {Function} Decorated component
  */
-export function connectWpQuery (queryFn, shouldUpdate, opts = {}) {
+export function connectWpQuery (queryFn, shouldUpdate = () => false, opts = {}) {
   if (typeof shouldUpdate === 'object') {
     opts = shouldUpdate
     shouldUpdate = opts.shouldUpdate
   }
-
-  shouldUpdate = shouldUpdate || (() => false)
 
   invariants.isObject('opts', opts)
   invariants.isFunction('queryFn', queryFn)
@@ -307,17 +309,20 @@ export function connectWpQuery (queryFn, shouldUpdate, opts = {}) {
       _makePropsData () {
         const query = this._query()
         const state = this.props.wordpress
+
         if (!query || !query.complete || query.error) {
           return {}
-        } else if (opts.preserve) {
-          return query.result
-        } else {
-          return findEntities(
-            state.entities,
-            state.__keyEntitiesBy,
-            query.entities
-          )
         }
+
+        if (opts.preserve) {
+          return query.result
+        }
+
+        return findEntities(
+          state.entities,
+          state.__keyEntitiesBy,
+          query.entities
+        )
       }
     }
 
