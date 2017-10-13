@@ -2,7 +2,7 @@
 
 // jest.disableAutomock() hoisted here by babel-jest
 
-import { wrapQueryFn } from '../../src/connect'
+import { wrapQueryFn } from '../../src/connect/util'
 import { call } from 'redux-saga/effects'
 
 jest.disableAutomock()

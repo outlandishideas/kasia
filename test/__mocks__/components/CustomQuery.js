@@ -4,7 +4,7 @@
 
 import React, { Component } from 'react'
 
-import { connectWpQuery } from '../../../src/connect'
+import connectWpQuery from '../../../src/connect/connectWpQuery'
 
 jest.disableAutomock()
 

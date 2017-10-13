@@ -2,7 +2,7 @@
 
 // jest.disableAutomock() hoisted here by babel-jest
 
-import { rewind } from '../../src/connect'
+import { rewind } from '../../src/connect/util'
 import { ActionTypes, ContentTypes } from '../../src/constants'
 import { fetch } from '../../src/redux/sagas'
 

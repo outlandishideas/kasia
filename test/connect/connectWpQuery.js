@@ -7,7 +7,7 @@ import merge from 'lodash.merge'
 import isNode from 'is-node-fn'
 import { mount } from 'enzyme'
 
-import { wrapQueryFn, rewind } from '../../src/connect'
+import { wrapQueryFn, rewind } from '../../src/connect/util'
 import { ActionTypes } from '../../src/constants'
 
 import '../__mocks__/WP'

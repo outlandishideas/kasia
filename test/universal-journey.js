@@ -13,7 +13,7 @@ import { mount } from 'enzyme'
 import './__mocks__/WP'
 import kasia from '../src'
 import schemasManager from '../src/util/schemas-manager'
-import { rewind } from '../src/connect'
+import { rewind } from '../src/connect/util'
 import { ActionTypes } from '../src/constants'
 import { fetch } from '../src/redux/sagas'
 

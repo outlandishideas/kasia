@@ -9,7 +9,7 @@ import '../__mocks__/WP'
 import { ActionTypes } from '../../src/constants'
 import { fetch } from '../../src/redux/sagas'
 import { preload, preloadQuery } from '../../src/util/preload'
-import { wrapQueryFn } from '../../src/connect'
+import { wrapQueryFn } from '../../src/connect/util'
 
 import ConnectPostC from '../__mocks__/components/BuiltInContentType'
 import ConnectQueryC, { queryFn } from '../__mocks__/components/CustomQuery'

@@ -4,7 +4,7 @@
 
 import React, { Component } from 'react'
 
-import { connectWpPost } from '../../../src/connect'
+import connectWpPost from '../../../src/connect/connectWpPost'
 
 jest.disableAutomock()
 

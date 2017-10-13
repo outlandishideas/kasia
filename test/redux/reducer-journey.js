@@ -13,7 +13,7 @@ import kasia from '../../src'
 import normalise from '../../src/util/normalise'
 import pickEntityIds from '../../src/util/pick-entity-ids'
 import schemasManager from '../../src/util/schemas-manager'
-import { rewind } from '../../src/connect'
+import { rewind } from '../../src/connect/util'
 import { ContentTypes } from '../../src/constants'
 import { createPostRequest, acknowledgeRequest, completeRequest, failRequest } from '../../src/redux/actions'
 
