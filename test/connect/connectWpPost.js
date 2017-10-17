@@ -126,7 +126,7 @@ describe('connectWpPost', () => {
     let rendered
 
     beforeAll(() => {
-      const props =  { id: postJson.id }
+      const props = { id: postJson.id }
       state = stateMultipleEntities
       store = setup()
       rendered = ExplicitIdentifier(props, store)

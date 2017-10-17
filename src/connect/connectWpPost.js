@@ -76,7 +76,7 @@ export default function connectWpPost (contentType, id, shouldUpdate) {
 
           for (const key in entities) {
             const entity = entities[key]
-            if (entity[idKey] == lookupId) {
+            if (entity[idKey] == lookupId) { // eslint-disable-line eqeqeq
               return entity
             }
           }

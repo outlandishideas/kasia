@@ -1,7 +1,6 @@
 import merge from 'lodash.merge'
 import isNode from 'is-node-fn'
 
-import debug from '../util/debug'
 import pickEntityIds from '../util/pick-entity-ids'
 import normalise from '../util/normalise'
 import { ActionTypes, PreloadQueryId } from '../constants'
