@@ -5,6 +5,12 @@ import isNode from 'is-node-fn'
 import debug from '../util/debug'
 import { incrementNextQueryId } from '../redux/actions'
 
+let nextClientQueryId = 0
+
+export function _rewindNextClientQueryId () {
+  nextClientQueryId = 0
+}
+
 /**
  * Base connect component.
  * @param {Function} target
@@ -60,27 +66,50 @@ export default function base (target, dataKey, fallbackDataValue) {
     }
 
     componentWillMount () {
-      const state = this.props.wordpress
-      const queryId = this.queryId = state.__nextQueryId
-      const query = state.queries[queryId]
+      const {__nextQueryId, queries} = this.props.wordpress
 
-      debug(`${displayName} will mount with queryId=${queryId}`)
+      if (isNode()) {
+        this.queryId = __nextQueryId
+      } else {
+        this.queryId = nextClientQueryId
+      }
+
+      const query = queries[this.queryId]
+
+      debug(`${displayName} will mount with queryId=${this.queryId}`)
 
       if (query && query.prepared) {
-        debug(`${displayName} has prepared data at queryId=${queryId}`)
-        this.props.dispatch(incrementNextQueryId())
-      } else if (!isNode()) {
+        debug(`${displayName} has prepared data at queryId=${this.queryId}`)
+        if (isNode()) {
+          this.props.dispatch(incrementNextQueryId())
+        }
+      } else {
         debug(`${displayName} initiating request in componentWillMount`)
         this._requestWpData(this.props)
+        if (!isNode()) {
+          nextClientQueryId++
+        }
       }
     }
 
     componentWillReceiveProps (nextProps) {
-      const willUpdate = this._shouldUpdate(this.props, nextProps, this.context.store.getState())
-      if (willUpdate) {
-        this.queryId = this.props.wordpress.__nextQueryId
-        debug(`${displayName} initiating request: queryId=${this.queryId}, props: ${nextProps}`)
-        this._requestWpData(nextProps)
+      const {__nextQueryId, queries} = this.props.wordpress
+      const query = queries[this.queryId]
+
+      if (query && query.complete) {
+        const willUpdate = this._shouldUpdate(this.props, nextProps, this.context.store.getState())
+
+        if (willUpdate) {
+          if (isNode()) {
+            this.queryId = __nextQueryId
+          } else {
+            this.queryId = nextClientQueryId++
+          }
+
+          debug(`${displayName} initiating request: queryId=${this.queryId}, props: ${nextProps}`)
+
+          this._requestWpData(nextProps)
+        }
       }
     }
 

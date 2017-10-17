@@ -17,6 +17,7 @@ import {
 
 import kasia from '../../src'
 import schemasManager from '../../src/util/schemas-manager'
+import { _rewindNextClientQueryId } from '../../src/connect/base'
 import { ActionTypes } from '../../src/constants'
 import { fetch, _getCurrentQueryId } from '../../src/redux/sagas'
 import { buildQueryFunction } from '../../src/util/query-builder'
@@ -76,6 +77,7 @@ describe('Universal journey', function () {
       let rendered, preloader, action, iter, store, runSaga
 
       function newStore () {
+        _rewindNextClientQueryId()
         const s = setup(keyEntitiesBy)
         store = s.store
         runSaga = s.runSaga

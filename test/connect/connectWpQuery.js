@@ -7,6 +7,7 @@ import merge from 'lodash.merge'
 import isNode from 'is-node-fn'
 import { mount } from 'enzyme'
 
+import { _rewindNextClientQueryId } from '../../src/connect/base'
 import { wrapQueryFn } from '../../src/connect/util'
 import { ActionTypes } from '../../src/constants'
 
@@ -30,6 +31,7 @@ const CustomQuery = (props, store) => mount(<CustomQueryComponent {...props} />,
 const PreserveQuery = (props, store) => mount(<PreserveQueryComponent {...props} />, { context: { store } })
 
 function setup (state) {
+  _rewindNextClientQueryId()
   const dispatch = jest.fn()
   const subscribe = () => {}
   const getState = () => state

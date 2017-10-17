@@ -8,6 +8,7 @@ import isNode from 'is-node-fn'
 import { mount } from 'enzyme'
 
 import { ActionTypes } from '../../src/constants'
+import { _rewindNextClientQueryId } from '../../src/connect/base'
 
 import '../__mocks__/WP'
 import stateMultipleEntities from '../__mocks__/states/multipleEntities'
@@ -30,6 +31,7 @@ const ExplicitIdentifier = (props, store) => mount(<ExplicitIdentifierComponent 
 let state
 
 function setup () {
+  _rewindNextClientQueryId()
   const dispatch = jest.fn()
   const subscribe = () => {}
   const getState = () => state
