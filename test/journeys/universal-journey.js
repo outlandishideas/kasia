@@ -148,6 +148,7 @@ describe('Universal journey', function () {
       })
 
       it('CLIENT', () => {
+        _rewindNextClientQueryId()
         kasia.rewind(store)
         isNode.mockReturnValue(false)
         returnPost = post2

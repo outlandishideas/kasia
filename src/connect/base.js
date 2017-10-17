@@ -82,6 +82,8 @@ export default function base (target, dataKey, fallbackDataValue) {
         debug(`${displayName} has prepared data at queryId=${this.queryId}`)
         if (isNode()) {
           this.props.dispatch(incrementNextQueryId())
+        } else {
+          nextClientQueryId++
         }
       } else {
         debug(`${displayName} initiating request in componentWillMount`)
