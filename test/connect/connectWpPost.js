@@ -32,10 +32,11 @@ let state
 
 function setup () {
   _rewindNextClientQueryId()
-  const dispatch = jest.fn()
-  const subscribe = () => {}
-  const getState = () => state
-  return { dispatch, getState, subscribe }
+  return {
+    dispatch: jest.fn(),
+    subscribe: () => {},
+    getState: () => state
+  }
 }
 
 jest.mock('is-node-fn')
@@ -43,17 +44,16 @@ isNode.mockReturnValue(false)
 
 describe('connectWpPost', () => {
   describe('with built-in content type', () => {
-    let store
-    let rendered
+    let store, rendered
 
     beforeAll(() => {
+      const props = { id: postJson.id }
       state = initialState()
       store = setup()
-      rendered = BuiltInType({ id: postJson.id }, store)
+      rendered = BuiltInType(props, store)
     })
 
     it('should wrap the component', () => {
-      // Components are wrapped first by react-redux connect()
       expect(BuiltInTypeComponent.WrappedComponent).toBe(target)
       expect(BuiltInTypeComponent.__kasia__).toBe(true)
     })
@@ -74,16 +74,16 @@ describe('connectWpPost', () => {
       state = merge({}, stateMultipleEntities, { wordpress: { queries: { 0: query } } })
       rendered.update() // Fake store update from completed request
       expect(rendered.html()).toEqual('<div>Architecto enim omnis repellendus</div>')
-      state.wordpress.__nextQueryId = 1
     })
 
-    it('should update to new entity that exists in store straight away', () => {
+    it('should update to new entity in store', () => {
+      state.wordpress.__nextQueryId = 1
       const nextProps = { id: postJson.id + 1 }
       rendered.setProps(nextProps)
       expect(rendered.html()).toEqual('<div>new title</div>')
     })
 
-    it('should dispatch RequestCreatePost for entity that is not in store', () => {
+    it('should dispatch RequestCreatePost for entity not in store', () => {
       const nextProps = { id: 100 }
       rendered.setProps(nextProps)
       expect(rendered.html()).toEqual('<div>Loading...</div>')
@@ -96,8 +96,7 @@ describe('connectWpPost', () => {
   })
 
   describe('with custom content type', () => {
-    let store
-    let rendered
+    let store, rendered
 
     beforeAll(() => {
       const props = { id: bookJson.id }
@@ -124,8 +123,7 @@ describe('connectWpPost', () => {
   // Test that a store keyed by numeric ID can still resolve an
   // entity that is fetched using explicit slug identifier
   describe('with explicit slug identifier', () => {
-    let store
-    let rendered
+    let store, rendered
 
     beforeAll(() => {
       const props = { id: postJson.id }
@@ -150,7 +148,7 @@ describe('connectWpPost', () => {
   })
 
   describe('with bad content type', () => {
-    it('should throw "content type is not recognised" error', () => {
+    it('should throw error', () => {
       const store = setup(stateMultipleEntities)
       const props = { id: postJson.id }
       expect(() => BadContentType(props, store)).toThrowError(/is not recognised/)

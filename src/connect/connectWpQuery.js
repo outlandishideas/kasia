@@ -1,12 +1,20 @@
+import { call } from 'redux-saga/effects'
 import get from 'lodash.get'
 
 import debug from '../util/debug'
 import invariants from '../invariants'
 import findEntities from '../util/find-entities'
 import base from './base'
-import { wrapQueryFn, connect } from './util'
+import { connect } from './util'
 import { createQueryRequest } from '../redux/actions'
 import { fetch } from '../redux/sagas'
+
+/** Wrap `queryFn` in a function that takes the node-wpapi instance. */
+export function _wrapQueryFn (queryFn, props, state) {
+  return function * (wpapi) {
+    return yield call(queryFn, wpapi, props, state)
+  }
+}
 
 /**
  * Connect a component to arbitrary data from WordPress.
@@ -72,14 +80,14 @@ export default function connectWpQuery (queryFn, shouldUpdate, opts = {}) {
     class KasiaConnectWpQueryComponent extends base(target, 'data', {}) {
       static preload (props, state) {
         debug(displayName, 'connectWpQuery preload with props:', props, 'state:', state)
-        const wrappedQueryFn = wrapQueryFn(queryFn, props, state)
+        const wrappedQueryFn = _wrapQueryFn(queryFn, props, state)
         const action = createQueryRequest(wrappedQueryFn, opts.preserve)
         return [fetch, action]
       }
 
       _getRequestWpDataAction (props) {
         debug(displayName, 'connectWpQuery request with props:', props)
-        const wrappedQueryFn = wrapQueryFn(queryFn, props, this.context.store.getState())
+        const wrappedQueryFn = _wrapQueryFn(queryFn, props, this.context.store.getState())
         return createQueryRequest(wrappedQueryFn, opts.preserve)
       }
 

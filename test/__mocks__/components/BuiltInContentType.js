@@ -17,6 +17,10 @@ export class target extends Component {
       return <div>Loading...</div>
     }
 
+    if (!post) {
+      console.log(query, post)
+    }
+
     return <div>{post.title.rendered}</div>
   }
 }

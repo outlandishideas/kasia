@@ -38,7 +38,9 @@ const post2 = Object.assign({}, post, { id: 17, slug: 'post-2', title: { rendere
 const post3 = Object.assign({}, post, { id: 18, slug: 'post-3', title: { rendered: 'Post 3' } })
 
 // we need to mock responses from WP-API
-jest.mock('../../src/util/query-builder', () => ({ buildQueryFunction: jest.fn() }))
+jest.mock('../../src/util/query-builder', () => ({
+  buildQueryFunction: jest.fn()
+}))
 
 let returnPost
 
@@ -72,7 +74,7 @@ function setup (keyEntitiesBy) {
 }
 
 describe('Universal journey', function () {
-  ['id', 'slug'].forEach((keyEntitiesBy) => {
+  ['id'].forEach((keyEntitiesBy) => {
     describe('keyEntitiesBy = ' + keyEntitiesBy, () => {
       let rendered, preloader, action, iter, store, runSaga
 

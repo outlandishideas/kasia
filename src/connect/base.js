@@ -7,6 +7,10 @@ import { incrementNextQueryId } from '../redux/actions'
 
 let nextClientQueryId = 0
 
+export function getNextClientQueryId () {
+  return nextClientQueryId++
+}
+
 export function _rewindNextClientQueryId () {
   nextClientQueryId = 0
 }
@@ -31,8 +35,20 @@ export default function base (target, dataKey, fallbackDataValue) {
     }
 
     /** Make request for new data from WP-API. */
-    _requestWpData (props) {
+    _requestWpData (props, reuseQueryId = false) {
       const action = this._getRequestWpDataAction(props)
+
+      if (reuseQueryId) {
+        action.request.id = this.queryId
+      } else {
+        if (isNode()) {
+          action.request.id = this.props.wordpress.__nextQueryId
+        } else {
+          action.request.id = getNextClientQueryId()
+        }
+        this.queryId = action.request.id
+      }
+
       this.props.dispatch(action)
     }
 
@@ -66,12 +82,12 @@ export default function base (target, dataKey, fallbackDataValue) {
     }
 
     componentWillMount () {
-      const {__nextQueryId, queries} = this.props.wordpress
+      const { __nextQueryId, queries } = this.props.wordpress
 
       if (isNode()) {
         this.queryId = __nextQueryId
       } else {
-        this.queryId = nextClientQueryId
+        this.queryId = getNextClientQueryId()
       }
 
       const query = queries[this.queryId]
@@ -82,34 +98,22 @@ export default function base (target, dataKey, fallbackDataValue) {
         debug(`${displayName} has prepared data at queryId=${this.queryId}`)
         if (isNode()) {
           this.props.dispatch(incrementNextQueryId())
-        } else {
-          nextClientQueryId++
         }
       } else {
         debug(`${displayName} initiating request in componentWillMount`)
-        this._requestWpData(this.props)
-        if (!isNode()) {
-          nextClientQueryId++
-        }
+        this._requestWpData(this.props, true)
       }
     }
 
     componentWillReceiveProps (nextProps) {
-      const {__nextQueryId, queries} = this.props.wordpress
+      const { queries } = this.props.wordpress
       const query = queries[this.queryId]
 
       if (query && query.complete) {
         const willUpdate = this._shouldUpdate(this.props, nextProps, this.context.store.getState())
 
         if (willUpdate) {
-          if (isNode()) {
-            this.queryId = __nextQueryId
-          } else {
-            this.queryId = nextClientQueryId++
-          }
-
           debug(`${displayName} initiating request: queryId=${this.queryId}, props: ${nextProps}`)
-
           this._requestWpData(nextProps)
         }
       }

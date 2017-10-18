@@ -9,7 +9,7 @@ import '../__mocks__/WP'
 import { ActionTypes, PreloadQueryId } from '../../src/constants'
 import { fetch } from '../../src/redux/sagas'
 import { preload, preloadQuery } from '../../src/util/preload'
-import { wrapQueryFn } from '../../src/connect/util'
+import { _wrapQueryFn } from '../../src/connect/connectWpQuery'
 
 import ConnectPostC from '../__mocks__/components/BuiltInContentType'
 import ConnectQueryC, { queryFn } from '../__mocks__/components/CustomQuery'
@@ -50,7 +50,7 @@ describe('util/preload', () => {
     })
 
     it('that yields fork effect for each component', () => {
-      const wrappedQueryFnStr = wrapQueryFn(queryFn, props).toString()
+      const wrappedQueryFnStr = _wrapQueryFn(queryFn, props).toString()
 
       expect(res.done).toEqual(false)
 

@@ -1,4 +1,3 @@
-import { call } from 'redux-saga/effects'
 import { connect as reduxConnect } from 'react-redux'
 
 import invariants from '../invariants'
@@ -16,11 +15,4 @@ export function connect (cls) {
     invariants.hasWordpressObject(wordpress)
     return { wordpress }
   })(cls)
-}
-
-/** Wrap `queryFn` in a function that takes the node-wpapi instance. */
-export function wrapQueryFn (queryFn, props, state) {
-  return function * (wpapi) {
-    return yield call(queryFn, wpapi, props, state)
-  }
 }

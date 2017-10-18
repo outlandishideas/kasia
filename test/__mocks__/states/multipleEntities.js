@@ -3,7 +3,9 @@ import bookJson from '../../__fixtures__/wp-api-responses/book'
 
 const post2 = Object.assign({}, postJson, {
   id: postJson.id + 1,
-  title: { rendered: 'new title' }
+  title: {
+    rendered: 'new title'
+  }
 })
 
 export default {

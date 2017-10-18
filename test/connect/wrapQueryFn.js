@@ -2,8 +2,9 @@
 
 // jest.disableAutomock() hoisted here by babel-jest
 
-import { wrapQueryFn } from '../../src/connect/util'
 import { call } from 'redux-saga/effects'
+
+import { _wrapQueryFn } from '../../src/connect/connectWpQuery'
 
 jest.disableAutomock()
 
@@ -16,7 +17,7 @@ const state = { state: true }
 const wpapi = { wpapi: true }
 
 describe('wrapQueryFn', () => {
-  const wrapped = wrapQueryFn(testSaga, props, state)
+  const wrapped = _wrapQueryFn(testSaga, props, state)
   const saga = wrapped(wpapi)
 
   it('should yield a call with correct arguments', () => {

@@ -8,7 +8,7 @@ import isNode from 'is-node-fn'
 import { mount } from 'enzyme'
 
 import { _rewindNextClientQueryId } from '../../src/connect/base'
-import { wrapQueryFn } from '../../src/connect/util'
+import { _wrapQueryFn } from '../../src/connect/connectWpQuery'
 import { ActionTypes } from '../../src/constants'
 
 import '../__mocks__/WP'
@@ -101,7 +101,7 @@ describe('connectWpQuery', () => {
       CustomQuery({ id: 10 }, store)
       const action = store.dispatch.mock.calls[0][0]
       expect(action.type).toEqual(ActionTypes.RequestCreateQuery)
-      expect(action.request.queryFn.toString()).toEqual(wrapQueryFn(queryFn).toString())
+      expect(action.request.queryFn.toString()).toEqual(_wrapQueryFn(queryFn).toString())
     })
   })
 

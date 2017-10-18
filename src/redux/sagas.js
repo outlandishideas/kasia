@@ -1,4 +1,5 @@
 import { takeEvery, select, call, put } from 'redux-saga/effects'
+import isNode from 'is-node-fn'
 
 import getWP from '../wpapi'
 import { ActionTypes } from '../constants'
@@ -16,7 +17,10 @@ export function _getCurrentQueryId (state) {
  */
 export function * fetch ({ request }) {
   try {
-    request.id = yield select(_getCurrentQueryId)
+    if (isNode()) {
+      // we get here via the component preloaders
+      request.id = yield select(_getCurrentQueryId)
+    }
     yield put(acknowledgeRequest(request))
     const wpapi = getWP()
     const fn = request.queryFn || buildQueryFunction(request)
