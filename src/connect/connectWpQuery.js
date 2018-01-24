@@ -51,6 +51,7 @@ export function _wrapQueryFn (queryFn, props, state) {
  * @param {Object} [opts] Options object
  * @param {Function|String|Object} [opts.shouldUpdate] See `shouldUpdate` docs
  * @param {Boolean} [opts.preserve] Preserve result of query and pass this untouched to component (no normalisation)
+ * @param {Function} [opts.cacheStrategy] Function returning caching strategy object
  * @returns {Function} Decorated component
  */
 export default function connectWpQuery (queryFn, shouldUpdate, opts = {}) {
@@ -77,18 +78,36 @@ export default function connectWpQuery (queryFn, shouldUpdate, opts = {}) {
 
     invariants.isNotWrapped(target, displayName)
 
-    class KasiaConnectWpQueryComponent extends base(target, 'data', {}) {
-      static preload (props, state) {
+    const baseCls = base({
+      target,
+      dataKey: 'data',
+      fallbackDataValue: {},
+      cacheStrategy: opts.cacheStrategy
+    })
+
+    class KasiaConnectWpQueryComponent extends baseCls {
+      static preload (props, state, req, res) {
         debug(displayName, 'connectWpQuery preload with props:', props, 'state:', state)
-        const wrappedQueryFn = _wrapQueryFn(queryFn, props, state)
-        const action = createQueryRequest(wrappedQueryFn, opts.preserve)
-        return [fetch, action]
+        const wrappedQueryFn = _wrapQueryFn(queryFn, props, state, req, res)
+        return [
+          fetch,
+          createQueryRequest({
+            queryFn: wrappedQueryFn,
+            preserve: opts.preserve,
+            cacheStrategy: baseCls.cacheStrategy(props, state, req, res)
+          })
+        ]
       }
 
       _getRequestWpDataAction (props) {
         debug(displayName, 'connectWpQuery request with props:', props)
-        const wrappedQueryFn = _wrapQueryFn(queryFn, props, this.context.store.getState())
-        return createQueryRequest(wrappedQueryFn, opts.preserve)
+        const state = this.context.store.getState()
+        const wrappedQueryFn = _wrapQueryFn(queryFn, props, state)
+        return createQueryRequest({
+          queryFn: wrappedQueryFn,
+          preserve: opts.preserve,
+          cacheStrategy: baseCls.cacheStrategy(props, state)
+        })
       }
 
       _makePropsData (_, query) {

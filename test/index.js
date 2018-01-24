@@ -3,7 +3,7 @@
 // jest.disableAutomock() hoisted here by babel-jest
 
 import { wpapi } from './__mocks__/WP'
-import kasia, { preload, preloadQuery } from '../src'
+import kasia, { preloadComponents, preloadQuery } from '../src'
 
 jest.disableAutomock()
 
@@ -23,7 +23,7 @@ describe('Kasia', () => {
   })
 
   it('exports preloaders', () => {
-    expect(typeof preload).toEqual('function')
+    expect(typeof preloadComponents).toEqual('function')
     expect(typeof preloadQuery).toEqual('function')
   })
 
@@ -39,7 +39,7 @@ describe('Kasia', () => {
     }).toThrowError(/Expecting plugins to be array/)
   })
 
-  it('throws with bad index value', () => {
+  it('throws with bad keyEntitiesBy value', () => {
     expect(() => {
       kasia({ wpapi, keyEntitiesBy: 0 })
     }).toThrowError(/Expecting keyEntitiesBy/)

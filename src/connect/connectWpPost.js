@@ -30,11 +30,14 @@ import { fetch } from '../redux/sagas'
  * @param {Function|String|Number} id Entity's ID/slug/a function that derives either from props
  * @param {Function} [shouldUpdate] Receives thisProps & nextProps and returns
  *                                  bool indicating whether data should be re-fetched
+ * @param {Object} [opts] Options object
+ * @param {Function} [opts.cacheStrategy] Function returning caching strategy object
  * @returns {Function} Decorated component
  */
-export default function connectWpPost (contentType, id, shouldUpdate) {
+export default function connectWpPost (contentType, id, shouldUpdate, opts = {}) {
   invariants.isString('contentType', contentType)
   invariants.isIdentifierArg(id)
+  invariants.isObject('opts', opts)
 
   if (shouldUpdate) {
     invariants.isShouldUpdate(shouldUpdate)
@@ -47,18 +50,33 @@ export default function connectWpPost (contentType, id, shouldUpdate) {
 
     invariants.isNotWrapped(target, displayName)
 
-    class KasiaConnectWpPostComponent extends base(target, contentType, null) {
-      static preload (props) {
+    const baseCls = base({
+      target,
+      dataKey: contentType,
+      fallbackDataValue: null,
+      cacheStrategy: opts.cacheStrategy
+    })
+
+    class KasiaConnectWpPostComponent extends baseCls {
+      static preload (props, state, req, res) {
         debug(displayName, 'connectWpPost preload with props:', props)
         invariants.isValidContentType(typeConfig, contentType, `${displayName} component`)
-        const action = createPostRequest(contentType, identifier(displayName, id, props))
+        const action = createPostRequest({
+          contentType,
+          identifier: identifier(displayName, id, props),
+          cacheStrategy: baseCls.cacheStrategy(props, state, req, res)
+        })
         return [fetch, action]
       }
 
       _getRequestWpDataAction (props) {
         debug(displayName, 'connectWpPost request with props:', props)
-        const realId = identifier(displayName, id, props)
-        return createPostRequest(contentType, realId)
+        const state = this.context.store.getState()
+        return createPostRequest({
+          contentType,
+          identifier: identifier(displayName, id, props),
+          cacheStrategy: baseCls.cacheStrategy(props, state)
+        })
       }
 
       _makePropsData (props) {
@@ -66,18 +84,14 @@ export default function connectWpPost (contentType, id, shouldUpdate) {
 
         if (entities) {
           const lookupId = identifier(displayName, id, props)
-          let idKey
-
-          if (typeof lookupId === 'string') {
-            idKey = 'slug'
-          } else {
-            idKey = 'id'
-          }
+          const idKey = typeof lookupId === 'string' ? 'slug' : 'id'
 
           for (const key in entities) {
-            const entity = entities[key]
-            if (entity[idKey] == lookupId) { // eslint-disable-line eqeqeq
-              return entity
+            if (entities.hasOwnProperty(key)) {
+              const entity = entities[key]
+              if (entity[idKey] == lookupId) { // eslint-disable-line eqeqeq
+                return entity
+              }
             }
           }
         }

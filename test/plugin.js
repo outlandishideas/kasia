@@ -49,14 +49,29 @@ function setup () {
 describe('Plugin', () => {
   const { store, kasiaSagas } = setup()
 
+  it('throws if plugin is not function', () => {
+    expect(() => {
+      kasia({
+        wpapi: new Wpapi({ endpoint: '' }),
+        plugins: ['']
+      })
+    }).toThrowError(/is not a function/)
+  })
+
   it('should run untouched native action type', () => {
-    store.dispatch(acknowledgeRequest({ type: ActionTypes.RequestCreatePost, id: 0 }))
+    store.dispatch(acknowledgeRequest({
+      type: ActionTypes.RequestCreatePost,
+      id: 0
+    }))
     expect(store.getState().wordpress.queries['0']).toBeTruthy()
   })
 
   describe('with native action type', () => {
     it('should hit native action handler', () => {
-      store.dispatch(completeRequest(0, postJson))
+      store.dispatch(completeRequest({
+        id: 0,
+        result: postJson
+      }))
       expect(store.getState().wordpress.queries['0']).toBeTruthy()
     })
 

@@ -4,14 +4,14 @@
 
 import '../__mocks__/WP'
 import postJson from '../__fixtures__/wp-api-responses/post'
-import { INITIAL_STATE, acknowledgeReducer, completeReducer, failReducer } from '../../src/redux/reducer'
+import { INITIAL_STATE, acknowledgeReducer, createCompleteReducer, failReducer } from '../../src/redux/reducer'
 
 jest.disableAutomock()
 
 describe('redux/reducer', () => {
   const id = 0
 
-  let state
+  let state = INITIAL_STATE
   let query
 
   function assertState (fn) {
@@ -26,7 +26,7 @@ describe('redux/reducer', () => {
 
   describe('acknowledge', () => {
     it('returns a new object', assertState(() => {
-      return acknowledgeReducer(INITIAL_STATE, {
+      return acknowledgeReducer(state, {
         request: { id }
       })
     }))
@@ -44,7 +44,7 @@ describe('redux/reducer', () => {
 
   describe('complete', () => {
     it('returns a new object', assertState(() => {
-      const complete = completeReducer((data) => data)
+      const complete = createCompleteReducer((data) => data)
       const action = {
         request: {
           id,

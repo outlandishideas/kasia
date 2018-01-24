@@ -1,12 +1,9 @@
-const NODE_WPAPI_GITHUB_URL = 'http://bit.ly/2adfKKg'
 const KASIA_URL = 'http://kasia.io'
 
 function invariant (predicate, message, ...args) {
   if (!predicate) {
     const interpolated = args.reduce((str, arg) => str.replace(/%s/, arg), message)
-    const err = new Error('[kasia] ' + interpolated)
-    err.framesToPop = 1
-    throw err
+    throw new Error('[kasia] ' + interpolated)
   }
 }
 
@@ -26,12 +23,12 @@ export default {
     'Expecting %s to be function, got "%s".',
     name, typeof value
   ),
-  isPlugin: (name, value) => invariant(
+  isPlugin: (idx, value) => invariant(
     typeof value === 'function',
-    'Expecting %s to be function, got "%s". ' +
+    'Plugin at index %s is not a function, got "%s". ' +
     'Please file an issue with the plugin if you ' +
     'think there might be a problem with it.',
-    name, typeof value
+    idx, typeof value
   ),
   isArray: (name, value) => invariant(
     Array.isArray(value),
@@ -50,8 +47,7 @@ export default {
   ),
   isWpApiInstance: (value = {}) => invariant(
     typeof value.registerRoute === 'function',
-    'Expecting WP to be instance of `node-wpapi`. ' +
-    `See documentation: ${NODE_WPAPI_GITHUB_URL}.`
+    'Expecting WP to be instance of `node-wpapi`.'
   ),
   isIdentifierArg: (identifier) => invariant(
     ['function', 'string', 'number'].indexOf(typeof identifier) > -1,
@@ -100,5 +96,14 @@ export default {
     keyEntitiesBy === 'slug' || keyEntitiesBy === 'id',
     'Expecting keyEntitiesBy to be "slug" or "id", got "%s".',
     keyEntitiesBy
+  ),
+  isValidCacheStrategy: (strategy) => invariant(
+    !strategy || (
+      typeof strategy === 'object' &&
+      typeof strategy.expires === 'number' &&
+      typeof strategy.cacheId === 'string' &&
+      (typeof strategy.invalidate === 'undefined' || typeof strategy.invalidate === 'boolean')
+    ),
+    'Expecting cacheStrategy retval to be object {cacheId:string, expires:number[, invalidate:boolean]}.'
   )
 }

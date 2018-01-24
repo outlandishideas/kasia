@@ -8,7 +8,7 @@ import { createMockTask } from 'redux-saga/utils'
 import '../__mocks__/WP'
 import { ActionTypes, PreloadQueryId } from '../../src/constants'
 import { fetch } from '../../src/redux/sagas'
-import { preload, preloadQuery } from '../../src/util/preload'
+import { preloadComponents, preloadQuery } from '../../src/util/preload'
 import { _wrapQueryFn } from '../../src/connect/connectWpQuery'
 
 import ConnectPostC from '../__mocks__/components/BuiltInContentType'
@@ -29,19 +29,19 @@ describe('util/preload', () => {
     let res
 
     it('throws with bad components', () => {
-      expect(() => preload({}, '')).toThrowError(/Expecting components to be array/)
+      expect(() => preloadComponents({}, '')).toThrowError(/Expecting components to be array/)
     })
 
     it('throws with bad renderProps', () => {
-      expect(() => preload([], '')).toThrowError(/Expecting renderProps to be an object/)
+      expect(() => preloadComponents([], '')).toThrowError(/Expecting renderProps to be an object/)
     })
 
     it('throws with bad state', () => {
-      expect(() => preload([], {}, '')).toThrowError(/Expecting state to be an object/)
+      expect(() => preloadComponents([], {}, '')).toThrowError(/Expecting state to be an object/)
     })
 
     it('returns generator', () => {
-      const actual = preload(components, props)
+      const actual = preloadComponents(components, props)()
 
       iter = actual()
       res = iter.next()
@@ -58,6 +58,7 @@ describe('util/preload', () => {
       expect(res.value[0]).toEqual(fork(fetch, {
         type: ActionTypes.RequestCreatePost,
         request: {
+          cacheStrategy: false,
           contentType: 'post',
           identifier: 16
         }
@@ -96,7 +97,8 @@ describe('util/preload', () => {
     })
 
     it('yields data from given queryFn', () => {
-      iter = preloadQuery(() => 'mockResult')()
+      const actual = preloadQuery(() => 'mockResult')()
+      iter = actual()
       expect(iter.next().value).toEqual('mockResult')
     })
 

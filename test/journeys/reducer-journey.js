@@ -65,7 +65,10 @@ describe('reducer journey', () => {
       })
 
       it('can Request*Create', () => {
-        const action = createPostRequest(ContentTypes.Post, param)
+        const action = createPostRequest({
+          contentType: ContentTypes.Post,
+          identifier: param
+        })
         request = action.request
         store.dispatch(action)
       })
@@ -87,7 +90,10 @@ describe('reducer journey', () => {
       })
 
       it('can RequestComplete', () => {
-        store.dispatch(completeRequest(0, postJson))
+        store.dispatch(completeRequest({
+          id: 0,
+          result: postJson
+        }))
         const expected = normalise(postJson, {idAttribute: keyEntitiesBy})
         const actual = store.getState().wordpress.entities
         expect(actual).toEqual(expected)
@@ -107,8 +113,11 @@ describe('reducer journey', () => {
       })
 
       it('can RequestFail', () => {
-        store.dispatch(createPostRequest(ContentTypes.Post, param))
-        store.dispatch(failRequest(1, error))
+        store.dispatch(createPostRequest({
+          contentType: ContentTypes.Post,
+          identifier: param
+        }))
+        store.dispatch(failRequest({ id: 1, error }))
         const expected = { id: 1, complete: true, OK: false, error, prepared: true }
         const actual = store.getState().wordpress.queries[1]
         expect(actual).toEqual(expected)

@@ -63,7 +63,6 @@ export default class extends React.Component () {
 
 ## Glossary
 
-- [Extra Docs](#docs)
 - [Requirements](#requirements)
 - [Install](#install)
 - [Import](#import)
@@ -72,13 +71,9 @@ export default class extends React.Component () {
 - [Exports](#exports)
 - [Plugins](#plugins)
 - [Universal Applications](#universal-applications)
-- [Draft Posts](#draft-posts)
+- [Draft Posts](https://github.com/outlandishideas/kasia/blob/v5.0.0/docs/draft-posts.md)
 - [Contributing](#contributing)
 - [Author & License](#author-&-license)
-
-## Docs
-
-See the [`docs/` folder](https://github.com/outlandishideas/kasia/tree/master/docs) for extra documentation.
 
 ## Requirements
 
@@ -87,10 +82,9 @@ Kasia suits applications that are built using these technologies:
 - React
 - Redux
 - Redux Sagas (>= 0.10.0)
-- WordPress
-- [WP-API plugin](http://v2.wp-api.org/)
+- WordPress (w/ [WP-API plugin](http://v2.wp-api.org/) if necessary)
 - [`node-wpapi`](https://github.com/WP-API/node-wpapi)
-- Node (>= 6)
+- Node (>= 6.0.0)
 
 Please note that in v4.2 the required Node version has been raised to 6.
 
@@ -173,7 +167,7 @@ Returns an object containing the Kasia reducer and sagas.
 
 ```js
 const { kasiaReducer, kasiaSagas } = kasia({
-  wpapi: new wpapi({ endpoint: 'http://wordpress/wp-json' })
+  wpapi: wpapi({ endpoint: 'http://wordpress/wp-json' })
 })
 ```
 
@@ -338,15 +332,9 @@ export function getPostsByTagId(wpapi, id) {
   return wpapi.posts().embed().tag(id).get()
 }
 
-function * topicsByTag(wpapi, props, state) {
+function * topicsByTag(wpapi, props) {
     const tag = yield call(getTagsBySlug, wpapi, props.location.query.tag)
-    let stories
-    if (tag.length) {
-      stories = yield call(getPostsByTagId, wpapi, tag[0].id)
-    } else {
-      stories = []
-    }
-    return stories
+    return tag.length ? yield call(getPostsByTagId, wpapi, tag[0].id) : []
 }
 
 @connectWpQuery(topicsByTag, 'location.query.tag')
@@ -411,7 +399,7 @@ A plugin should:
 }
 ```
 
-A plugin can hook into Kasia's native action types, available at `kasia/lib/constants/ActionTypes`.
+A plugin can hook into Kasia's native action types, available at `import {ActionTypes} from 'kasia/lib/constants`.
 All reducers for an action type are merged into a single function that calls each reducer in succession
 with the state returned by the previous reducer. This means the order of plugins that touch the same
 action type is important.
@@ -429,16 +417,16 @@ Please create a pull request to get your own added to the list.
 __Important...__ 
 
   - __before calling the preloaders for SSR you must call `kasia.rewind(store)`__
-  - __or if you call `runSagas()` from the utilities then this is done for you.__
+  - __or if you call `runPreloaders()` from the utilities then this is done for you.__
 
 ### Utilities
 
-#### `runSagas(store, sagas) : Promise`
+#### `runPreloaders(store, preloaders) : Promise`
 
 Run a bunch of sagas against the store and wait on their completion.
 
 - __store__ {Object} Redux store enhanced with `runSaga` method
-- __sagas__ {Array} Array of functions that accept the store state and return a saga generator
+- __preloaders__ {Array} Array of preloaders that return saga operations
 
 Returns a Promise resolving on completion of all the sagas.
 
@@ -491,36 +479,43 @@ Where:
 A somewhat contrived example using the available preloader methods.
 
 ```js
+// third-party deps
 import { match } from 'react-router'
-import { runSagas, preload, preloadQuery } from 'kasia'
+import kasia from 'kasia'
 
-import routes from './routes'
-import store from './store'
-import renderToString from './render'
+// server stuff
+import app from './router'
 import getAllCategories from './queries/categories'
 
-export default function renderPage (res, location) { 
-  return match({ routes, location }, (error, redirect, renderProps) => {
+// react (client) stuff
+import routes from '../client/routes'
+import store from '../client/redux/store'
+import renderToString from './render'
+
+const wordpress = kasia.app({
+  store  
+})
+
+app.use(wordpress.middleware())
+
+app.get(function (req, res) { 
+  return match({
+    routes,
+    location: req.originalUrl
+  }, (error, redirect, renderProps) => {
     if (error) return res.sendStatus(500)
     if (redirect) return res.redirect(302, redirect.pathname + redirect.search)
-    
-    // We are using `runSagas` which rewinds for us, but if we weren't then
-    // we would call `kasia.rewind(store)` here instead:
-    //
-    // kasia.rewind(store)
-    
-    // Each preloader accepts the state that may/may not have been modified by
-    // the saga before it, so the order might be important depending on your use-case!
-    const preloaders = [
-      () => preload(renderProps.components, renderProps),
-      (state) => preloadQuery(getAllCategories, renderProps, state)
+ 
+    const wordpressData = [
+      getAllCategories,
+      renderProps.components
     ]
-    
-    return runSagas(store, preloaders)
-      .then(() => renderToString(renderProps.components, renderProps, store.getState()))
+
+    return req.preload(wordpressData, renderProps)
+      .then(() => renderToString(store, renderProps))
       .then((document) => res.send(document))
   })  
-}
+})
 ```
 
 ## Testing

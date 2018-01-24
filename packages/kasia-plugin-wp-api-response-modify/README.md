@@ -36,6 +36,18 @@ const { kasiaReducer, kasiaSagas } = Kasia({
 })
 ```
 
+```js
+// pass in desired effects
+const { kasiaReducer, kasiaSagas } = Kasia({
+  WP,
+  plugins: [
+    [KasiaWpApiResponseModifyPlugin, {
+      effects: [/*...*/]
+    }]
+  ]
+})
+```
+
 ## The Shape of Things
 
 With this plugin Kasia restructures the [shape of things](https://www.youtube.com/watch?v=Zn2JFlteeJ0) returned from the WP-API.

@@ -1,5 +1,18 @@
 # Kasia Changelog
 
+- __v5.0.0__ - _???_
+
+  - [BREAKING] Improved preloader API (`runSagas` has become `runPreloaders`, see docs)
+  - [BREAKING] Actions (e.g. `createPostRequest`/`createQueryRequest`) signature changed to take single object as argument
+  - Option to preserve return value of `connectWpQuery` query function ([#30](https://github.com/outlandishideas/kasia/issues/30))
+  - Support comma-separated dot-paths for `shouldUpdate` ([#38](https://github.com/outlandishideas/kasia/issues/38))
+  - Support generator query functions ([!59](https://github.com/outlandishideas/kasia/pull/59))
+  - Support for per-component naive caching strategies (browser) ([#74](https://github.com/outlandishideas/kasia/issues/74))
+  - Access to `req` and `res` objects in query functions (SSR) ([#77](https://github.com/outlandishideas/kasia/issues/77))
+  - Added `prettier-standard` via `husky` & `lint-staged`
+
+---
+
 - __v4.0.0__
 
   - [BREAKING] WP API responses no longer modified by `wp-api-response-modify` by default. Functionality moved into [`kasia-plugin-wp-api-response-modify`](https://github.com/outlandishideas/kasia/tree/master/packages/kasia-plugin-wp-api-response-modify) plugin.

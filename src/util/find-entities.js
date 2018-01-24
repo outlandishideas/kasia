@@ -5,9 +5,17 @@ export default function findEntities (entities, identifiers, keyToInspect) {
   const reduced = {}
 
   for (const entityTypeName in entities) {
+    if (!entities.hasOwnProperty(entityTypeName)) {
+      continue
+    }
+
     const entitiesOfType = entities[entityTypeName]
 
     for (const key in entitiesOfType) {
+      if (!entitiesOfType.hasOwnProperty(key)) {
+        continue
+      }
+
       const entity = entitiesOfType[key]
 
       // Try to find entity by `keyToInspect` but fall back on id and then slug as

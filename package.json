@@ -1,6 +1,6 @@
 {
   "name": "kasia",
-  "version": "4.2.0-beta.14",
+  "version": "5.0.0-beta.0",
   "description": "A React Redux toolset for the WordPress API",
   "main": "lib/index.js",
   "jsnext:main": "src/index.js",
@@ -68,10 +68,13 @@
     "check-node-version": "^2.1.0",
     "coveralls": "^2.13.1",
     "enzyme": "^2.9.1",
+    "husky": "^0.14.3",
     "in-publish": "^2.0.0",
-    "jest": "^21.2.1",
-    "jest-cli": "^21.2.1",
-    "lerna": "2.0.0",
+    "jest": "^22.1.4",
+    "jest-cli": "^22.1.4",
+    "lerna": "^2.8.0",
+    "lint-staged": "^6.0.1",
+    "prettier-standard": "^8.0.0",
     "react-test-renderer": "^16.0.0",
     "redux": "^3.7.2",
     "rimraf": "^2.6.1",
@@ -91,17 +94,29 @@
   "jest": {
     "automock": true,
     "verbose": true,
-    "testRegex": "/test/.*\\.js$",
+    "testMatch": [
+      "**/test/**/*.js"
+    ],
     "unmockedModulePathPatterns": [
       "<rootDir>/node_modules/react",
       "<rootDir>/node_modules/react-dom",
       "<rootDir>/node_modules/enzyme",
-      "<rootDir>/node_modules/lodash"
+      "<rootDir>/node_modules/lodash",
+      "<rootDir>/node_modules/babel-polyfill"
     ],
     "testPathIgnorePatterns": [
       "/node_modules/",
       "/__mocks__/",
       "/__fixtures__/"
+    ],
+    "setupFiles": [
+      "<rootDir>/jest.init.js"
+    ]
+  },
+  "lint-staged": {
+    "{src,test}/**/*.js": [
+      "prettier-standard",
+      "git add"
     ]
   }
 }

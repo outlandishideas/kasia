@@ -74,7 +74,7 @@ function setup (keyEntitiesBy) {
 }
 
 describe('Universal journey', function () {
-  ['id'].forEach((keyEntitiesBy) => {
+  ['id', 'slug'].forEach((keyEntitiesBy) => {
     describe('keyEntitiesBy = ' + keyEntitiesBy, () => {
       let rendered, preloader, action, iter, store, runSaga
 
@@ -106,6 +106,7 @@ describe('Universal journey', function () {
         action = {
           type: ActionTypes.RequestCreatePost,
           request: {
+            cacheStrategy: false,
             identifier: post1[keyEntitiesBy],
             contentType: 'post'
           }
@@ -120,6 +121,7 @@ describe('Universal journey', function () {
         const ackAction = {
           type: ActionTypes.RequestAck,
           request: {
+            cacheStrategy: false,
             identifier: post1[keyEntitiesBy],
             contentType: 'post'
           }

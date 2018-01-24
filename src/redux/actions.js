@@ -1,20 +1,22 @@
 import { ActionTypes } from '../constants'
 
 /** Initiate a request for a single entity from the WP-API. */
-export const createPostRequest = (contentType, identifier) => ({
+export const createPostRequest = ({ contentType, identifier, cacheStrategy }) => ({
   type: ActionTypes.RequestCreatePost,
   request: {
     contentType,
-    identifier
+    identifier,
+    cacheStrategy
   }
 })
 
 /** Initiate an arbitrary request to the WP-API. */
-export const createQueryRequest = (queryFn, preserve = false) => ({
+export const createQueryRequest = ({ queryFn, preserve = false, cacheStrategy = null }) => ({
   type: ActionTypes.RequestCreateQuery,
   request: {
     queryFn,
-    preserve
+    preserve,
+    cacheStrategy
   }
 })
 
@@ -25,16 +27,17 @@ export const acknowledgeRequest = (request) => ({
 })
 
 /** Place the result of a successful request on the store */
-export const completeRequest = (id, result) => ({
+export const completeRequest = ({ id, result, fromCache = false }) => ({
   type: ActionTypes.RequestComplete,
   request: {
     id,
-    result
+    result,
+    fromCache
   }
 })
 
 /** Update the record of a request with the error returned from a failed response. */
-export const failRequest = (id, error) => ({
+export const failRequest = ({ id, error }) => ({
   type: ActionTypes.RequestFail,
   request: {
     id,

@@ -15,7 +15,7 @@ export default function normalise (response, { idAttribute }) {
     if (!type) {
       console.log(
         `[kasia] could not derive entity type - ignoring.`,
-        `Entity: ${entity ? JSON.stringify(entity) : typeof entity}`
+        `Entity: ${JSON.stringify(entity)}`
       )
       return entities
     }

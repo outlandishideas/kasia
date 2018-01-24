@@ -29,8 +29,13 @@ describe('util/contentTypesManager', () => {
       expect(fn).toThrowError(/Invalid content type object/)
     })
 
-    for (var builtInType in ContentTypes) {
+    for (const builtInType in ContentTypes) {
+      if (!ContentTypes.hasOwnProperty(builtInType)) {
+        continue
+      }
+
       const typeName = ContentTypes[builtInType]
+
       it('throws when name is ' + typeName, () => {
         const opts = { name: typeName, plural: typeName, slug: typeName }
         const fn = () => contentTypesManager.register(opts)

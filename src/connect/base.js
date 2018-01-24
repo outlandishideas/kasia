@@ -2,6 +2,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import isNode from 'is-node-fn'
 
+import invariants from '../invariants'
 import debug from '../util/debug'
 import { incrementNextQueryId } from '../redux/actions'
 
@@ -20,15 +21,29 @@ export function _rewindNextClientQueryId () {
  * @param {Function} target
  * @param {String} dataKey
  * @param {*} fallbackDataValue
+ * @param {Function} [cacheStrategy]
  * @returns {KasiaConnectedComponent}
  */
-export default function base (target, dataKey, fallbackDataValue) {
+export default function base ({ target, dataKey, fallbackDataValue, cacheStrategy }) {
   const displayName = target.displayName || target.name
+
+  if (!cacheStrategy) {
+    // default is no caching
+    cacheStrategy = () => false
+  }
+
+  invariants.isFunction('opts.cacheStrategy', cacheStrategy)
 
   return class KasiaConnectedComponent extends React.PureComponent {
     static __kasia__ = true
 
     static WrappedComponent = target
+
+    static cacheStrategy (...args) {
+      const strategy = cacheStrategy(...args)
+      invariants.isValidCacheStrategy(strategy)
+      return strategy
+    }
 
     static contextTypes = {
       store: PropTypes.object.isRequired
