@@ -5,11 +5,17 @@ jest.disableAutomock()
 import React, { Component } from 'react'
 
 import { connectWpQuery } from '../../../src/connect'
+import { preload } from '../../../src/util/preload'
+
 import bookJson from '../../__fixtures__/wp-api-responses/book'
 
-export const queryFn = (wpapi, props) => {
-  // return wpapi.books(props.params.id).get()
-  return Promise.resolve(bookJson)
+const nested = connectWpQuery(() => {
+  return Promise.resolve({...bookJson, id: bookJson.id + 1 })
+}, () => true)(class {})
+
+export const queryFn = function * () {
+  yield preload([nested])()
+  return yield Promise.resolve(bookJson)
 }
 
 export const target = class extends Component {
